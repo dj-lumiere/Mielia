@@ -371,7 +371,7 @@ secret routine unknown_cannot_hash(type_name: Text) -> U64
 ### Keeps an entity: the `Unknown` is one more name for it.
 ### :param from: The entity.
 ### :returns: The `Unknown` keeping it.
-infallible routine Unknown(from: Roamed[T]) -> Unknown
+routine Unknown(from: Roamed[T]) -> Unknown
 needs EntityType T
     return unknown_wrap[Roamed[T]](
         value: from,
@@ -384,13 +384,13 @@ needs EntityType T
 ### An `Unknown` given to `Unknown(from:)` is the same `Unknown`: it is never kept inside another one.
 ### :param from: The `Unknown`.
 ### :returns: The same value.
-infallible routine Unknown(from: Unknown) -> Unknown
+routine Unknown(from: Unknown) -> Unknown
     return Unknown(cell: from.cell)
 
 ### Keeps a copy of a value of any type that is not an entity (a record, a choice, a routine value, ...).
 ### :param from: The value.
 ### :returns: The `Unknown` keeping it.
-infallible routine Unknown(from: T) -> Unknown
+routine Unknown(from: T) -> Unknown
 needs AnyType T
     return T.kept_unknown(value: from)
 
@@ -425,14 +425,14 @@ routine Unknown.eq(you: Viewing[Unknown]) -> Bool
 ### :returns: The hash.
 @readonly
 @override
-infallible routine Unknown.hash() -> U64
+routine Unknown.hash() -> U64
     return me.kind().do_hash(me.data())
 
 ### The kept value's hash, keyed: its hash mixed with the two keys.
 ### :returns: The hash.
 @readonly
 @override
-infallible routine Unknown.hash(k0: U64, k1: U64) -> U64
+routine Unknown.hash(k0: U64, k1: U64) -> U64
     return me.kind().do_hash(me.data()).bitxor(you: k0).rotate_left(bits: 17).bitxor(you: k1)
 
 ### Whether the kept value is a `T`.

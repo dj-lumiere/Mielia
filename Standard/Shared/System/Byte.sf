@@ -105,4 +105,4 @@ routine Byte.diagnose() -> Text
 ### :param k1: The second 64-bit key word.
 ### :returns: The resulting `U64` value.
 @rf("Byte.hash")
-infallible routine Byte.hash(k0: U64, k1: U64) -> U64
+routine Byte.hash(k0: U64, k1: U64) -> U64

@@ -246,7 +246,7 @@ routine Int.serialize() -> SerialValue
 ### :param k1: The second 64-bit key word.
 ### :returns: The 64-bit keyed hash.
 @rf("Int.hash")
-infallible routine Int.hash(k0: U64, k1: U64) -> U64
+routine Int.hash(k0: U64, k1: U64) -> U64
 
 ### Parses a base-2 integer from text.
 ### :param text: The binary digits to parse.

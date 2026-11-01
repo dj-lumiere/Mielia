@@ -69,7 +69,7 @@ routine Decimal.eq(you: Decimal) -> Bool
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("Decimal.hash")
-infallible routine Decimal.hash(k0: U64, k1: U64) -> U64
+routine Decimal.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `me * you`, exactly.
 ### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.

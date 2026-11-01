@@ -18,4 +18,4 @@ needs Hashable everywhere
     ### :param k0: The first 64-bit key word.
     ### :param k1: The second 64-bit key word.
     ### :returns: The resulting `U64` value.
-    infallible routine Me.hash(k0: U64, k1: U64) -> U64
+    routine Me.hash(k0: U64, k1: U64) -> U64

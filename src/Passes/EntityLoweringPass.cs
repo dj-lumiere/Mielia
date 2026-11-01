@@ -402,6 +402,18 @@ internal sealed class EntityLoweringPass
         Statement rewritten;
         switch (stmt)
         {
+            // The adapter a recovery variant takes out of the carrier a recovered call gave (`var it =
+            // __rf_prop_1.value`) keeps the collection the call was made over, when it is a shared handle. One the
+            // library gives as the entity itself is used up in the routine, while the hidden variable holds the
+            // collection.
+            case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } unwrap } taken }
+                when IsRoamedType(t: unwrap.ResolvedType) && CarrierRead(expr: unwrap) is { } carrierName &&
+                     _carrierSources.TryGetValue(key: carrierName, value: out Expression? carriedSource) &&
+                     KeepCall(adapter: new IdentifierExpression(Name: taken.Name, Location: stmt.Location)
+                     {
+                         ResolvedType = unwrap.ResolvedType
+                     }, source: carriedSource) is { } carriedKeep:
+                return [stmt, carriedKeep];
             case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ds:
             {
                 Expression value = keeper.Keep(expr: init, keptBy: vd.Name);
@@ -459,6 +471,40 @@ internal sealed class EntityLoweringPass
         return [.. keeper.Before, rewritten, .. keeper.After];
     }
 
+    /// <summary>The collections the adapters held in recovery carriers were made over, by the carrier's variable
+    /// (see <see cref="AdapterKeeper"/>).</summary>
+    private readonly Dictionary<string, Expression> _carrierSources = new(comparer: StringComparer.Ordinal);
+
+    /// <summary>The variable whose carried value <paramref name="expr"/> reads (<c>__rf_prop_1.value</c>, also
+    /// stolen or shared), or null.</summary>
+    private static string? CarrierRead(Expression expr)
+    {
+        return expr switch
+        {
+            MemberExpression { Object: IdentifierExpression carrier, MemberName: RuntimeContract.Carrier.ValueField } =>
+                carrier.Name,
+            StealExpression { Operand: var operand } => CarrierRead(expr: operand),
+            CallExpression { Callee: MemberExpression { Object: var shared, MemberName: RuntimeContract.Duplication.Share } } =>
+                CarrierRead(expr: shared),
+            _ => null
+        };
+    }
+
+    /// <summary>The adapter a recovery carrier (<c>Optional[A]</c>, <c>Check[A]</c>) holds, or null.</summary>
+    internal static TypeSymbol? CarriedAdapter(TypeSymbol? type)
+    {
+        TypeSymbol? definition = type switch
+        {
+            VariantTypeSymbol { GenericDefinition: { } variantDef } => variantDef,
+            RecordTypeSymbol { GenericDefinition: { } recordDef } => recordDef,
+            _ => null
+        };
+        return definition?.Name is "Optional" or "Check" && type!.TypeArguments is [var carried] &&
+               PointsAtSource(type: carried)
+            ? carried
+            : null;
+    }
+
     /// <summary>
     /// Finds the adapters one statement makes and arranges for each to keep its collection (see
     /// <see cref="KeepSourcesOf"/>): <see cref="Before"/> gets the hidden variables and their keeps, <see cref="After"/>
@@ -485,6 +531,28 @@ internal sealed class EntityLoweringPass
         protected override Expression VisitCall(CallExpression e)
         {
             bool whole = ReferenceEquals(objA: e, objB: _whole);
+            // A recovered call that makes an adapter (`__rf_prop_1 = xs.select[try](...)` in a recovery variant) gives
+            // it inside a carrier: the collection is kept in a hidden variable, and the adapter taken out of the
+            // carrier keeps it (KeepSourcesOf).
+            if (e.Callee is MemberExpression { Object: var carriedReceiver } carriedMember &&
+                CarriedAdapter(type: e.ResolvedType) != null && IsEntityValue(type: carriedReceiver.ResolvedType))
+            {
+                Expression carriedSource = VisitExpression(expr: carriedReceiver);
+                if (!IsReadPath(expr: carriedSource))
+                {
+                    carriedSource = Hide(value: carriedSource, prefix: "__emitter_source");
+                }
+
+                if (whole && _keptBy != null)
+                {
+                    pass._carrierSources[key: _keptBy] = carriedSource;
+                }
+
+                return ReferenceEquals(objA: carriedSource, objB: carriedReceiver)
+                    ? e
+                    : e with { Callee = carriedMember with { Object = carriedSource } };
+            }
+
             if (e.Callee is not MemberExpression { Object: var receiver } member ||
                 !PointsAtSource(type: e.ResolvedType) || !IsEntityValue(type: receiver.ResolvedType))
             {
