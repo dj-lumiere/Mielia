@@ -1,0 +1,17 @@
+record literal, count 1
+tuple literal, count 1
+add_last, count 1
+after round 0
+record literal, count 1
+tuple literal, count 1
+add_last, count 1
+after round 1
+record literal, count 1
+tuple literal, count 1
+add_last, count 1
+after round 2
+record literal, count 1
+tuple literal, count 1
+add_last, count 1
+after round 3
+101
