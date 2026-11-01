@@ -11,7 +11,7 @@ entity Counter
 routine Counter.adder() -> Callable[(S64,), S64]
     return (k: S64) => me.n + k
 
-routine Counter.checked_adder() -> failable Callable[(S64,), S64]
+routine Counter.checked_adder() -> Callable[(S64,), S64]
     return (k: S64) => me.n + k
 
 routine start()

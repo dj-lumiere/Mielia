@@ -34,7 +34,7 @@ routine Bool.represent() -> Text
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("Bool.hash")
-routine Bool.hash(k0: U64, k1: U64) -> U64
+infallible routine Bool.hash(k0: U64, k1: U64) -> U64
 
 ### Converts this boolean to an `S32` integer.
 ### :returns: `1` if `me` is `true`; `0` if `me` is `false`.

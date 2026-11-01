@@ -42,13 +42,13 @@ routine S8.signum() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S8.ilog2() -> Int
+routine S8.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S8.ilog10() -> Int
+routine S8.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -125,13 +125,13 @@ routine S16.signum() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S16.ilog2() -> Int
+routine S16.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S16.ilog10() -> Int
+routine S16.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -208,13 +208,13 @@ routine S32.signum() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S32.ilog2() -> Int
+routine S32.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S32.ilog10() -> Int
+routine S32.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -291,13 +291,13 @@ routine S64.signum() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S64.ilog2() -> Int
+routine S64.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S64.ilog10() -> Int
+routine S64.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -374,13 +374,13 @@ routine S128.signum() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S128.ilog2() -> Int
+routine S128.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me <= 0`.
-failable routine S128.ilog10() -> Int
+routine S128.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -452,13 +452,13 @@ routine U8.trailing_ones() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U8.ilog2() -> Int
+routine U8.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U8.ilog10() -> Int
+routine U8.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -530,13 +530,13 @@ routine U16.trailing_ones() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U16.ilog2() -> Int
+routine U16.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U16.ilog10() -> Int
+routine U16.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -608,13 +608,13 @@ routine U32.trailing_ones() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U32.ilog2() -> Int
+routine U32.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U32.ilog10() -> Int
+routine U32.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -686,13 +686,13 @@ routine U64.trailing_ones() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U64.ilog2() -> Int
+routine U64.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U64.ilog10() -> Int
+routine U64.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -768,13 +768,13 @@ routine U128.trailing_ones() -> Int
 ### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
 ### :returns: The floor of the base-2 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U128.ilog2() -> Int
+routine U128.ilog2() -> Int
     return me.ilog2().to[Int]()
 
 ### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
 ### :returns: The floor of the base-10 logarithm.
 ### :throws: {NumericDomainError} if `me == 0`.
-failable routine U128.ilog10() -> Int
+routine U128.ilog10() -> Int
     return me.ilog10().to[Int]()
 
 ### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
@@ -839,7 +839,7 @@ routine B16.ldexp(n: Int) -> B16
 ### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-two exponent to apply.
 ### :returns: `me` scaled by `2^n`.
-failable routine B16.scaleb(n: Int) -> B16
+routine B16.scaleb(n: Int) -> B16
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -868,7 +868,7 @@ routine B32.ldexp(n: Int) -> B32
 ### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-two exponent to apply.
 ### :returns: `me` scaled by `2^n`.
-failable routine B32.scaleb(n: Int) -> B32
+routine B32.scaleb(n: Int) -> B32
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -898,7 +898,7 @@ routine B64.ldexp(n: Int) -> B64
 ### finite `me` overflows to ±infinity (use `scaleb_unchecked` for raw IEEE propagation).
 ### :param n: The power-of-two exponent to apply.
 ### :returns: `me` scaled by `2^n`.
-failable routine B64.scaleb(n: Int) -> B64
+routine B64.scaleb(n: Int) -> B64
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -924,7 +924,7 @@ routine B128.ldexp(n: Int) -> B128
 ### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-two exponent to apply.
 ### :returns: `me` scaled by `2^n`.
-failable routine B128.scaleb(n: Int) -> B128
+routine B128.scaleb(n: Int) -> B128
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -947,7 +947,7 @@ routine D32.round(places: Int = 0, rule: RoundingRule = RoundingRule.HALF_EVEN) 
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.
 ### :returns: `me` scaled by `10^n`.
-failable routine D32.scaleb(n: Int) -> D32
+routine D32.scaleb(n: Int) -> D32
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -970,7 +970,7 @@ routine D64.round(places: Int = 0, rule: RoundingRule = RoundingRule.HALF_EVEN) 
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.
 ### :returns: `me` scaled by `10^n`.
-failable routine D64.scaleb(n: Int) -> D64
+routine D64.scaleb(n: Int) -> D64
     return me.scaleb(n: n.to[S64]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
@@ -993,7 +993,7 @@ routine D128.round(places: Int = 0, rule: RoundingRule = RoundingRule.HALF_EVEN)
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.
 ### :returns: `me` scaled by `10^n`.
-failable routine D128.scaleb(n: Int) -> D128
+routine D128.scaleb(n: Int) -> D128
     return me.scaleb(n: n.to[S64]())
 
 ### Formats this value as `a+bi` / `a-bi` with exactly `places` digits after the point in each part

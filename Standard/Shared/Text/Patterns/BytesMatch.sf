@@ -21,7 +21,7 @@ routine BytesMatch.bytes() -> Bytes
 ### :throws: {CaptureNameError} The pattern has no capture of that name.
 ### :throws: {AbsentValueError} The capture took no part in the match.
 @rf("BytesMatch.group")
-failable routine BytesMatch.group(name: Text) -> Bytes
+routine BytesMatch.group(name: Text) -> Bytes
 
 ### The match as its place and what it took: `0 til 10: 2026-10-20`.
 ### :returns: The text.

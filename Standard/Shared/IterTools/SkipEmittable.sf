@@ -32,4 +32,4 @@ routine SkipEmittable[T, TSource].emitter() -> SkipEmitter[T, TSource/Emitter]
 ### Values are discarded only until `remaining` reaches zero.
 ### :returns: The resulting `T` value.
 @rf("SkipEmitter.emit")
-failable routine SkipEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+routine SkipEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item

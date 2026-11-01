@@ -241,7 +241,7 @@ secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dic
 ### :throws: {RoutineNotBuiltError} when the build left the routine out.
 ### :throws: {GenericRoutineCallError} when the routine has type parameters of its own.
 ### :throws: {ArgumentError} when the arguments do not fit the routine.
-failable routine call(target: T, name: Text, args: Dict[Text, Unknown]) -> Unknown
+routine call(target: T, name: Text, args: Dict[Text, Unknown]) -> Unknown
 needs AnyType T
     var held = Unknown(from: target)
     var fact = held.type_fact()
@@ -263,7 +263,7 @@ needs AnyType T
 ### :returns: What the routine returns, kept in an `Unknown` (one keeping `none` when it returns nothing).
 ### :throws: {CallTargetError} when the routine is a member routine.
 ### :throws: {ArgumentError} when the arguments do not fit the routine.
-failable routine call(info: RoutineInfo, args: Dict[Text, Unknown]) -> Unknown
+routine call(info: RoutineInfo, args: Dict[Text, Unknown]) -> Unknown
     if info.kind == RoutineKind.MEMBER
         throw CallTargetError(routine_name: info.full_name)
     if info.is_generic
@@ -286,7 +286,7 @@ failable routine call(info: RoutineInfo, args: Dict[Text, Unknown]) -> Unknown
 ### :throws: {NoSuchRoutineError} when the type has no creator.
 ### :throws: {RoutineNotBuiltError} when the build left the creator out.
 ### :throws: {ArgumentError} when no creator fits the arguments.
-failable routine create(type: TypeInfo, args: Dict[Text, Unknown]) -> Unknown
+routine create(type: TypeInfo, args: Dict[Text, Unknown]) -> Unknown
     var chosen = choose_routine(facts: type.handle.make_creators(), name: type.name, args: args)
     if chosen.problem == "NO_SUCH"
         throw NoSuchRoutineError(owner: type.name, routine_name: type.name)
@@ -340,28 +340,28 @@ entity Invocation
     routine_info: RoutineInfo
     ### The arguments of the call, in parameter order.
     args: List[Unknown]
-    secret run: failable Callable[(), Unknown]
+    secret run: Callable[(), Unknown]
 
 ### Runs the routine with the call's arguments and gives back what it returns (an `Unknown` keeping `none` when it
 ### returns nothing). It can run any number of times. A failure of the routine passes on through a failable
 ### `around` and crashes in one that is not failable.
 ### :returns: What the routine returns, kept in an `Unknown`.
-failable routine Invocation.proceed() -> Unknown
+routine Invocation.proceed() -> Unknown
     return me.run()
 
-secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], run: failable Callable[(), Unknown]) -> Invocation
+secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], run: Callable[(), Unknown]) -> Invocation
     return Invocation(routine_info: routine_info, args: args, run: run)
 
 # The description of a routine of the program's modules that carries an annotation. An empty module name matches
 # any module.
-secret failable routine annotated_routine(module_name: Text, name: Text, count: Int) -> RoutineInfo
+secret routine annotated_routine(module_name: Text, name: Text, count: Int) -> RoutineInfo
     for fact in reached_routines()
         if fact.name == name and fact.parameters.count() == count and (module_name == "" or fact.module_name == module_name)
             return routine_info_from(fact: fact, owner: module_handle(), seen: Dict[U64, TypeInfo]())
     throw NoSuchRoutineError(owner: module_name, routine_name: name)
 
 # The description of a member routine or a common routine that carries an annotation.
-secret failable routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Int) -> RoutineInfo
+secret routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Int) -> RoutineInfo
     var fact = maker()
     for listed in fact.handle.make_routines()
         if listed.name == name and listed.parameters.count() == count

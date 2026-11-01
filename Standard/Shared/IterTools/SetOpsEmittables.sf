@@ -57,7 +57,7 @@ needs T obeys Hashable, Comparable
 ### Source elements not found in the set are consumed and discarded.
 ### :returns: The resulting `T` value.
 @rf("IntersectEmitter.emit")
-failable routine IntersectEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+routine IntersectEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
 needs T obeys Hashable, Comparable
 
 ### Materializes `other` into a set and returns an emitter that removes matching elements.
@@ -70,5 +70,5 @@ needs T obeys Hashable, Comparable
 ### Source elements found in the set are consumed and discarded.
 ### :returns: The resulting `T` value.
 @rf("ExcludeEmitter.emit")
-failable routine ExcludeEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+routine ExcludeEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
 needs T obeys Hashable, Comparable

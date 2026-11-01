@@ -3,7 +3,7 @@ module Tests/StdlibSf/CaughtErrorDisplay
 # A caught error shown whole (`show(e)`) shows its message, and the name an `else as` arm binds when only `None` is
 # left holds `none`.
 
-failable routine half(n: S64) -> S64
+routine half(n: S64) -> S64
     if n % 2 != 0
         throw AbsentValueError()
     return n // 2

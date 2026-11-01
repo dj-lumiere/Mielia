@@ -21,7 +21,7 @@ obeys Emitter[Int]
     current: Int
     top: Int
 
-failable routine Stairs.emit() -> Int
+routine Stairs.emit() -> Int
     if me.current > me.top
         throw AbsentValueError()
     var value = me.current

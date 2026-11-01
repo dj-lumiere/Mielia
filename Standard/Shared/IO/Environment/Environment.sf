@@ -21,7 +21,7 @@ common routine Environment.arguments() -> List[Text]
 ### :returns: Its value.
 ### :throws: {AbsentValueError} when it isn't set (`try Environment.variable(name:)` gives an `Optional`).
 @rf("Environment.variable")
-failable common routine Environment.variable(name: Text) -> Text
+common routine Environment.variable(name: Text) -> Text
 
 ### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
 ### when it changes.
@@ -33,13 +33,13 @@ common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
 ### :returns: The resulting `Directory`.
 ### :throws: {IOError} when the working directory cannot be read.
 @rf("Environment.working_directory")
-failable common routine Environment.working_directory() -> Directory
+common routine Environment.working_directory() -> Directory
 
 ### The current user's home directory.
 ### :returns: The resulting `Directory`.
 ### :throws: {NotFoundError} when the home directory cannot be told.
 @rf("Environment.home_directory")
-failable common routine Environment.home_directory() -> Directory
+common routine Environment.home_directory() -> Directory
 
 ### The platform's temporary directory. Honors the usual environment variables, never fails.
 ### :returns: The resulting `Directory`.

@@ -222,7 +222,7 @@ secret routine reached_invoke(index: U64, args: Roamed[SF::System.Dict[Text, Unk
     return unknown_nothing()
 
 ### One argument of a call, as the parameter's type.
-secret failable routine unknown_argument[P](args: Roamed[SF::System.Dict[Text, Unknown]], name: Text, routine_name: Text) -> P
+secret routine unknown_argument[P](args: Roamed[SF::System.Dict[Text, Unknown]], name: Text, routine_name: Text) -> P
     when try args[name]
         is None => throw ArgumentError(routine_name: routine_name, problem: f"the argument '{name}' is missing")
         else as supplied =>

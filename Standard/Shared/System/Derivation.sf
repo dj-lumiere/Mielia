@@ -72,5 +72,5 @@ needs FlagsType T
 ### value, a literal or a construction from literals.
 ### :returns: The source text.
 @rf("T.preset_literal")
-routine T.preset_literal() -> Text
+infallible routine T.preset_literal() -> Text
 needs AnyType T

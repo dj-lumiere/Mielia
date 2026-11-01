@@ -96,7 +96,7 @@ routine Matrix4R4C.get(row: U64, col: U64) -> B32
 ### :returns: The row vector `<m(row,0), m(row,1), m(row,2), m(row,3)>`.
 ### :throws: {IndexOutOfBoundsError} if `index >= 4`.
 @rf("Matrix4R4C.getitem")
-failable routine Matrix4R4C.getitem(index: U64) -> Vector[B32, 4]
+routine Matrix4R4C.getitem(index: U64) -> Vector[B32, 4]
 
 ### Element-wise matrix sum.
 ### :param you: The matrix to add.
@@ -148,7 +148,7 @@ routine Matrix4R4C.determinant() -> B32
 ### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
 ###     like the checked `B32` operators.
 @rf("Matrix4R4C.inverse")
-failable routine Matrix4R4C.inverse() -> Matrix4R4C
+routine Matrix4R4C.inverse() -> Matrix4R4C
 
 ### The inverse of this matrix by the same elimination in raw IEEE 754 arithmetic: no check, so a singular
 ### matrix gives infinities or NaN.
@@ -162,7 +162,7 @@ routine Matrix4R4C.inverse_unchecked() -> Matrix4R4C
 ### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
 ###     like the checked `B32` operators.
 @rf("Matrix4R4C.solve")
-failable routine Matrix4R4C.solve(b: Vector[B32, 4]) -> Vector[B32, 4]
+routine Matrix4R4C.solve(b: Vector[B32, 4]) -> Vector[B32, 4]
 
 ### Returns `true` when all sixteen elements compare equal.
 ### :param you: The matrix to compare against.

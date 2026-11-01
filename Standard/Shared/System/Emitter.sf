@@ -18,4 +18,4 @@ relates Item
     ### nothing stored to point at (a range, a generator). The builder takes `Item` from what `emit!`
     ### returns, so an emitter never names it.
     ### :returns: The next element in the iteration sequence.
-    failable routine Me.emit() -> Me/Item
+    routine Me.emit() -> Me/Item

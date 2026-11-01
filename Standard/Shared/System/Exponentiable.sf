@@ -13,4 +13,4 @@ protocol Exponentiable
     ### conforming type.
     ### :param you: The exponent value.
     ### :returns: The resulting `Me` value.
-    failable routine Me.pow(you: Me) -> Me
+    routine Me.pow(you: Me) -> Me

@@ -9,7 +9,7 @@ routine noisy(label: Text, value: Int) -> Int
     show(f"  eval {label}")
     return value
 
-failable routine in_band(a: Int, b: Int, hi: Int) -> Bool
+routine in_band(a: Int, b: Int, hi: Int) -> Bool
     return 0 <= a // b <= hi
 
 routine start()

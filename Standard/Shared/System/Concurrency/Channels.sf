@@ -41,7 +41,7 @@ obeys Emitter[T]
 ### :returns: A `(Transmitter[T], Receiver[T])` tuple sharing one channel.
 ### :throws: {OutOfMemoryError} The buffer is more bytes than a `U64` counts, or the heap has no room for it.
 @rf("make_channel")
-secret failable routine make_channel[T](capacity: U64) -> (Transmitter[T], Receiver[T])
+secret routine make_channel[T](capacity: U64) -> (Transmitter[T], Receiver[T])
 
 ### Creates a multi-consumer channel and returns its `(Transmitter, SharedReceiver)` pair. Clone the
 ### `SharedReceiver` (one per consumer) for a worker pool — any free worker takes the next item (consumer
@@ -50,20 +50,20 @@ secret failable routine make_channel[T](capacity: U64) -> (Transmitter[T], Recei
 ### :returns: A `(Transmitter[T], SharedReceiver[T])` tuple sharing one channel.
 ### :throws: {OutOfMemoryError} The buffer is more bytes than a `U64` counts, or the heap has no room for it.
 @rf("make_shared_channel")
-secret failable routine make_shared_channel[T](capacity: U64) -> (Transmitter[T], SharedReceiver[T])
+secret routine make_shared_channel[T](capacity: U64) -> (Transmitter[T], SharedReceiver[T])
 
 ### Transmits one item, moving its ownership into the channel. Blocks/parks while the buffer is full
 ### (backpressure); for a rendezvous channel waits until a consumer takes it. FAILABLE: throws
 ### {ChannelClosedError} if the channel is already closed or has no consumers left.
 ### :param item: The value to transmit (ownership transfers in).
 @rf("Transmitter.transmit")
-secret failable routine Transmitter[T].transmit(item: T)
+secret routine Transmitter[T].transmit(item: T)
 
 ### Transmits one item only when the channel has room for it now, never waiting.
 ### :param item: The value to transmit.
 ### :returns: `true` when it went in, `false` when the channel was full.
 @rf("Transmitter.transmit_if_room")
-secret failable routine Transmitter[T].transmit_if_room(item: T) -> Bool
+secret routine Transmitter[T].transmit_if_room(item: T) -> Bool
 
 ### Produces another transmitting handle on the same channel (fan-in: more producers).
 ### :returns: A new `Transmitter[T]` on the same channel.
@@ -137,4 +137,4 @@ secret routine SharedReceiver[T].capacity() -> U64
 ### Receives the next item, or throws `AbsentValueError` when the channel is closed and the buffer is empty.
 ### :returns: The next value. Throws `AbsentValueError` at end-of-stream.
 @rf("ChannelDrain.emit")
-secret failable routine ChannelDrain[T].emit() -> T
+secret routine ChannelDrain[T].emit() -> T

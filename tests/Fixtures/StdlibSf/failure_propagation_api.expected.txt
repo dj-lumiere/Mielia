@@ -1,0 +1,7 @@
+ok: 5
+deep: division by zero
+wide: overflow
+pick: out of range
+lambda: none
+select: none
+nothing to fail: 5

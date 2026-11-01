@@ -15,4 +15,4 @@ obeys Sized
     ### :param index: The zero-based position to read.
     ### :returns: The element at that position.
     ### :throws: {IndexOutOfBoundsError} if `index >= count()`.
-    failable routine Me.getitem(index: U64) -> T
+    routine Me.getitem(index: U64) -> T

@@ -23,4 +23,4 @@ record RoutineTrace
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("RoutineTrace.hash")
-routine RoutineTrace.hash(k0: U64, k1: U64) -> U64
+infallible routine RoutineTrace.hash(k0: U64, k1: U64) -> U64

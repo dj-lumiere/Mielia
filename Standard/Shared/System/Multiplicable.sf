@@ -12,4 +12,4 @@ protocol Multiplicable
     ### Implementations should preserve both input operands.
     ### :param you: The other factor.
     ### :returns: The resulting `Me` value.
-    failable routine Me.mul(you: Me) -> Me
+    routine Me.mul(you: Me) -> Me

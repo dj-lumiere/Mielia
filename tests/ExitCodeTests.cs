@@ -23,7 +23,7 @@ public sealed class ExitCodeTests
     }
 
     /// <summary>A throw in a routine that is not failable crashes where it stands with its crashable's message (status
-    /// 82), even when a failable routine calls it under <c>try</c>, after the same <c>try</c> received the failable
+    /// 82), even when a routine calls it under <c>try</c>, after the same <c>try</c> received the failable
     /// routine's own throw.</summary>
     [Fact]
     public void ThrowInPlainRoutineUnderTry_CrashesWithItsMessage()
@@ -72,7 +72,7 @@ public sealed class ExitCodeTests
     }
 
     /// <summary>Failures rise only through failable routines: <c>try</c> receives a lambda's failure handed through a
-    /// <c>failable Callable</c> parameter and a failable routine's throw, but a division by zero inside a routine that
+    /// <c>Callable</c> parameter and a routine's throw, but a division by zero inside a routine that
     /// is not failable crashes there (status 82), even under <c>try</c>.</summary>
     [Fact]
     public void FailureInsidePlainHelperUnderTry_CrashesLoudly()

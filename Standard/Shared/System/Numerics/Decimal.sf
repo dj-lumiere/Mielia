@@ -22,7 +22,7 @@ routine dec_of_d128(x: D128) -> Decimal
 ### Decimal finite-only on every conversion from a possibly infinite/NaN source.
 ### :throws: {NumericOverflowError} if `d` is +-infinity; {NumericDomainError} if `d` is NaN.
 @rf("dec_of_d128_finite")
-failable routine dec_of_d128_finite(d: D128) -> Decimal
+routine dec_of_d128_finite(d: D128) -> Decimal
 
 ### Returns the raw i128 BID storage of this value.
 @rf("Decimal.to_bits")
@@ -69,26 +69,26 @@ routine Decimal.eq(you: Decimal) -> Bool
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("Decimal.hash")
-routine Decimal.hash(k0: U64, k1: U64) -> U64
+infallible routine Decimal.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `me * you`, exactly.
 ### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.
 @rf("Decimal.mul")
-failable routine Decimal.mul(you: Decimal) -> Decimal
+routine Decimal.mul(you: Decimal) -> Decimal
 
 ### Returns `me + you`, exactly.
 ### :throws: {NumericOverflowError} when the exact sum needs more than 34 significant digits.
 @rf("Decimal.add")
-failable routine Decimal.add(you: Decimal) -> Decimal
+routine Decimal.add(you: Decimal) -> Decimal
 
 ### Returns `me - you`, exactly.
 ### :throws: {NumericOverflowError} when the exact difference needs more than 34 significant digits.
 @rf("Decimal.sub")
-failable routine Decimal.sub(you: Decimal) -> Decimal
+routine Decimal.sub(you: Decimal) -> Decimal
 
 ### Returns `me / you`.
 @rf("Decimal.truediv")
-failable routine Decimal.truediv(you: Decimal) -> Decimal
+routine Decimal.truediv(you: Decimal) -> Decimal
 
 ### The smaller of `me` and `you`. If one operand is NaN, the other one.
 ### :param you: The value to compare with.
@@ -136,7 +136,7 @@ routine Decimal.diagnose() -> Text
 ### Parses a decimal literal into a Decimal.
 ### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
 @rf("Text.to")
-failable routine Text.to[Decimal]() -> Decimal
+routine Text.to[Decimal]() -> Decimal
 
 ### S8 -> Decimal.
 @rf("S8.to")
@@ -202,13 +202,13 @@ routine B64.to[Decimal]() -> Decimal
 ### :returns: The `B32` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
 @rf("Decimal.to")
-failable routine Decimal.to[B32]() -> B32
+routine Decimal.to[B32]() -> B32
 
 ### Converts a `Decimal` to the nearest `B64`.
 ### :returns: The `B64` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
 @rf("Decimal.to")
-failable routine Decimal.to[B64]() -> B64
+routine Decimal.to[B64]() -> B64
 
 ### B128 -> Decimal (correctly rounded half up, crashes if the value is non-finite).
 @rf("B128.to")

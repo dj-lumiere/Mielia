@@ -38,7 +38,7 @@ routine Decimal.round(places: Int = 0, rule: RoundingRule = RoundingRule.HALF_UP
 ### :returns: The quotient.
 ### :throws: {DivisionByZeroError} when `by` is zero; {NumericOverflowError} when the quotient at that place needs more
 ###     than 34 significant digits.
-failable routine Decimal.divide(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+routine Decimal.divide(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
     return me.divide(by: by, places: places.to[U64](), rule: rule)
 
 ### Returns `me + you` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
@@ -48,7 +48,7 @@ failable routine Decimal.divide(by: Decimal, places: Int, rule: RoundingRule = R
 ### :param rule: How the digits past them go.
 ### :returns: The rounded result.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-failable routine Decimal.add(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+routine Decimal.add(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
     return me.add(you: you, places: places.to[U64](), rule: rule)
 
 ### Returns `me - you` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
@@ -58,7 +58,7 @@ failable routine Decimal.add(you: Decimal, places: Int, rule: RoundingRule = Rou
 ### :param rule: How the digits past them go.
 ### :returns: The rounded result.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-failable routine Decimal.subtract(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+routine Decimal.subtract(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
     return me.subtract(you: you, places: places.to[U64](), rule: rule)
 
 ### Returns `me * by` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
@@ -68,9 +68,9 @@ failable routine Decimal.subtract(you: Decimal, places: Int, rule: RoundingRule 
 ### :param rule: How the digits past them go.
 ### :returns: The rounded result.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-failable routine Decimal.multiply(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+routine Decimal.multiply(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
     return me.multiply(by: by, places: places.to[U64](), rule: rule)
 
 ### me * 10^n (the decimal analog of ldexp).
-failable routine Decimal.scaleb(n: Int) -> Decimal
+routine Decimal.scaleb(n: Int) -> Decimal
     return me.scaleb(n: n.to[S64]())

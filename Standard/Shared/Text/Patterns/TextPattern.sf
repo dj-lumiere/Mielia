@@ -34,7 +34,7 @@ record TextPattern
 ### :throws: {PatternSyntaxError} The expression can't be read, or asks for what the patterns don't do: a
 ###   backreference, lookahead or lookbehind, a shortest repetition (`*?`).
 @rf("TextPattern.from_regex")
-failable common routine TextPattern.from_regex(regex: Text) -> TextPattern
+common routine TextPattern.from_regex(regex: Text) -> TextPattern
 
 ### Whether all of `text` matches the pattern.
 ### :param text: The text.
@@ -47,7 +47,7 @@ routine TextPattern.matches(text: Text) -> Bool
 ### :returns: The match.
 ### :throws: {AbsentValueError} The pattern matches nowhere in the text (`try p.find(t)` gives `none`).
 @rf("TextPattern.find")
-failable routine TextPattern.find(text: Text) -> TextMatch
+routine TextPattern.find(text: Text) -> TextMatch
 
 ### `text` with every match (as `find_all` finds them) replaced by `with`.
 ### :param text: The text.

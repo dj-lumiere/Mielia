@@ -11,7 +11,7 @@ module System/Numerics
 ### :param radix: The numeric base to use.
 ### :returns: The resulting `Int` value.
 ### :throws: {ValueError} if `text` is not a valid integer in `radix`.
-failable routine Int(text: Text, radix: Int = 10) -> Int
+routine Int(text: Text, radix: Int = 10) -> Int
     return Int(text: text, radix: radix.to[S64]().to[S32]())
 
 ### Shifts this value left by `bits` positions (`me << bits`).
@@ -31,14 +31,14 @@ routine Int.arith_shift_right(bits: Int) -> Int
 ### :param bits: The number of bit positions to shift, 0 or more (below 0 crashes).
 ### :returns: The resulting `Int` value.
 ### :throws: {NumericDomainError} when this value is negative.
-failable routine Int.logical_shift_right(bits: Int) -> Int
+routine Int.logical_shift_right(bits: Int) -> Int
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Int` value.
 ### :throws: {NumericDomainError} when `exp` is negative (the result would not be an integer).
-failable routine Int.pow(exp: Int) -> Int
+routine Int.pow(exp: Int) -> Int
     if exp < 0
         throw NumericDomainError(description: "negative exponent: no integer result")
     return me.pow(exp: exp.to[U64]().to[U32]())

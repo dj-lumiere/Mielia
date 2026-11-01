@@ -33,7 +33,7 @@ routine EnumerateEmittable[T, TSource].emitter() -> EnumerateEmitter[T, TSource/
 
 ### Returns the next pair.
 ### :throws: {AbsentValueError} The source has no more values.
-failable routine EnumerateEmitter[T, TSourceEmitter].emit() -> Tuple[Int, TSourceEmitter/Item]
+routine EnumerateEmitter[T, TSourceEmitter].emit() -> Tuple[Int, TSourceEmitter/Item]
     var position = me.index
     me.index = me.index + 1
     # The value goes into the pair straight from the source, so the pair is its only holder.

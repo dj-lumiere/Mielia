@@ -272,6 +272,7 @@ public partial class SuflaeLexer
             [key: "danger"] = TokenType.Danger,
             [key: "dangerous"] = TokenType.Dangerous,
             [key: "failable"] = TokenType.Failable,
+            [key: "infallible"] = TokenType.Infallible,
 
             // `needs P everywhere` — the structural-conferral gate of the protocol model (a `needs`-clause
             // modifier, NOT a reflection construct). It lives with `needs`/`obeys`/`protocol`, which SF

@@ -78,7 +78,7 @@ needs AnyType T
     return Unknown(from: of).type_fact().name
 
 ### Finds the member variable a verb names, with the type it holds.
-secret failable routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
+secret routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
     for member in fact.memvars
         if member.name == memvar
             return member.fact()
@@ -89,7 +89,7 @@ secret failable routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
 ### :param memvar: The member variable's name.
 ### :returns: The member variable's value.
 ### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
-failable routine peek(target: T, memvar: Text) -> Unknown
+routine peek(target: T, memvar: Text) -> Unknown
 needs AnyType T
     var held = Unknown(from: target)
     when held.peek_memvar(memvar: memvar)
@@ -104,7 +104,7 @@ needs AnyType T
 ### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
 ### :throws: {MemberVariableTypeError} when value is not of the member variable's type.
 ### :throws: {PokeKindError} when target is a record.
-failable routine poke(target: T, memvar: Text, value: V)
+routine poke(target: T, memvar: Text, value: V)
 needs AnyType T
 needs AnyType V
     var held = Unknown(from: target)
@@ -126,14 +126,14 @@ needs AnyType V
 ### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
 ### :throws: {MemberVariableTypeError} when value is not of the member variable's type.
 ### :throws: {PokeKindError} when target is an entity.
-failable routine poked(target: T, memvar: Text, value: V) -> T
+routine poked(target: T, memvar: Text, value: V) -> T
 needs RecordType T
 needs AnyType V
     var held = Unknown(from: target)
     var changed = poked_unknown(held: held, memvar: memvar, value: Unknown(from: value))
     return changed.kept_as[T]()
 
-secret failable routine poked_unknown(held: Unknown, memvar: Text, value: Unknown) -> Unknown
+secret routine poked_unknown(held: Unknown, memvar: Text, value: Unknown) -> Unknown
     var fact = held.type_fact()
     if held.is_entity()
         throw PokeKindError(type_name: fact.name, is_entity: true)

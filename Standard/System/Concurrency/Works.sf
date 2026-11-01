@@ -35,7 +35,7 @@ routine work_recipe[T](entry: Addr, recipe: Addr) -> Work[T]
 ### :throws: {TaskSpawnError} if the work could not be started.
 ### :throws: {TaskTimeoutError} if a deadline was set with `waitfor` and passed first.
 ### :returns: The value the routine returned.
-failable routine Work[T].retrieve() -> T
+routine Work[T].retrieve() -> T
     # A deadline from `waitfor` is for this one retrieve.
     var has_deadline = me.has_deadline
     me.has_deadline = false
@@ -44,7 +44,7 @@ failable routine Work[T].retrieve() -> T
 ### Starts the work now and returns at once. Collect its value later with `retrieve` or `gather`.
 ### :throws: {WorkStartError} if the work was started already.
 ### :throws: {TaskSpawnError} if the work could not be started.
-failable routine Work[T].start_now()
+routine Work[T].start_now()
     me.state.start_now()
     return
 
@@ -100,7 +100,7 @@ secret routine Work[T].join_race(race: Addr)
 
 ### The value the finished work produced, or its failure thrown here. A cancelled Work throws
 ### {CancelRequested}.
-secret failable routine Work[T].result() -> T
+secret routine Work[T].result() -> T
     return me.state.settle()
 
 ### Frees the work once nothing will read it again.
@@ -125,7 +125,7 @@ routine Work[T].destruct()
 ### so none runs before the others are ready. Collect the results later with `gather()`.
 ### :throws: {WorkStartError} if a Work of the list was started already.
 ### :throws: {TaskSpawnError} if a Work could not be started.
-failable routine List[Work[T]].start_now()
+routine List[Work[T]].start_now()
     for job in me
         if not job.state.is_waiting()
             throw WorkStartError(reason: "You called start_now() on a list holding a Work that was already started. " +
@@ -150,7 +150,7 @@ routine List[Work[T]].launch_together() -> Bool
 ### :throws: {WorkStartError} if the list is empty (there is no work to race).
 ### :throws: {TaskSpawnError} if a Work cannot be started.
 ### :returns: The value produced by the first Work to finish.
-failable routine List[Work[T]].race() -> T
+routine List[Work[T]].race() -> T
     if me.is_empty()
         throw WorkStartError(reason: "You called race() on an empty list, so there is no work to race. " +
             "Put the Works in the list first.")
@@ -171,7 +171,7 @@ failable routine List[Work[T]].race() -> T
 ### The total wait is the slowest Work, not the sum. If a Work throws, the throw comes out here.
 ### :throws: {TaskSpawnError} if a Work cannot be started.
 ### :returns: The values produced by every Work, in the order they appear in the list.
-failable routine List[Work[T]].gather() -> List[T]
+routine List[Work[T]].gather() -> List[T]
     # Start every Work first, together, so they run together, then collect each.
     if not me.launch_together()
         throw TaskSpawnError()
@@ -186,7 +186,7 @@ failable routine List[Work[T]].gather() -> List[T]
 ### :throws: {WorkStartError} if the list is empty (there is no work to wait for).
 ### :throws: {TaskSpawnError} if a Work cannot be started.
 ### :returns: The first Work of the list to finish.
-failable routine List[Work[T]].next_finished() -> Work[T]
+routine List[Work[T]].next_finished() -> Work[T]
     if me.is_empty()
         throw WorkStartError(reason: "You called next_finished() on an empty list, so there is no work to wait " +
             "for. Put the Works in the list first.")

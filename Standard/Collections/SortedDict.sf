@@ -99,7 +99,7 @@ routine SortedDict[TKey, TValue].lacks_key(key: TKey) -> Bool
 ### Returns the value of `key` (`d[k]`).
 ### :param key: The key to look up.
 ### :throws: {AbsentValueError} The key has no entry.
-failable routine SortedDict[TKey, TValue].getitem(key: TKey) -> TValue
+routine SortedDict[TKey, TValue].getitem(key: TKey) -> TValue
     if not me.tree.has_key(key: key)
         throw KeyNotFoundError(key: key.represent())
     return me.tree.value_of(key: key)
@@ -146,7 +146,7 @@ routine SortedDict[TKey, TValue].remove(key: TKey) -> Bool
 ### :param i: The zero-based sorted rank to read.
 ### :returns: The `(TKey, TValue)` tuple at that sorted position.
 ### :throws: {IndexOutOfBoundsError} if `i >= count()`.
-failable routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> (TKey, TValue)
+routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> (TKey, TValue)
     var position = position_of(value: i)
     var count = me.tree.count()
     if position >= count
@@ -159,26 +159,26 @@ failable routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> (TKey, TValue)
 
 ### Returns the entry with the smallest key.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].min() -> (TKey, TValue)
+routine SortedDict[TKey, TValue].min() -> (TKey, TValue)
     if me.is_empty()
         throw AbsentValueError()
     return me.entry_at(rank: 0)
 
 ### Returns the entry with the largest key.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].max() -> (TKey, TValue)
+routine SortedDict[TKey, TValue].max() -> (TKey, TValue)
     if me.is_empty()
         throw AbsentValueError()
     return me.entry_at(rank: me.tree.count() - 1)
 
 ### Returns the entry with the smallest key. Alias for {SortedDict[TKey, TValue].min()}.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].first() -> (TKey, TValue)
+routine SortedDict[TKey, TValue].first() -> (TKey, TValue)
     return me.min()
 
 ### Returns the entry with the largest key. Alias for {SortedDict[TKey, TValue].max()}.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].last() -> (TKey, TValue)
+routine SortedDict[TKey, TValue].last() -> (TKey, TValue)
     return me.max()
 
 # ============================================================================
@@ -215,7 +215,7 @@ routine SortedDict[TKey, TValue].emitter() -> SortedDictEmitter[TKey, TValue]
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SortedDictEmitter[TKey, TValue].emit() -> (TKey, TValue)
+routine SortedDictEmitter[TKey, TValue].emit() -> (TKey, TValue)
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var rank = me.index
@@ -258,7 +258,7 @@ routine SortedDict[TKey, TValue].serialize() -> SerialValue
 ### Builds the dictionary from its serialized entry table.
 ### :throws: {SerialShapeError} when the value is not a table or an entry does not fit, or a parse error when a key
 ### does not read as a `TKey`.
-failable common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
+common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
     var result = SortedDict[TKey, TValue]()
     when value
         is RF::System.Dict[Text, SerialValue] as entries =>

@@ -23,7 +23,7 @@ obeys Comparable, DurationAddable, DurationSubtractable
 ### :param offset: The UTC offset associated with the local civil time.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.from_local")
-failable common routine LocalMoment.from_local(
+common routine LocalMoment.from_local(
     year: S64,
     month: S64,
     day: S64,
@@ -127,14 +127,14 @@ routine LocalMoment.to_utc() -> LocalMoment
 ### :param duration: The `duration` value.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.add_duration")
-failable routine LocalMoment.add_duration(duration: Duration) -> LocalMoment
+routine LocalMoment.add_duration(duration: Duration) -> LocalMoment
 
 ### Returns this local moment shifted backward by `duration`.
 ### The stored offset is preserved.
 ### :param duration: The time span to subtract.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.subtract_duration")
-failable routine LocalMoment.subtract_duration(duration: Duration) -> LocalMoment
+routine LocalMoment.subtract_duration(duration: Duration) -> LocalMoment
 
 ### Returns the elapsed duration from `earlier` to this local moment.
 ### Offset differences do not affect the result because arithmetic is based on
@@ -142,25 +142,25 @@ failable routine LocalMoment.subtract_duration(duration: Duration) -> LocalMomen
 ### :param earlier: The earlier comparison local moment.
 ### :returns: The resulting `Duration` value.
 @rf("LocalMoment.elapsed_since")
-failable routine LocalMoment.elapsed_since(earlier: LocalMoment) -> Duration
+routine LocalMoment.elapsed_since(earlier: LocalMoment) -> Duration
 
 ### Returns the local moment reached by advancing this one by `you`.
 ### :param you: The duration to advance by.
 ### :returns: The resulting `LocalMoment`.
 @rf("LocalMoment.add")
-failable routine LocalMoment.add(you: Duration) -> LocalMoment
+routine LocalMoment.add(you: Duration) -> LocalMoment
 
 ### Returns the local moment reached by retreating this one by `you`.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `LocalMoment`.
 @rf("LocalMoment.sub")
-failable routine LocalMoment.sub(you: Duration) -> LocalMoment
+routine LocalMoment.sub(you: Duration) -> LocalMoment
 
 ### Returns the elapsed time from `you` to this moment.
 ### :param you: The earlier moment to measure from.
 ### :returns: The `Duration` between the two moments.
 @rf("LocalMoment.sub")
-failable routine LocalMoment.sub(you: LocalMoment) -> Duration
+routine LocalMoment.sub(you: LocalMoment) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
@@ -189,4 +189,4 @@ routine LocalMoment.diagnose() -> Text
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("LocalMoment.hash")
-routine LocalMoment.hash(k0: U64, k1: U64) -> U64
+infallible routine LocalMoment.hash(k0: U64, k1: U64) -> U64

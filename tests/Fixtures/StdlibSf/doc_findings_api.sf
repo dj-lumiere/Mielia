@@ -44,14 +44,14 @@ routine BadNumberError.crash_message() -> Text
     return f"not a number: {me.text}"
 
 protocol Parsable
-    failable routine Me(text: Text)
+    routine Me(text: Text)
 
 record Digit
 obeys Parsable
     value: Int
 
 # A protocol's creator requirement is met by a creator of the type with the same parameters.
-failable routine Digit(text: Text) -> Digit
+routine Digit(text: Text) -> Digit
     if text == "" or text.count() > 1
         throw BadNumberError(text: text)
     return Digit(value: text.to[Int]())
@@ -67,7 +67,7 @@ routine Sized.doubled() -> Int
 routine List[T].second() -> T
     return me[1]
 
-failable routine find(n: Int) -> Int
+routine find(n: Int) -> Int
     if n < 0
         throw AbsentValueError()
     return n

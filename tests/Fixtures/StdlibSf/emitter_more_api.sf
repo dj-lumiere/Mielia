@@ -9,7 +9,7 @@ obeys Emitter[Int]
     current: Int
     last: Int
 
-failable routine Steps.emit() -> Int
+routine Steps.emit() -> Int
     if me.current > me.last
         throw AbsentValueError()
     var value = me.current

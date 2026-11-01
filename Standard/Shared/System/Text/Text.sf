@@ -102,7 +102,7 @@ routine Text.compare(you: Text) -> ComparisonSign
 ### :param k1: The second 64-bit key word.
 ### :returns: The resulting `U64` keyed hash.
 @rf("Text.hash")
-routine Text.hash(k0: U64, k1: U64) -> U64
+infallible routine Text.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `true` when this text contains `character`.
 ### The search succeeds when any stored character matches exactly.
@@ -152,7 +152,7 @@ routine Text.ends_with(suffix: Text) -> Bool
 ### :returns: A `(before, after)` tuple.
 ### :throws: {AbsentValueError} Thrown when the separator is not found.
 @rf("Text.split_once")
-failable routine Text.split_once(separator: Text) -> (Text, Text)
+routine Text.split_once(separator: Text) -> (Text, Text)
 
 ### Converts this value to uppercase.
 ### Case conversion follows the behavior defined on `Char`.
@@ -257,4 +257,4 @@ routine Text.emitter() -> TextEmitter
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("TextEmitter.emit")
-failable routine TextEmitter.emit() -> Char
+routine TextEmitter.emit() -> Char

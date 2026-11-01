@@ -15,7 +15,7 @@ crashable OtherError
 routine OtherError.crash_message() -> Text
     return f"other {me.code}"
 
-failable routine inner(n: Int) -> Int
+routine inner(n: Int) -> Int
     if n == 3
         throw NopeError(what: f"three {n}")
     if n == 4
@@ -23,13 +23,13 @@ failable routine inner(n: Int) -> Int
     return n * 10
 
 # No error arm: the error passes on to the caller.
-failable routine passes(n: Int) -> Int
+routine passes(n: Int) -> Int
     when check inner(n: n)
         is Int as v =>
             return v + 1
 
 # Rethrows the caught error: it moves to this routine's carrier.
-failable routine rethrows(n: Int) -> Int
+routine rethrows(n: Int) -> Int
     when check inner(n: n)
         is Int as v =>
             return v + 2

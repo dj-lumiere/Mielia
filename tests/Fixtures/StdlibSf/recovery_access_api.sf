@@ -12,38 +12,38 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-failable routine pick(items: List[Int], i: Int) -> Int
+routine pick(items: List[Int], i: Int) -> Int
     if i < 0
         throw NopeError(what: "negative")
     var v = items[i]
     return v
 
-failable routine letter(t: Text, i: Int) -> Char
+routine letter(t: Text, i: Int) -> Char
     if i < 0
         throw AbsentValueError()
     return t[i]
 
-failable routine score(ages: Dict[Text, Int], name: Text) -> Int
+routine score(ages: Dict[Text, Int], name: Text) -> Int
     if name == ""
         throw NopeError(what: "empty")
     return ages[name] * 10
 
-failable routine narrow(n: S64) -> S8
+routine narrow(n: S64) -> S8
     if n < 0
         throw AbsentValueError()
     var b = n.to[S8]()
     return b
 
-failable routine parsed(t: Text) -> Int
+routine parsed(t: Text) -> Int
     if t == ""
         throw AbsentValueError()
     return t.to[Int]()
 
 # a failable routine with a subscript, called bare by another failable one
-failable routine last_of(items: List[Int]) -> Int
+routine last_of(items: List[Int]) -> Int
     return items[items.count() - 1]
 
-failable routine last_plus_one(items: List[Int]) -> Int
+routine last_plus_one(items: List[Int]) -> Int
     if items.count() > 1000
         throw AbsentValueError()
     return last_of(items: items) + 1

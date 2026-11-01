@@ -56,7 +56,7 @@ needs U64 COUNT
 ### Returns the element at `index` as the array holds it, without bounds checking and without a holder of
 ### its own. Only call this when the index is already proven to be in range.
 @rf("Items.get_raw")
-routine Items[T, COUNT].get_raw(index: U64) -> T
+infallible routine Items[T, COUNT].get_raw(index: U64) -> T
 
 ### Returns true when the buildtime size is zero.
 ### :returns: `true` if `COUNT == 0`.
@@ -67,13 +67,13 @@ routine Items[T, COUNT].is_empty() -> Bool
 ### :returns: The element at index `0`.
 ### :throws: {AbsentValueError} The array has zero elements (`COUNT == 0`).
 @rf("Items.first")
-failable routine Items[T, COUNT].first() -> T
+routine Items[T, COUNT].first() -> T
 
 ### Returns the last element of the array.
 ### :returns: The element at index `COUNT - 1`.
 ### :throws: {AbsentValueError} The array has zero elements (`COUNT == 0`).
 @rf("Items.last")
-failable routine Items[T, COUNT].last() -> T
+routine Items[T, COUNT].last() -> T
 
 ### Returns true if any element equals `value`.
 ### Scans from index 0 to N - 1 using the element type's equality operator.
@@ -100,7 +100,7 @@ routine Items[T, COUNT].emitter() -> ItemsEmitter[T, COUNT]
 ### :returns: The element at the current index.
 ### :throws: {AbsentValueError} All `COUNT` elements have been yielded.
 @rf("ItemsEmitter.emit")
-failable routine ItemsEmitter[T, COUNT].emit() -> T
+routine ItemsEmitter[T, COUNT].emit() -> T
 
 @rf("Items.represent")
 routine Items[T, COUNT].represent() -> Text

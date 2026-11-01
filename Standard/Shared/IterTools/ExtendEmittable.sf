@@ -37,4 +37,4 @@ routine ExtendEmittable[T, TFirstSource, TSecondSource].emitter() -> ExtendEmitt
 ### Once the first emitter is exhausted, all remaining values come from the second emitter.
 ### :returns: The resulting `T` value.
 @rf("ExtendEmitter.emit")
-failable routine ExtendEmitter[T, TFirstEmitter, TSecondEmitter].emit() -> T
+routine ExtendEmitter[T, TFirstEmitter, TSecondEmitter].emit() -> T

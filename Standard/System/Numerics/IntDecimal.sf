@@ -8,78 +8,78 @@ module System/Numerics
 ### :param you: The other side.
 ### :returns: The sum.
 ### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Int.add(you: Decimal) -> Decimal
+routine Int.add(you: Decimal) -> Decimal
     return me.exact_decimal().add(you: you)
 
 ### `me - you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The difference.
 ### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Int.sub(you: Decimal) -> Decimal
+routine Int.sub(you: Decimal) -> Decimal
     return me.exact_decimal().sub(you: you)
 
 ### `me * you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The product.
 ### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Int.mul(you: Decimal) -> Decimal
+routine Int.mul(you: Decimal) -> Decimal
     return me.exact_decimal().mul(you: you)
 
 ### `me / you` as a `Decimal`.
 ### :param you: The divisor.
 ### :returns: The quotient.
 ### :throws: {DivisionByZeroError} when `you` is zero.
-failable routine Int.truediv(you: Decimal) -> Decimal
+routine Int.truediv(you: Decimal) -> Decimal
     return me.exact_decimal().truediv(you: you)
 
 ### Whether `me` and `you` are the same number.
 ### :param you: The other side.
 ### :returns: `true` when they are equal.
-failable routine Int.eq(you: Decimal) -> Bool
+routine Int.eq(you: Decimal) -> Bool
     return me.exact_decimal() == you
 
 ### How `me` orders against `you`.
 ### :param you: The other side.
 ### :returns: The order.
-failable routine Int.compare(you: Decimal) -> ComparisonSign
+routine Int.compare(you: Decimal) -> ComparisonSign
     return me.exact_decimal().compare(you: you)
 
 ### `me + you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The sum.
 ### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Decimal.add(you: Int) -> Decimal
+routine Decimal.add(you: Int) -> Decimal
     return me.add(you: you.exact_decimal())
 
 ### `me - you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The difference.
 ### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Decimal.sub(you: Int) -> Decimal
+routine Decimal.sub(you: Int) -> Decimal
     return me.sub(you: you.exact_decimal())
 
 ### `me * you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The product.
 ### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
-failable routine Decimal.mul(you: Int) -> Decimal
+routine Decimal.mul(you: Int) -> Decimal
     return me.mul(you: you.exact_decimal())
 
 ### `me / you` as a `Decimal`.
 ### :param you: The divisor.
 ### :returns: The quotient.
 ### :throws: {DivisionByZeroError} when `you` is zero.
-failable routine Decimal.truediv(you: Int) -> Decimal
+routine Decimal.truediv(you: Int) -> Decimal
     return me.truediv(you: you.exact_decimal())
 
 ### Whether `me` and `you` are the same number.
 ### :param you: The other side.
 ### :returns: `true` when they are equal.
-failable routine Decimal.eq(you: Int) -> Bool
+routine Decimal.eq(you: Int) -> Bool
     return me == you.exact_decimal()
 
 ### How `me` orders against `you`.
 ### :param you: The other side.
 ### :returns: The order.
-failable routine Decimal.compare(you: Int) -> ComparisonSign
+routine Decimal.compare(you: Int) -> ComparisonSign
     return me.compare(you: you.exact_decimal())

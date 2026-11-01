@@ -37,7 +37,7 @@ routine none_of(chars: Text) -> TextPiece
 ### :returns: The piece.
 ### :throws: {InvalidPatternError} `from` comes after `to`.
 @rf("char_range")
-failable routine char_range(from: Char, `to`: Char) -> TextPiece
+routine char_range(from: Char, `to`: Char) -> TextPiece
 
 ### The piece once or not at all, once when it can.
 ### :param piece: The piece.

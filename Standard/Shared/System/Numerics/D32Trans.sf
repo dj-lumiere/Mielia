@@ -6,7 +6,7 @@ module System/Numerics
 ### e^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.exp")
-failable routine D32.exp() -> D32
+routine D32.exp() -> D32
 
 ### e^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.exp_unchecked")
@@ -15,7 +15,7 @@ routine D32.exp_unchecked() -> D32
 ### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.exp_m1")
-failable routine D32.exp_m1() -> D32
+routine D32.exp_m1() -> D32
 
 ### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.exp_m1_unchecked")
@@ -24,7 +24,7 @@ routine D32.exp_m1_unchecked() -> D32
 ### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.exp2")
-failable routine D32.exp2() -> D32
+routine D32.exp2() -> D32
 
 ### 2^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.exp2_unchecked")
@@ -33,7 +33,7 @@ routine D32.exp2_unchecked() -> D32
 ### 10^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.exp10")
-failable routine D32.exp10() -> D32
+routine D32.exp10() -> D32
 
 ### 10^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.exp10_unchecked")
@@ -42,7 +42,7 @@ routine D32.exp10_unchecked() -> D32
 ### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.ln")
-failable routine D32.ln() -> D32
+routine D32.ln() -> D32
 
 ### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.ln_unchecked")
@@ -51,7 +51,7 @@ routine D32.ln_unchecked() -> D32
 ### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.ln_1p")
-failable routine D32.ln_1p() -> D32
+routine D32.ln_1p() -> D32
 
 ### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.ln_1p_unchecked")
@@ -60,7 +60,7 @@ routine D32.ln_1p_unchecked() -> D32
 ### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.log2")
-failable routine D32.log2() -> D32
+routine D32.log2() -> D32
 
 ### log2(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.log2_unchecked")
@@ -69,7 +69,7 @@ routine D32.log2_unchecked() -> D32
 ### log10(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.log10")
-failable routine D32.log10() -> D32
+routine D32.log10() -> D32
 
 ### log10(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.log10_unchecked")
@@ -78,7 +78,7 @@ routine D32.log10_unchecked() -> D32
 ### sqrt(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.sqrt")
-failable routine D32.sqrt() -> D32
+routine D32.sqrt() -> D32
 
 ### sqrt(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.sqrt_unchecked")
@@ -89,7 +89,7 @@ routine D32.sqrt_unchecked() -> D32
 ### :throws: {NumericDomainError} when `me` is below zero or NaN.
 ### :throws: {NumericOverflowError} when `me` is zero.
 @rf("D32.rsqrt")
-failable routine D32.rsqrt() -> D32
+routine D32.rsqrt() -> D32
 
 ### 1 / sqrt(me) rounded once, raw IEEE: +0 gives +infinity, -0 gives -infinity, +infinity gives +0, and a value
 ### below zero or NaN gives NaN.
@@ -103,7 +103,7 @@ routine D32.cbrt() -> D32
 ### asin(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.asin")
-failable routine D32.asin() -> D32
+routine D32.asin() -> D32
 
 ### asin(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.asin_unchecked")
@@ -112,7 +112,7 @@ routine D32.asin_unchecked() -> D32
 ### acos(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.acos")
-failable routine D32.acos() -> D32
+routine D32.acos() -> D32
 
 ### acos(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.acos_unchecked")
@@ -137,7 +137,7 @@ routine D32.tan() -> D32
 ### sinh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.sinh")
-failable routine D32.sinh() -> D32
+routine D32.sinh() -> D32
 
 ### sinh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.sinh_unchecked")
@@ -146,7 +146,7 @@ routine D32.sinh_unchecked() -> D32
 ### cosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.cosh")
-failable routine D32.cosh() -> D32
+routine D32.cosh() -> D32
 
 ### cosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.cosh_unchecked")
@@ -163,7 +163,7 @@ routine D32.asinh() -> D32
 ### acosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.acosh")
-failable routine D32.acosh() -> D32
+routine D32.acosh() -> D32
 
 ### acosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.acosh_unchecked")
@@ -172,7 +172,7 @@ routine D32.acosh_unchecked() -> D32
 ### atanh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.atanh")
-failable routine D32.atanh() -> D32
+routine D32.atanh() -> D32
 
 ### atanh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.atanh_unchecked")
@@ -189,7 +189,7 @@ routine D32.erfc() -> D32
 ### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D32.gamma")
-failable routine D32.gamma() -> D32
+routine D32.gamma() -> D32
 
 ### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D32.gamma_unchecked")
@@ -209,7 +209,7 @@ routine atan2(y: D32, x: D32) -> D32
 
 ### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-failable routine hypot(x: D32, y: D32) -> D32
+routine hypot(x: D32, y: D32) -> D32
 
 ### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
 @rf("hypot_unchecked")
@@ -217,7 +217,7 @@ routine hypot_unchecked(x: D32, y: D32) -> D32
 
 ### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-failable routine hypot(x: D32, y: D32, z: D32) -> D32
+routine hypot(x: D32, y: D32, z: D32) -> D32
 
 ### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
 @rf("hypot_unchecked")
@@ -225,7 +225,7 @@ routine hypot_unchecked(x: D32, y: D32, z: D32) -> D32
 
 ### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
 @rf("D32.mul_add")
-failable routine D32.mul_add(b: D32, c: D32) -> D32
+routine D32.mul_add(b: D32, c: D32) -> D32
 
 ### me*b + c with a single rounding, raw IEEE.
 @rf("D32.mul_add_unchecked")
@@ -292,7 +292,7 @@ routine D32.signum() -> D32
 
 ### Throws when `me` is non-finite (inf or NaN).
 @rf("D32.finite")
-failable routine D32.finite() -> D32
+routine D32.finite() -> D32
 
 ### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
 @rf("D32.mod_trunc")

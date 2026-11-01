@@ -81,7 +81,7 @@ common routine BitList.from_literal(elements...: Bool) -> BitList
 ### :param capacity: The minimum number of bits to reserve.
 ### :returns: An empty `BitList` with preallocated storage.
 ### :throws: {OutOfMemoryError} if there is no memory left for the bits.
-secret failable routine BitList(capacity: U64) -> BitList
+secret routine BitList(capacity: U64) -> BitList
     # Create bit list with pre-allocated capacity (in bits)
     var word_size = bit_words(capacity)
     danger
@@ -97,7 +97,7 @@ secret failable routine BitList(capacity: U64) -> BitList
 ### :returns: An empty `BitList` with preallocated storage.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if `capacity` is more than a `U64` counts, or there is no memory left for the bits.
-failable routine BitList(capacity: Int) -> BitList
+routine BitList(capacity: Int) -> BitList
     return BitList(capacity: room_of(capacity: capacity))
 
 ### Returns how many 64-bit words hold `bits` bits.
@@ -215,7 +215,7 @@ routine BitList.add_last(value: Bool)
 ### Removes and returns the final bit in the sequence.
 ### :returns: The resulting `Bool` value.
 ### :throws: {AbsentValueError} Thrown when the bit list is empty.
-failable routine BitList.remove_last() -> Bool
+routine BitList.remove_last() -> Bool
     # Remove and return last bit - O(1)
     # Throws AbsentValueError because an empty list has no bit to remove
     if me.is_empty()
@@ -224,7 +224,7 @@ failable routine BitList.remove_last() -> Bool
     me.count = me.count - 1
     return me.get_bit_internal(me.count)
 
-secret failable routine BitList.reserve_raw(new_capacity: U64)
+secret routine BitList.reserve_raw(new_capacity: U64)
     # Ensure capacity is at least new_capacity (in bits)
     if new_capacity > me.capacity
         var new_word_size = bit_words(new_capacity)
@@ -251,7 +251,7 @@ secret failable routine BitList.reserve_raw(new_capacity: U64)
 ### :param new_capacity: The minimum capacity to reserve.
 ### :throws: {OutOfMemoryError} if `new_capacity` is more than a `U64` counts, or there is no memory left for the bits.
 ###     The bit list then stays as it was.
-failable routine BitList.reserve(new_capacity: Int)
+routine BitList.reserve(new_capacity: Int)
     me.reserve_raw(new_capacity: room_of(capacity: new_capacity))
     return
 
@@ -265,7 +265,7 @@ routine BitList.clear()
 # Indexing with Integral (forward index)
 # ============================================================================
 
-secret failable routine BitList.getitem_raw(index: U64) -> Bool
+secret routine BitList.getitem_raw(index: U64) -> Bool
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
     return me.get_bit_internal(index)
@@ -274,10 +274,10 @@ secret failable routine BitList.getitem_raw(index: U64) -> Bool
 ### :param index: The zero-based logical position to read.
 ### :returns: The resulting `Bool` value.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.getitem(index: Int) -> Bool
+routine BitList.getitem(index: Int) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
-secret failable routine BitList.setitem_raw(index: U64, value: Bool)
+secret routine BitList.setitem_raw(index: U64, value: Bool)
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
     me.set_bit_internal(index: index, value: value)
@@ -287,7 +287,7 @@ secret failable routine BitList.setitem_raw(index: U64, value: Bool)
 ### :param index: The zero-based logical position to update.
 ### :param value: The replacement bit value.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.setitem(index: Int, value: Bool)
+routine BitList.setitem(index: Int, value: Bool)
     me.setitem_raw(index: position_of(value: index), value: value)
     return
 
@@ -307,7 +307,7 @@ routine BitList.set_all(value: Bool)
         rf_set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
     return
 
-secret failable routine BitList.flip_raw(index: U64)
+secret routine BitList.flip_raw(index: U64)
     # Toggle bit at index
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
@@ -318,7 +318,7 @@ secret failable routine BitList.flip_raw(index: U64)
 ### Toggles the bit at `index`.
 ### :param index: The zero-based bit position to flip.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.flip(index: Int)
+routine BitList.flip(index: Int)
     me.flip_raw(index: position_of(value: index))
     return
 
@@ -393,7 +393,7 @@ routine BitList.is_none_true() -> Bool
 ### Returns the position of the first `true` bit.
 ### :returns: The lowest index whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit is `true`.
-failable routine BitList.first_true() -> Int
+routine BitList.first_true() -> Int
     var i: U64 = 0
     until i >= me.count
         if me.get_bit_internal(i)
@@ -405,7 +405,7 @@ failable routine BitList.first_true() -> Int
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit after `after` is `true`.
-failable routine BitList.next_true(after: Int) -> Int
+routine BitList.next_true(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= me.count
         throw AbsentValueError()
@@ -419,7 +419,7 @@ failable routine BitList.next_true(after: Int) -> Int
 ### Returns the position of the first `false` bit.
 ### :returns: The lowest index whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit is `false`.
-failable routine BitList.first_false() -> Int
+routine BitList.first_false() -> Int
     var i: U64 = 0
     until i >= me.count
         if not me.get_bit_internal(i)
@@ -431,7 +431,7 @@ failable routine BitList.first_false() -> Int
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit after `after` is `false`.
-failable routine BitList.next_false(after: Int) -> Int
+routine BitList.next_false(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= me.count
         throw AbsentValueError()
@@ -524,7 +524,7 @@ routine BitList.emitter() -> BitListEmitter
 ### Returns the next bit from the emitter.
 ### :returns: The resulting `Bool` value.
 ### :throws: {AbsentValueError} Thrown when the emitter reaches the captured bit count.
-failable routine BitListEmitter.emit() -> Bool
+routine BitListEmitter.emit() -> Bool
     if me.index >= me.count
         throw AbsentValueError()
     var word_idx = me.index >> 6
@@ -544,7 +544,7 @@ failable routine BitListEmitter.emit() -> Bool
 ### Returns the first stored bit without removing it.
 ### :returns: The bit at index `0`.
 ### :throws: {AbsentValueError} Thrown when the list is empty.
-failable routine BitList.first() -> Bool
+routine BitList.first() -> Bool
     # Get first bit (throws AbsentValueError if empty)
     if me.is_empty()
         throw AbsentValueError()
@@ -553,7 +553,7 @@ failable routine BitList.first() -> Bool
 ### Returns the last stored bit without removing it.
 ### :returns: The bit at index `count - 1`.
 ### :throws: {AbsentValueError} Thrown when the list is empty.
-failable routine BitList.last() -> Bool
+routine BitList.last() -> Bool
     # Get last bit (throws AbsentValueError if empty)
     if me.is_empty()
         throw AbsentValueError()
@@ -595,7 +595,7 @@ routine BitList.eq(you: BitList) -> Bool
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U8` value.
 ### :throws: {AbsentValueError} Thrown when fewer than eight bits are stored.
-failable routine BitList.to_u8() -> U8
+routine BitList.to_u8() -> U8
     # Convert first 8 bits to U8 (throws AbsentValueError if fewer than 8 bits)
     if me.count < 8
         throw AbsentValueError()
@@ -609,7 +609,7 @@ failable routine BitList.to_u8() -> U8
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U16` value.
 ### :throws: {AbsentValueError} Thrown when fewer than sixteen bits are stored.
-failable routine BitList.to_u16() -> U16
+routine BitList.to_u16() -> U16
     # Convert first 16 bits to U16 (throws AbsentValueError if fewer than 16 bits)
     if me.count < 16
         throw AbsentValueError()
@@ -623,7 +623,7 @@ failable routine BitList.to_u16() -> U16
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U32` value.
 ### :throws: {AbsentValueError} Thrown when fewer than thirty-two bits are stored.
-failable routine BitList.to_u32() -> U32
+routine BitList.to_u32() -> U32
     # Convert first 32 bits to U32 (throws AbsentValueError if fewer than 32 bits)
     if me.count < 32
         throw AbsentValueError()
@@ -637,7 +637,7 @@ failable routine BitList.to_u32() -> U32
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U64` value.
 ### :throws: {AbsentValueError} Thrown when fewer than sixty-four bits are stored.
-failable routine BitList.to_u64() -> U64
+routine BitList.to_u64() -> U64
     # Convert first 64 bits to U64 (throws AbsentValueError if fewer than 64 bits)
     if me.count < 64
         throw AbsentValueError()
@@ -735,7 +735,7 @@ routine BitList.destruct()
 ### universal member-walk would leave it, as a raw `Hijacked` frees nothing). No `roam_trace` override is
 ### needed: bits can never be `Roamed`, so the universal no-op trace is already correct.
 @override
-dangerous routine BitList.roam_free()
+infallible dangerous routine BitList.roam_free()
     me.data.invalidate()
     return
 

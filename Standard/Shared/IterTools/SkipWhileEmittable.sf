@@ -33,10 +33,10 @@ routine SkipWhileEmittable[T, TSource].emitter() -> SkipWhileEmitter[T, TSource/
 ### After the first predicate failure, later values are yielded without rechecking earlier skip state.
 ### :returns: The resulting `T` value.
 @rf("SkipWhileEmitter.emit")
-failable routine SkipWhileEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+routine SkipWhileEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
 
 ### Returns a lazy adapter that skips values while `predicate` returns `true`.
 ### :param predicate: The predicate that controls the initial skipping phase.
 ### :returns: The resulting `SkipWhileEmittable[T, Me]` value.
 @rf("Emittable.skip_while")
-routine Emittable[T].skip_while(predicate: failable Callable[(T,), Bool]) -> SkipWhileEmittable[T, Me]
+routine Emittable[T].skip_while(predicate: Callable[(T,), Bool]) -> SkipWhileEmittable[T, Me]

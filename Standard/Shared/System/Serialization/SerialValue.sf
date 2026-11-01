@@ -27,4 +27,4 @@ variant SerialValue
 ### single-owner entity that two values cannot share.
 ### :returns: A copy of this value that owns its own lists and dictionaries.
 @rf("SerialValue.share")
-secret routine SerialValue.share() -> SerialValue
+secret infallible routine SerialValue.share() -> SerialValue

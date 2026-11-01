@@ -49,7 +49,7 @@ routine TextPiece.repeat(count: Int) -> TextPiece
 ### :param range: The counts, `to` including its end and `til` leaving it out.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
-failable routine TextPiece.repeat(range: Range[Int]) -> TextPiece
+routine TextPiece.repeat(range: Range[Int]) -> TextPiece
     return me.repeat(range: positions_of(range: range))
 
 ### The piece `count` times in a row or more, as many as it can.
@@ -68,7 +68,7 @@ routine BytesPiece.repeat(count: Int) -> BytesPiece
 ### :param range: The counts, `to` including its end and `til` leaving it out.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
-failable routine BytesPiece.repeat(range: Range[Int]) -> BytesPiece
+routine BytesPiece.repeat(range: Range[Int]) -> BytesPiece
     return me.repeat(range: positions_of(range: range))
 
 ### The piece `count` times in a row or more, as many as it can.
@@ -82,7 +82,7 @@ routine BytesPiece.repeat_at_least(count: Int) -> BytesPiece
 ### :param pieces: The alternatives.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
-failable routine either_longer(pieces: List[TextPiece]) -> TextPiece
+routine either_longer(pieces: List[TextPiece]) -> TextPiece
     return either_longer(pieces: pieces.to[RF::List]())
 
 ### One of the pieces: the one that matches the shortest text at that place (the first one written, of those as
@@ -90,14 +90,14 @@ failable routine either_longer(pieces: List[TextPiece]) -> TextPiece
 ### :param pieces: The alternatives.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
-failable routine either_shorter(pieces: List[TextPiece]) -> TextPiece
+routine either_shorter(pieces: List[TextPiece]) -> TextPiece
     return either_shorter(pieces: pieces.to[RF::List]())
 
 ### One of the pieces: the one that matches the most bytes at that place (the first one written, of those as long).
 ### :param pieces: The alternatives.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
-failable routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
+routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
     return either_longer(pieces: pieces.to[RF::List]())
 
 ### One of the pieces: the one that matches the fewest bytes at that place (the first one written, of those as
@@ -105,14 +105,14 @@ failable routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
 ### :param pieces: The alternatives.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
-failable routine either_shorter(pieces: List[BytesPiece]) -> BytesPiece
+routine either_shorter(pieces: List[BytesPiece]) -> BytesPiece
     return either_shorter(pieces: pieces.to[RF::List]())
 
 ### A pattern of pieces matched one after another.
 ### :param pieces: The pieces, in order.
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
-failable common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
+common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
     return TextPattern.of(pieces: pieces.to[RF::List]())
 
 ### A pattern of pieces matched one after another, every letter in either case when `ignore_case` is true.
@@ -120,7 +120,7 @@ failable common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
 ### :param ignore_case: Whether letters match in either case.
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
-failable common routine TextPattern.of(pieces: List[TextPiece], ignore_case: Bool) -> TextPattern
+common routine TextPattern.of(pieces: List[TextPiece], ignore_case: Bool) -> TextPattern
     return TextPattern.of(pieces: pieces.to[RF::List](), ignore_case: ignore_case)
 
 ### Every place the pattern matches in `text`, in order and none overlapping: after a match the search goes on where
@@ -141,7 +141,7 @@ routine TextPattern.split(text: Text) -> List[Text]
 ### :param pieces: The pieces, in order.
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
-failable common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPattern
+common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPattern
     return BytesPattern.of(pieces: pieces.to[RF::List]())
 
 ### A pattern of bytes pieces matched one after another, every ASCII letter in either case when `ignore_case` is
@@ -150,7 +150,7 @@ failable common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPatter
 ### :param ignore_case: Whether ASCII letters match in either case.
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
-failable common routine BytesPattern.of(pieces: List[BytesPiece], ignore_case: Bool) -> BytesPattern
+common routine BytesPattern.of(pieces: List[BytesPiece], ignore_case: Bool) -> BytesPattern
     return BytesPattern.of(pieces: pieces.to[RF::List](), ignore_case: ignore_case)
 
 ### Every place the pattern matches in `bytes`, in order and none overlapping.

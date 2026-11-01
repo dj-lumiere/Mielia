@@ -18,7 +18,7 @@ obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, Sc
 ### :param nanoseconds: The nanosecond component within the current second.
 ### :returns: The resulting `Duration` value.
 @rf("normalize_duration")
-failable routine normalize_duration(seconds: S64, nanoseconds: S64) -> Duration
+routine normalize_duration(seconds: S64, nanoseconds: S64) -> Duration
 
 ### Returns the zero duration.
 ### :returns: The resulting `Duration` value.
@@ -167,30 +167,30 @@ routine Duration.int_abs() -> Duration
 ### :param you: The addend.
 ### :returns: The combined `Duration`.
 @rf("Duration.add")
-failable routine Duration.add(you: Duration) -> Duration
+routine Duration.add(you: Duration) -> Duration
 
 ### Returns `me - you`, subtracting `you` from this duration and normalizing.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `Duration`.
 @rf("Duration.sub")
-failable routine Duration.sub(you: Duration) -> Duration
+routine Duration.sub(you: Duration) -> Duration
 
 ### Returns the negated value.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.neg")
-failable routine Duration.neg() -> Duration
+routine Duration.neg() -> Duration
 
 ### Returns this value scaled by `factor`.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.scale")
-failable routine Duration.scale(factor: S64) -> Duration
+routine Duration.scale(factor: S64) -> Duration
 
 ### Returns the product of this value and the other value.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.mul")
-failable routine Duration.mul(factor: S64) -> Duration
+routine Duration.mul(factor: S64) -> Duration
 
 ### Returns how many times `you` fits into this duration. Like integer `//`, the remainder this leaves is
 ### never negative.
@@ -198,26 +198,26 @@ failable routine Duration.mul(factor: S64) -> Duration
 ### :returns: The integer quotient as `S64`.
 ### :throws: {DivisionByZeroError} when `you` is zero.
 @rf("Duration.floordiv")
-failable routine Duration.floordiv(you: Duration) -> S64
+routine Duration.floordiv(you: Duration) -> S64
 
 ### Returns what is left after `me // you`. Like integer `%`, it is never negative.
 ### :param you: The divisor duration.
 ### :returns: The remaining `Duration`.
 ### :throws: {DivisionByZeroError} when `you` is zero.
 @rf("Duration.mod")
-failable routine Duration.mod(you: Duration) -> Duration
+routine Duration.mod(you: Duration) -> Duration
 
 ### Returns this duration divided by `divisor`.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.div_by")
-failable routine Duration.div_by(divisor: S64) -> Duration
+routine Duration.div_by(divisor: S64) -> Duration
 
 ### Returns the quotient of this value and the other value.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.floordiv")
-failable routine Duration.floordiv(divisor: S64) -> Duration
+routine Duration.floordiv(divisor: S64) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
@@ -246,4 +246,4 @@ routine Duration.diagnose() -> Text
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("Duration.hash")
-routine Duration.hash(k0: U64, k1: U64) -> U64
+infallible routine Duration.hash(k0: U64, k1: U64) -> U64

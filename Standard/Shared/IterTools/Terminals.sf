@@ -7,27 +7,27 @@ module IterTools
 ### This is a convenience terminal operation over the first emitter element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.first")
-failable routine Emittable[T].first() -> T
+routine Emittable[T].first() -> T
 
 ### Returns the last value produced by this emittable.
 ### The emittable is consumed fully in order to find the final element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.last")
-failable routine Emittable[T].last() -> T
+routine Emittable[T].last() -> T
 
 ### Returns `true` when any produced value satisfies `predicate`.
 ### Iteration stops as soon as a matching value is found.
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Emittable.any")
-routine Emittable[T].any(predicate: failable Callable[(T,), Bool]) -> Bool
+routine Emittable[T].any(predicate: Callable[(T,), Bool]) -> Bool
 
 ### Returns `true` when every produced value satisfies `predicate`.
 ### Iteration stops as soon as a failing value is found.
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Emittable.all")
-routine Emittable[T].all(predicate: failable Callable[(T,), Bool]) -> Bool
+routine Emittable[T].all(predicate: Callable[(T,), Bool]) -> Bool
 
 ### Folds this emittable into a single result value.
 ### The combiner receives the current accumulator and the next item in iteration
@@ -38,40 +38,40 @@ routine Emittable[T].all(predicate: failable Callable[(T,), Bool]) -> Bool
 @rf("Emittable.accumulate")
 routine Emittable[T].accumulate[TState](
     start: TState,
-    combiner: failable Callable[(TState, T), TState],
+    combiner: Callable[(TState, T), TState],
 ) -> TState
 
 ### Returns the sum of all values in this emittable.
 ### The first element is used as the initial accumulator; subsequent elements are added to it.
 ### :returns: The resulting `T` value.
 @rf("Emittable.sum")
-failable routine Emittable[T].sum() -> T
+routine Emittable[T].sum() -> T
 needs T obeys Addable
 
 ### Returns the smallest value in this emittable.
 ### :returns: The resulting `T` value.
 @rf("Emittable.min")
-failable routine Emittable[T].min() -> T
+routine Emittable[T].min() -> T
 needs T obeys Comparable
 
 ### Returns the largest value in this emittable.
 ### :returns: The resulting `T` value.
 @rf("Emittable.max")
-failable routine Emittable[T].max() -> T
+routine Emittable[T].max() -> T
 needs T obeys Comparable
 
 ### Returns the element for which `selector` returns the smallest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.min_by")
-failable routine Emittable[T].min_by[TKey](selector: failable Callable[(T,), TKey]) -> T
+routine Emittable[T].min_by[TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the element for which `selector` returns the largest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.max_by")
-failable routine Emittable[T].max_by[TKey](selector: failable Callable[(T,), TKey]) -> T
+routine Emittable[T].max_by[TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the first value produced by this emittable, or `default` when the emittable is empty.

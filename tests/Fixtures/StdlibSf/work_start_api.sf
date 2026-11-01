@@ -15,7 +15,7 @@ routine Pair.sum() -> Int
 routine add(a: Int, b: Int) -> Int
     return a + b
 
-failable routine checked(n: Int) -> Int
+routine checked(n: Int) -> Int
     if n < 0
         throw VerificationFailedError()
     return n

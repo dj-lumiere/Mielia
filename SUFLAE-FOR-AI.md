@@ -72,9 +72,11 @@ through a `.rf` module the program imports (section 18).
    operators never take a rule, and there is no global rounding state.
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
-7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before
-   `dangerous` or `common`). `routine parse!(...)` is SF-G222, and call sites never mark the call. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` and
-   take the result apart with `when`. There is no try/catch and no `try_parse` name form (§11).
+7. **Every routine passes its failures to its caller.** Nothing marks a routine that can fail (`failable` is
+   SF-G230, `routine parse!(...)` is SF-G222), and call sites never mark the call. A failure nobody receives stops
+   the program loudly where it happened. To recover, prefix the call with `try` / `check` and take the result apart
+   with `when`: they receive a failure from any depth below the call. Only `infallible routine` is a wall. There is
+   no try/catch and no `try_parse` name form (§11).
 8. **Conditional expressions are top-level only.** `if c then a else b` is the whole value of `var x =` (also
    `global`), a plain `x =`, or `return`. Anywhere else it is SF-G112 by design: inside parentheses, an argument
    (`f(x: if c then a else b)`), an operand (`(if c then a else b) + 1`, `x += if ...`), a subscript, an f-text
@@ -579,8 +581,8 @@ var label = when
 - In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
   as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
   `becomes value`, the arm's value (without it, SF-S307). An arm may also be `throw ...` (`else => throw
-  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type. In a `failable`
-  routine the failure goes to the caller, and in a routine that is not failable it crashes on the spot.
+  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type. The failure goes to the
+  caller (in an `infallible` routine it stops the program on the spot).
 
 ```suflae
 when terrain
@@ -623,12 +625,12 @@ routine Account.deposit(amount: Int)                       # member routine, rec
   `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
   type-level routine with no `me`, called as `Type.name(...)`.
 - A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
-  `routine Celsius(degrees: B64) -> Celsius` (`failable routine Celsius(...)` when it can fail). A conversion is
+  `routine Celsius(degrees: B64) -> Celsius` (it throws from its body when it can fail). A conversion is
   a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
   variables directly. Routine types are written `Callable[(Int,), Int]` (the parameter list is
-  always a tuple: `()`, `(T,)`, `(A, B)`), and `failable Callable[(Int,), Int]` for one that may fail
-  (§11). A free routine's bare name is a value:
+  always a tuple: `()`, `(T,)`, `(A, B)`), for a routine value that may fail too (§11). A free routine's bare
+  name is a value:
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
@@ -746,8 +748,8 @@ variant Number
 
 ## 11. Errors and failure
 
-**Failable routines.** A routine that can fail is declared `failable` and fails with `throw`. A routine with
-no value to give throws `AbsentValueError()`, an ordinary standard error:
+**Failing.** A routine fails with `throw`, and nothing in its declaration says so. A routine with no value to give
+throws `AbsentValueError()`, an ordinary standard error:
 
 ```suflae
 crashable NopeError
@@ -756,24 +758,28 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-failable routine parse(n: Int) -> Int
+routine parse(n: Int) -> Int
     if n < 0
         throw NopeError(what: f"{n} is negative")
     return n * 10
 
-failable routine find(items: List[Text], name: Text) -> Int
+routine find(items: List[Text], name: Text) -> Int
     for i in 0 til items.count()
         if items[i] == name
             return i
     throw AbsentValueError()
 ```
 
-- `throw` in a routine not declared `failable` crashes on the spot with the error's message (status 82): use it for
-  a broken invariant (state the program can no longer trust), never for a condition a caller could handle. A
-  `failable` routine that never throws is an error.
+- Every routine passes its failures to its caller. **A failure nobody receives stops the program loudly** where it
+  happened: the error's title and message, where it was thrown, and a stack trace go to stderr (status 82).
+- **`infallible routine` is the only wall.** `infallible routine close(...)` (`infallible` first, before
+  `dangerous` or `common`) promises not to fail: a failure inside it (a `throw`, a checked operation, a call that
+  fails) breaks the promise and stops the program there, even under `try`/`check`. Use it for a routine whose
+  failure means the program can no longer be trusted. `start()` is not marked: a failure that reaches it ends the
+  program with its report. ✗ Marking a routine infallible so you don't have to think about failures: a failure the
+  caller could have received becomes a stop at that point.
 - Call sites never write `!` (`parse!(n: 1)` is SF-G211), and a declaration never does (`routine parse!(...)` is
-  SF-G222). **A bare call crashes loudly on failure**: the
-  error's title and message, where it was thrown, and a stack trace go to stderr.
+  SF-G222). `failable` is SF-G230 (`migrate --step failable` removes it).
 
 **Recovering.** Put a keyword in front of the expression:
 
@@ -804,30 +810,22 @@ routine start()
     return
 ```
 
-- **Failures rise only through failable routines.** A `throw` in a `failable` routine goes to the caller, where
-  `try`/`check` receive it (a bare call inside another failable routine passes it on). A routine that is not
-  failable is a wall: a failure inside it (its own `throw`, a checked operation, a bare call of a failable routine)
-  crashes there, even under `try`/`check` above its caller. Checked operations, indexing and conversions are failable
-  routines, so `try a + b` (a fixed-width overflow), `check a // b` (a division by zero), `try items[9]` (an index
-  out of range, a missing key), `300.to[S8]()` and `"x".to[Int]()` are received. Each becomes the result's
-  failure (`try`: `None`, `check`: the error), and evaluation stops at the first one. `try`/`check` in front of an
-  expression that reaches no failable call is SF-S760 (remove the keyword, or declare the routine `failable`).
-- **Routine values.** A lambda whose body can fail (a checked operation, indexing, a call of a failable routine)
-  and a failable routine named as a value may fail, and their type is written `failable Callable[(T,), U]`. They
-  go only to a parameter of such a type: handing one to a plain `Callable[...]` is SF-S761 (mark the parameter
-  `failable`, or hand it a value that cannot fail). A call that hands one to a `failable Callable` parameter can
-  fail through it: `try apply(f: x => 10 // x, x: 0)` gives `None`, a bare one crashes loudly. The library's
-  routines that take a routine value take it as `failable Callable[...]` (`select`, `where`, `take_while`,
-  `skip_while`, `distinct_by`, `select_many`, `any`, `all`, `accumulate`, `get_count`, `min_by`, `max_by`,
-  `sort_by`, `sorted_by`). An adapter (`select`, `where`, ...) keeps the lambda and calls it later, so a call that
-  works on the adapter (`s.to[List]()`) or a `for` loop over it can fail through it:
-  `try items.select(transform: x => 10 // x).to[List]()` is received, and a `for` loop over such an adapter passes
-  the lambda's failure on in a failable routine and crashes anywhere else. A handler given to `CpuEventManager`
-  that fails crashes the program.
+- **`try`/`check` receive a failure from any depth below them.** Code inside calls plainly (`var l =
+  eval(e.left)` in a recursive `eval`), and a failure anywhere under the keyword comes back to it: a `throw`, a
+  fixed-width `+ - *` that overflows (`IntegerOverflowError`), `a // b` by zero (`DivisionByZeroError`), `items[9]`
+  past the end (`IndexOutOfBoundsError`), a missing key, `300.to[S8]()`, `"x".to[Int]()`. The error type tells
+  them apart. Each becomes the result's failure (`try`: `None`, `check`: the error), and evaluation stops at the
+  first one. A keyword over something that cannot fail gives the value. A call with no keyword above it runs as it
+  is and stops where the failure happens.
+- **Routine values.** A lambda and a routine named as a value pass their failures on like any call:
+  `try apply(f: x => 10 // x, x: 0)` gives `None`, and `try items.select(transform: x => 10 // x).to[List]()` is
+  received (an adapter keeps the lambda and calls it later, and the call that works on the adapter passes its
+  failure on). With no keyword above, the lambda's failure stops the program where it happens. A handler given to
+  `CpuEventManager` runs with nothing above it, so a handler that fails stops the program.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
 - **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
-  running it crashes with `NotImplementedError` naming the routine, even under `try`/`check`. It does not make the routine
-  failable and ends its path, so a body that is only `todo` needs no `return`. The build warns once per routine
+  running it crashes with `NotImplementedError` naming the routine, even under `try`/`check`. It ends its path, so
+  a body that is only `todo` needs no `return`. The build warns once per routine
   that still has one (SF-W303). `nothing` is an empty body on purpose, a different thing.
 - Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
   the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
@@ -841,9 +839,9 @@ routine start()
 - When the success value is itself a variant, the arms may name the types it holds instead of the whole value
   (`is Deposit as d`, `is Withdraw as w` on `check parse(...)`), and together they must name every one of them.
   The same holds on a plain variant that holds another variant.
-- **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `failable` routine
-  as if `is Crashables as e => throw e` were written (the caller receives it), anywhere else the program
-  crashes loudly. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
+- **An error arm is optional.** With no arm for the error, the `when` passes it on, as if
+  `is Crashables as e => throw e` were written: a `try`/`check` above receives it, and with none the program stops
+  there. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
   its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
   `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,
   the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
@@ -874,10 +872,9 @@ category: only a crashable can be thrown.
   copies nothing. One failure is on its way at a time in each flow: errors are never stacked (to keep
   several, keep several `Check` values). An error thrown again (`throw e`, a work's error at `retrieve()`)
   goes back into the mold of the flow that throws it.
-- The builder collects the errors each routine can throw (its own `throw`s and those of the failable
-  routines it calls). `@throws([NopeError, AbsentValueError])` above a failable routine fixes that list:
-  an error the routine can throw that the list leaves out is SF-S712, and the annotation on a routine
-  that isn't failable is SF-S713. The editor marks a bare call of a failable routine with `may stop`.
+- The builder collects the errors each routine can throw (its own `throw`s and those of the routines it
+  calls). `@throws([NopeError, AbsentValueError])` above a routine fixes that list: an error the routine can
+  throw that the list leaves out is SF-S712, and the annotation on an `infallible` routine is SF-S713.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
   `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
@@ -886,7 +883,7 @@ category: only a crashable can be thrown.
   `LogicBreachedError`).
 
 **Fatal walls.** The line between recoverable and fatal is: a **data condition** the program can respond to
-(file missing, key absent, bad input) is recoverable through a `failable` routine and a keyword; a **physical or
+(file missing, key absent, bad input) is recoverable with a keyword above the call; a **physical or
 logic limit** is fatal and cannot be caught.
 
 - Out of memory is fatal, loud and uncatchable (a handler would itself need memory). Very deep recursion
@@ -1290,7 +1287,7 @@ routine start()
 - There is no thread type in Suflae.
 
 ```suflae
-failable routine checked(n: Int) -> Int
+routine checked(n: Int) -> Int
     if n < 0
         throw VerificationFailedError()
     return n
@@ -1520,8 +1517,8 @@ routine start()
   `call.proceed()` (runs the routine, any number of times, and gives its result as an `Unknown`, one keeping `none`
   for a routine that returns nothing). What `around` returns must be of the routine's return type (else a loud
   failure). A routine takes at most one annotation with an `around` (SF-S706), and neither goes on a routine or type
-  with type parameters. A failure of the routine passes on through a `failable` `around` and crashes in one that is
-  not. `RoutineInfo.annotations` and `TypeInfo.annotations` give the values back (`List[Unknown]`: `a.is[Route]()`,
+  with type parameters. A failure of the routine passes on through the `around` to the caller (an `infallible`
+  `around` stops the program there). `RoutineInfo.annotations` and `TypeInfo.annotations` give the values back (`List[Unknown]`: `a.is[Route]()`,
   `try a.to[Route]()`). An annotated routine stays in the build even when nothing calls it.
 
 ```suflae
@@ -1610,8 +1607,7 @@ number). At most 20 are shown per batch.
 | SF-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | SF-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
-| SF-S760       | `try`/`check` over nothing that can fail            | remove the keyword, or declare the routine `failable` |
-| SF-S761       | a lambda that can fail given to a plain `Callable`  | write the parameter `failable Callable[...]`      |
+| SF-G230       | `failable` written on a routine                     | remove it: every routine passes its failures on   |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
@@ -1637,7 +1633,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `for` `with`
   `break` `continue` `return` `throw` `todo` `becomes`
-- **Failure**: `failable` (on a routine's declaration: `failable routine parse(...)`) · **Recovery**: `try` `check`
+- **Failure**: `infallible` (a wall: `infallible routine close(...)`) · **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`
 - **Other**: `using` `as` `define` `given` `nothing` (an empty body: a type's, or a block's that
@@ -1647,7 +1643,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Concurrency**: `f.to[Work](args)`
 - **Reserved, not usable in a program**: `danger` `dangerous`
 
-A routine that can fail says so with `failable` before `routine`: `routine parse!(...)` is SF-G222, and a call never
+Nothing marks a routine that can fail (`failable` is SF-G230, `routine parse!(...)` is SF-G222), and a call never
 writes `!`. `steal` and `expand` are not Suflae words.
 
 The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an

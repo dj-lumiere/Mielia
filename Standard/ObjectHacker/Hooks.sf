@@ -13,7 +13,7 @@ module ObjectHacker
 
 secret record ChangeHook
     secret id: U64
-    secret handler: failable Callable[(Text, Unknown, Unknown), None]
+    secret handler: Callable[(Text, Unknown, Unknown), None]
 
 # The hooks of one object, and the values its member variables had before the changes under way: one list for each
 # flow (a thread, or a coroutine wherever it runs) that is changing the object, innermost last, so a change on one
@@ -39,13 +39,13 @@ secret routine hook_registry() -> HookRegistry
             return made
         else as kept => return kept.to[HookRegistry]()
 
-secret routine add_change_hook(key: U64, target: Unknown, handler: failable Callable[(Text, Unknown, Unknown), None]) -> U64
+secret routine add_change_hook(key: U64, target: Unknown, handler: Callable[(Text, Unknown, Unknown), None]) -> U64
     hooks_enter()
     var id = add_change_hook_held(key: key, target: target, handler: handler)
     hooks_leave()
     return id
 
-secret routine add_change_hook_held(key: U64, target: Unknown, handler: failable Callable[(Text, Unknown, Unknown), None]) -> U64
+secret routine add_change_hook_held(key: U64, target: Unknown, handler: Callable[(Text, Unknown, Unknown), None]) -> U64
     var registry = hook_registry()
     var id = registry.next_id
     registry.next_id = id + 1

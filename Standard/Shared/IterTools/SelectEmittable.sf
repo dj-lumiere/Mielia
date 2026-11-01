@@ -36,7 +36,7 @@ routine SelectEmittable[T, TResult, TSource].emitter() -> SelectEmitter[T, TResu
 ### The transform runs once for each successfully yielded source value.
 ### :returns: The resulting `TResult` value.
 @rf("SelectEmitter.emit")
-failable routine SelectEmitter[T, TResult, TSourceEmitter].emit() -> TResult
+routine SelectEmitter[T, TResult, TSourceEmitter].emit() -> TResult
 
 ### Returns a lazy projection of this emittable.
 ### The source sequence is not evaluated until the resulting emitter is
@@ -44,4 +44,4 @@ failable routine SelectEmitter[T, TResult, TSourceEmitter].emit() -> TResult
 ### :param transform: The routine used to map each source value to a result value.
 ### :returns: The resulting `SelectEmittable[T, TResult, Me]` value.
 @rf("Emittable.select")
-routine Emittable[T].select[TResult](transform: failable Callable[(T,), TResult]) -> SelectEmittable[T, TResult, Me]
+routine Emittable[T].select[TResult](transform: Callable[(T,), TResult]) -> SelectEmittable[T, TResult, Me]

@@ -1,22 +1,22 @@
 module Tests/ExitCode/WallUnderTry
 
 import IO/Console
-# Failures rise only through failable routines. A lambda handed to a `failable Callable` parameter passes its
-# failure on, so `try` receives it. A routine that is not failable is a wall: a division by zero inside it
-# crashes there (status 82), even under `try` above the failable routine that calls it.
+# Every routine passes its failures on, a lambda handed to a `Callable` parameter too, so `try` receives them.
+# An `infallible` routine is a wall: a division by zero inside it breaks its promise and stops the program there
+# (status 82), even under `try` above the routine that calls it.
 
 crashable NegativeTotalError
 
 routine NegativeTotalError.crash_message() -> Text
     return "the total is negative"
 
-routine apply(f: failable Callable[(Int,), Int], x: Int) -> Int
+routine apply(f: Callable[(Int,), Int], x: Int) -> Int
     return f(x)
 
-routine share(total: Int, parts: Int) -> Int
+infallible routine share(total: Int, parts: Int) -> Int
     return total // parts
 
-failable routine split(total: Int, parts: Int) -> Int
+routine split(total: Int, parts: Int) -> Int
     if total < 0
         throw NegativeTotalError()
     return share(total: total, parts: parts)

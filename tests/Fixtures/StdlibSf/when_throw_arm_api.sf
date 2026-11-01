@@ -9,14 +9,14 @@ crashable BadWordError
 routine BadWordError.crash_message() -> Text
     return f"bad word: {me.word}"
 
-failable routine score(word: Text) -> Int
+routine score(word: Text) -> Int
     var n = when word
         == "one" => 1
         == "two" => 2
         else => throw BadWordError(word: word)
     return n * 10
 
-failable routine label(n: Int) -> Text
+routine label(n: Int) -> Text
     return when
         n < 0 => throw BadWordError(word: f"{n}")
         n == 0 => "zero"

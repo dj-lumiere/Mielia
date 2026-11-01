@@ -30,7 +30,7 @@ needs TKey obeys Hashable, Equatable
 
 ### Collects the values into an `Items[T, N]`, in order. The bracket names the size: `xs.to[Items[Int, 3]]()`.
 ### :throws: {ElementCountMismatchError} There are fewer or more than `N` values.
-failable routine Emittable[T].to[Items[T, N]]() -> Items[T, N]
+routine Emittable[T].to[Items[T, N]]() -> Items[T, N]
 needs U64 N
 needs RecordType T
     var result = Items[T, N]()
@@ -50,7 +50,7 @@ routine Emittable[T].get_count() -> Int
 
 ### Returns how many values satisfy `predicate`.
 ### :param predicate: The test applied to each value.
-routine Emittable[T].get_count(predicate: failable Callable[(T,), Bool]) -> Int
+routine Emittable[T].get_count(predicate: Callable[(T,), Bool]) -> Int
     return me.get_count(predicate: predicate).to[Int]()
 
 ### Returns the values after the first `count`.

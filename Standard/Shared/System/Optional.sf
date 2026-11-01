@@ -26,13 +26,13 @@ routine Optional[T].diagnose() -> Text
 ### `unwrap` for a single-owner entity: it cannot be shared, so the caller gets an independent duplicate,
 ### which needs the entity to declare it can be copied.
 @rf("Optional.unwrap")
-failable routine Optional[T].unwrap() -> T
+routine Optional[T].unwrap() -> T
 needs EntityType T
 needs T obeys Copyable
 
 ### `unwrap` for a variant: one with an entity arm cannot be shared, so the caller gets a duplicate.
 @rf("Optional.unwrap")
-failable routine Optional[T].unwrap() -> T
+routine Optional[T].unwrap() -> T
 needs VariantType T
 needs T obeys Copyable
 
@@ -57,7 +57,7 @@ needs T obeys Copyable
 ### :returns: The contained `T` value, moved out.
 ### :throws: {AbsentValueError} if this `Optional` is absent.
 @rf("Optional.strip_out")
-failable routine Optional[T].strip_out() -> T
+routine Optional[T].strip_out() -> T
 
 @rf("Optional.is_present")
 routine Optional[T].is_present() -> Bool
@@ -75,5 +75,5 @@ needs T obeys Equatable
 ### :param k1: The second 64-bit key word.
 ### :returns: The resulting `U64` value.
 @rf("Optional.hash")
-routine Optional[T].hash(k0: U64, k1: U64) -> U64
+infallible routine Optional[T].hash(k0: U64, k1: U64) -> U64
 needs T obeys Hashable

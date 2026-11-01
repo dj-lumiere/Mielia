@@ -28,7 +28,7 @@ routine bytes(value: Bytes) -> BytesPiece
 ### :returns: The piece.
 ### :throws: {InvalidPatternError} The range holds no byte or doesn't count up by 1.
 @rf("byte_range")
-failable routine byte_range(range: Range[U8]) -> BytesPiece
+routine byte_range(range: Range[U8]) -> BytesPiece
 
 ### The piece once or not at all, once when it can.
 ### :param piece: The piece.
