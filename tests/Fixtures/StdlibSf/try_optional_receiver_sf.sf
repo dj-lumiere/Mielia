@@ -37,5 +37,11 @@ routine start()
     var pt: Pt? = Pt(x: 4)
     var no_pt: Pt? = none
     show(f"record: {try pt.twice()}, {try no_pt.twice()}")
+    var optionals = List[Int?]()
+    optionals.add_last(value: 5)
+    optionals.add_last(value: none)
+    var ends_in_value: Int? = try optionals.first()
+    var ends_in_none: Int? = try optionals.last()
+    show(f"a chain ending in a T? gives one T?: {ends_in_value}, {ends_in_none}")
     show("DONE")
     return

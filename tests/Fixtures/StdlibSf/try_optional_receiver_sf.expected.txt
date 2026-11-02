@@ -4,4 +4,5 @@ try below the receiver: none
 check on none: Attempted to access a value that is absent.
 check on a value: 42
 record: 8, none
+a chain ending in a T? gives one T?: 5, none
 DONE
