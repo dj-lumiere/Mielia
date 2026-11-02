@@ -354,15 +354,18 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 
 **Optionals and `none`.**
 
-- `T?` is the optional type, `Optional[T]`. It is the one named type whose kind follows what it holds: over a value
-  it is a value (copied by `=`), and over an entity `E?` is a handle that may be empty. `Maybe` is an unknown type
+- `T?` is the optional type, `Optional[T]`, for an entity too: `E?` is `Optional[E]` and works like any other `T?`
+  (`!!`, `??`, `when` with `is None`). It is the one named type whose kind follows what it holds: over a value it is a
+  value (copied by `=`), and over an entity an `E?` refers to the entity, or holds `none`. `Maybe` is an unknown type
   whose error names `Optional[T]` and `T?` (`migrate --step type-names` renames it).
 - `None` (capital) is the type and pattern (`is None`, `isnot None`); `none` (lowercase) is the value.
 - `none` is legal only where the target type can be absent: `T?`, a variant with a `None`
   member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
 - Reading through an `E?` before checking it is SF-S619; check with `if e isnot None` (or return early on
-  `if e is None`) and the name is narrowed after the check. Putting `none` into a non-optional `E` slot is
-  SF-S252: declare the slot `E?`.
+  `if e is None`, or a `when e` whose `is None` arm returns) and the name is the `E` after the check, until it is
+  given a new value (`cur = cur.next` still reads the checked `cur`). An `E?` goes where an `E` is wanted only after
+  the check (`take(b: m)` with `m: Box?` is SF-S502). Putting `none` into a non-optional `E` slot is SF-S252, a type
+  argument included (`List[Box]().add_last(none)`): declare the slot `E?` (`List[Box?]`).
 
 ## 6. Variables, constants and globals
 

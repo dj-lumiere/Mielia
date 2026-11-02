@@ -47,9 +47,10 @@ routine never_called() -> S64
     return 1
 
 routine returns_name(info: RoutineInfo) -> Text
-    if info.returns is None
+    var returned = info.returns
+    if returned is None
         return "nothing"
-    return info.returns.name
+    return returned.name
 
 routine show_problem(hero: Hero, name: Text, args: Dict[Text, Unknown])
     when check call(target: hero, name: name, args: args)

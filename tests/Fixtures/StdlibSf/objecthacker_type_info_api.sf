@@ -31,7 +31,8 @@ routine start()
     show(f"{info.name} ({info.full_name}) in {info.module_name}: {info.kind}")
     for m in info.memvars
         show(f"  {m.order} {m.name}: {m.type.name} {m.type.kind}")
-    show(f"  next is a {info.memvars[1].type.name} too: {info.memvars[1].type.name == info.name}")
+    var optional_name = f"Optional[{info.name}]"
+    show(f"  next is a {info.memvars[1].type.name}: {info.memvars[1].type.name == optional_name}")
 
     var point = type_info(of: Point(x: 0, y: 0))
     show(f"{point.name}: {point.kind}, Equatable: {point.obeys_protocol(name: "Equatable")}")
