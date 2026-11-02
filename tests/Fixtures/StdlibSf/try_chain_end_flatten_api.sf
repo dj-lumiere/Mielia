@@ -1,7 +1,10 @@
 module Tests/StdlibSf/TryChainEndFlattenApi
 
-# A `try` chain that ends in a `T?` of a record gives one `T?`, not a `T??`: a none end is the one absence, and a
-# failure on the way is the same absence.
+# A `try` chain that ends in a `T?` gives one `T?`, not a `T??`: a none end is the one absence, and a failure on the
+# way is the same absence.
+
+entity Node
+    n: Int
 
 crashable StopError
     reason: Text
@@ -14,6 +17,12 @@ routine pass[T](x: T, stop: Bool) -> T
         throw StopError(reason: "stop")
     return x
 
+routine show_node(label: Text, node: Node?)
+    when node
+        is Node as held => show(f"{label}: node {held.n}")
+        is None => show(f"{label}: none")
+    return
+
 routine start()
     var present: Int? = 7
     var absent: Int? = none
@@ -21,4 +30,14 @@ routine start()
     var count_b: Int? = try pass(x: absent, stop: false)
     var count_c: Int? = try pass(x: present, stop: true)
     show(f"record: {count_a} {count_b} {count_c}")
+
+    var held: Node? = Node(n: 3)
+    var node_a: Node? = try pass(x: held, stop: false)
+    show_node(label: "entity a", node: node_a)
+    var missing: Node? = none
+    var node_b: Node? = try pass(x: missing, stop: false)
+    show_node(label: "entity b", node: node_b)
+    var stopped: Node? = Node(n: 4)
+    var node_c: Node? = try pass(x: stopped, stop: true)
+    show_node(label: "entity c", node: node_c)
     return

@@ -1,0 +1,86 @@
+module Tests/StdlibSf/EntityTupleListApi
+
+# A list of tuples that hold an entity: the tuple stored in the list shares the entity, and the names a pop takes the
+# tuple apart into give their shares back, so the walk of a tree with a stack of `(Step, Node)` matches the recursive one.
+
+entity Node
+    value: Int
+    left: Node?
+    right: Node?
+
+choice Step
+    ENTER
+    VISIT
+
+routine pre_recursive(node: Node?, out: List[Int])
+    if node is None
+        return
+    out.add_last(value: node.value)
+    pre_recursive(node: node.left, out)
+    pre_recursive(node: node.right, out)
+
+routine in_recursive(node: Node?, out: List[Int])
+    if node is None
+        return
+    in_recursive(node: node.left, out)
+    out.add_last(value: node.value)
+    in_recursive(node: node.right, out)
+
+routine post_recursive(node: Node?, out: List[Int])
+    if node is None
+        return
+    post_recursive(node: node.left, out)
+    post_recursive(node: node.right, out)
+    out.add_last(value: node.value)
+
+routine walk(root: Node, order: Text) -> List[Int]
+    var out = List[Int]()
+    var stack = [(Step.ENTER, root)]
+    until stack.is_empty()
+        var (step, node) = stack.remove_last()
+        if step == Step.VISIT
+            out.add_last(value: node.value)
+            continue
+        if order == "post"
+            stack.add_last((Step.VISIT, node))
+        if node.right isnot None
+            stack.add_last((Step.ENTER, node.right))
+        if order == "in"
+            stack.add_last((Step.VISIT, node))
+        if node.left isnot None
+            stack.add_last((Step.ENTER, node.left))
+        if order == "pre"
+            stack.add_last((Step.VISIT, node))
+    return out
+
+routine start()
+    var root = Node(value: 1,
+        left: Node(value: 2, left: Node(value: 4, left: none, right: none), right: Node(value: 5, left: none, right: none)),
+        right: Node(value: 3, left: none, right: Node(value: 6, left: none, right: none)))
+    var pre = List[Int]()
+    pre_recursive(node: root, out: pre)
+    var inorder = List[Int]()
+    in_recursive(node: root, out: inorder)
+    var post = List[Int]()
+    post_recursive(node: root, out: post)
+    show(f"pre:  {pre} / {walk(root, order: "pre")}")
+    show(f"in:   {inorder} / {walk(root, order: "in")}")
+    show(f"post: {post} / {walk(root, order: "post")}")
+
+    var pushed = List[(Int, Node)]()
+    for i in 0 til 3
+        pushed.add_last((i, Node(value: i, left: none, right: none)))
+    var total = 0
+    until pushed.is_empty()
+        var (key, node) = pushed.remove_last()
+        total += node.value + key
+    show(f"declared: {total}")
+
+    var stack = [(Step.ENTER, Node(value: 0, left: none, right: none))]
+    for i in 1 til 4
+        stack.add_last((Step.VISIT, Node(value: i, left: none, right: none)))
+    var sum = 0
+    until stack.is_empty()
+        var (step, node) = stack.remove_last()
+        sum += node.value
+    show(f"literal: {sum}")
