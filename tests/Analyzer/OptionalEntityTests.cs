@@ -98,4 +98,46 @@ public class OptionalEntityTests
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.NullableEntityDeref);
     }
+
+    /// <summary>A field path a check narrowed reads as the entity, until the path is assigned.</summary>
+    [Fact]
+    public void Analyze_MemberPathChecked_IsTheEntity()
+    {
+        AnalysisResult result = AnalyzeSaSuflae(source: """
+                                       entity Cell
+                                           next: Cell?
+                                           value: Int
+
+                                       routine sum(c: Cell) -> Int
+                                           if c.next is None
+                                               return c.value
+                                           return c.value + c.next.value
+
+                                       routine second(c: Cell) -> Int
+                                           if c.next isnot None
+                                               if c.next.next isnot None
+                                                   return c.next.next.value
+                                           return 0
+                                       """);
+        Assert.Empty(collection: result.Errors);
+    }
+
+    /// <summary>Assigning the path puts the optional back.</summary>
+    [Fact]
+    public void Analyze_MemberPathAssigned_IsOptionalAgain()
+    {
+        AnalysisResult result = AnalyzeSaSuflae(source: """
+                                       entity Cell
+                                           next: Cell?
+                                           value: Int
+
+                                       routine again(c: Cell) -> Int
+                                           if c.next is None
+                                               return 0
+                                           c.next = none
+                                           return c.next.value
+                                       """);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.NullableEntityDeref);
+    }
 }

@@ -363,7 +363,10 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
 - Reading through an `E?` before checking it is SF-S619; check with `if e isnot None` (or return early on
   `if e is None`, or a `when e` whose `is None` arm returns) and the name is the `E` after the check, until it is
-  given a new value (`cur = cur.next` still reads the checked `cur`). An `E?` goes where an `E` is wanted only after
+  given a new value (`cur = cur.next` still reads the checked `cur`). A field path is checked the same way
+  (`if info.returns is None` leaving, then `info.returns.name`, any depth) until the path or a name in front of it is
+  given a new value. A call in between does not end the check, and if another name set the field to `none` meanwhile,
+  the read crashes loudly. An `E?` goes where an `E` is wanted only after
   the check (`take(b: m)` with `m: Box?` is SF-S502). Putting `none` into a non-optional `E` slot is SF-S252, a type
   argument included (`List[Box]().add_last(none)`): declare the slot `E?` (`List[Box?]`).
 
