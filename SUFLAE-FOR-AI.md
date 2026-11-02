@@ -37,10 +37,11 @@ through a `.rf` module the program imports (section 18).
 
 ## 2. The rules most likely to break your assumptions
 
-1. **Calls with three or more parameters REQUIRE named arguments (SF-S510).** Two parameters may be positional
-   (no warning), naming them is still clearer: `gcd(a: 252, b: 105)`. Single-argument calls may be positional. Routines annotated
-   `@positional` accept all-positional calls. Mixing named and positional in one call is always an error
-   (SF-S512).
+1. **Arguments without a label fill the parameters in order from the first** (`volume(2, 3, 4)`), labels pick a
+   parameter (`gcd(a: 252, b: 105)`) and follow the unlabeled ones: an unlabeled argument after a labeled one is
+   SF-S512. A bare variable named like ANOTHER parameter of the routine, sitting in a different parameter's place,
+   is SF-S510 (`f(n - 1, from, to, tmp)`: write `f(n - 1, from, tmp: to, to: tmp)`). Routines annotated
+   `@positional` skip the place check.
 2. **A routine that returns a value returns it on every path** (`return x`). A routine that returns nothing
    needs no closing `return`: it ends where its body ends. `return` still leaves one early.
 3. **Entities are shared; records are copied.** `var b = a` on an entity gives a second name for the same
