@@ -224,7 +224,7 @@ public sealed class ExitCodeTests
         Assert.Equal(expected: "2\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary><c>Int(1)</c> builds an <c>Int</c> from a value that is one already: SF-S646, which says to use the
+    /// <summary><c>Int(n)</c> builds an <c>Int</c> from a variable that is one already: SF-S646, which says to use the
     /// value as it is, where the LLVM emitter used to stop.</summary>
     [Fact]
     public void IntBuiltFromAnInt_IsS646()

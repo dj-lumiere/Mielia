@@ -1,3 +1,4 @@
 routine start()
-    var a = Int(1)
+    var n = 5
+    var a = Int(n)
     show(a)
