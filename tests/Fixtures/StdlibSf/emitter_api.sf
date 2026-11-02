@@ -1,7 +1,7 @@
 module Tests/StdlibSf/EmitterApi
 
 # Emitters used directly, emitters collected with to[...], and a list of Works started together.
-import IterTools
+import EmitterTools
 import Collections
 
 routine square(n: Int) -> Int

@@ -1,7 +1,7 @@
 module Tests/StdlibSf/OwnSurfaceApi
 
 import IO/Console
-import IterTools
+import EmitterTools
 
 # Suflae's surface of the types it shares with RazorForge: Items, Text, Bytes, Character and the emittable
 # terminals count and index with Int and build Suflae lists, while the values stay the same types.

@@ -1,4 +1,4 @@
-module IterTools
+module EmitterTools
 
 # Suflae's surface of the emittable terminals and adapters that count: counts are `Int`, and the
 # collections they build are Suflae's own. A Suflae program calls these in place of the RazorForge routines of

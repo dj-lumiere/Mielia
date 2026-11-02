@@ -1,7 +1,7 @@
 module Tests/StdlibSf/WeirdExprsApi
 
 import IO/Console
-import IterTools
+import EmitterTools
 
 # Suflae's twin of RazorForge's weird_exprs_api: expressions that are legal but stack features the way a real
 # program does. Each line is a combination that broke once, kept here so it stays fixed.

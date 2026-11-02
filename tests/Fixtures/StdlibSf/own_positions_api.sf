@@ -1,7 +1,7 @@
 module Tests/StdlibSf/OwnPositionsApi
 
 import IO/Console
-import IterTools
+import EmitterTools
 
 # Positions count with Int in Suflae: end-relative `^n`, slices, Text search, and the RazorForge
 # list crossing.

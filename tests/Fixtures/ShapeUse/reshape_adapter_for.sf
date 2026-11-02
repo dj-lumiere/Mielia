@@ -1,7 +1,7 @@
 module Tests/ShapeUse/ReshapeAdapterFor
 
 import IO/Console
-import IterTools
+import EmitterTools
 # A loop over `nums.where(...)` walks `nums` itself, so a routine that adds to `nums` inside it crashes with
 # ReshapingWhileInUseError.
 

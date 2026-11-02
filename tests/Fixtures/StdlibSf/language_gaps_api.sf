@@ -1,6 +1,6 @@
 module Tests/StdlibSf/LanguageGapsApi
 
-import IterTools
+import EmitterTools
 import Collections
 
 global log: List[Text] = []

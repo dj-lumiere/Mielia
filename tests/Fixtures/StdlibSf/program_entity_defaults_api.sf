@@ -1,7 +1,7 @@
 module Tests/StdlibSf/ProgramEntityDefaultsApi
 
 # Library routines a protocol writes for every type that obeys it, run on entities the program writes.
-import IterTools
+import EmitterTools
 
 # An emitter the program writes: each step hands out the next number up to `top`.
 entity Stairs

@@ -2,7 +2,7 @@ module Tests/StdlibSf/AdapterKeptApi
 
 # An adapter keeps the collection it walks, wherever the adapter is kept: a member variable, a returned value, an
 # argument, a chain of adapters, or a variable whose collection is dropped.
-import IterTools
+import EmitterTools
 
 entity Holder
     big: WhereEmittable[Int, List[Int]]

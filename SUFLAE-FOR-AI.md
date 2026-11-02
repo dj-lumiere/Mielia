@@ -9,7 +9,7 @@ When unsure, consult ground truth in the repo:
 - `Suflae/tests/Fixtures/StdlibSf/*.sf` — Suflae programs with their expected output (`.expected.txt`).
   Start from the closest one.
 - `RazorForge/Standard/` — the standard library every Suflae build reads (`System`, `Collections`, `IO`,
-  `IterTools`, …). It is written in RazorForge, the sibling language, but every public routine
+  `EmitterTools`, …). It is written in RazorForge, the sibling language, but every public routine
   in it is callable from Suflae exactly as declared.
 - `Suflae/Standard/` — the modules only Suflae builds read (today: `ObjectHacker`).
 
@@ -161,7 +161,7 @@ it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/
 `Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `ObjectHacker`
+`PriorityQueue`, …), `EmitterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `ObjectHacker`
 (`type_name(of: x)`, reflection, section 19). Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
 `module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
@@ -265,7 +265,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   name on the trace too, as `(standard library)` frames. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Int, Text]`. A routine of a generic entity (`Cell[T].get()`)
-  reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so IterTools adapters walk it.
+  reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so EmitterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
 - A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Int` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
@@ -514,7 +514,7 @@ loop                      # doesn't end by itself: break, return or throw leaves
 
 `for` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry is
 the tuple `(key, value)`, `for (k, v) in d` or `e.item0` / `e.item1`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
-`IterTools`) produce tuples that `for (a, b) in ...` takes apart.
+`EmitterTools`) produce tuples that `for (a, b) in ...` takes apart.
 
 Loops are `until c`, `loop` and `for`. `until c` stops when `c` becomes true, tested before each round: write the
 condition that ends the loop. `loop` doesn't end by itself: only a `break`, `return` or `throw` leaves it, so the
@@ -1118,7 +1118,7 @@ for (name, age) in ages
   `take(count:)`, ...) work on an entity the program writes that obeys `Emitter[T]` or `Emittable[T]`, and a
   protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
   works on the program's entities the same way.
-- Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
+- Emitter adapters (`import EmitterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
   `reverse`, `enumerate`, `zip(a:, b:)`, `min_by`, … are lazy (there is no `chain` or `extend` routine in Suflae yet: `add_range(you:)` appends one list to another); finish with `for` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the

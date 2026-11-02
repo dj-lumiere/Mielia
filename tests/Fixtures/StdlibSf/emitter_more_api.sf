@@ -1,7 +1,7 @@
 module Tests/StdlibSf/EmitterMoreApi
 
 # Collecting into a fixed-size Items, and terminals and adapters straight on an emitter.
-import IterTools
+import EmitterTools
 
 # An emitter the program writes: each step hands out the next number up to `last`.
 entity Steps

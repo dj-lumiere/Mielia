@@ -1,7 +1,7 @@
 module Tests/StdlibSf/EmitterGapsApi
 
 # Forms that once passed analysis and then stopped the LLVM emitter or ran wrong.
-import IterTools
+import EmitterTools
 
 entity Session
     open: Bool

@@ -2,7 +2,7 @@ module Tests/StdlibSf/FailurePropagationApi
 
 # Every routine passes its failures to its caller: a `try` or `check` above a call receives a failure from any depth
 # below it, through plain calls. An overflowing `+` and an index past the end are failures told apart by their type.
-import IterTools
+import EmitterTools
 
 entity Node
     op: Text
