@@ -326,7 +326,7 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   `.to[S64]()`.
 - A pair with no conversion is SF-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
   Converting a value to its own type is SF-S646 too (use the value as it is), and so is building a type from a
-  value of that type (`Int(1)`: `1` is an `Int` already).
+  variable of that type (`Int(n)`: `n` is an `Int` already). A number written out is read as the type (`Int(1)`).
 - A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
   SF-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`. A number
   written out is different: `S32(3)`, `U8(255)` read that literal as the type (checked against its range, SF-S010
