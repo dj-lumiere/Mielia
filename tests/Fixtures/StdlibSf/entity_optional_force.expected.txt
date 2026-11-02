@@ -1,0 +1,5 @@
+parent of c: 2
+grandparent of c: 1
+kept: 2
+depth of c: 2
+DONE
