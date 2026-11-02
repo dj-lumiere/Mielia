@@ -1,4 +1,1 @@
 record: 7 none none
-entity a: node 3
-entity b: none
-entity c: none
