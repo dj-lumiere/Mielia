@@ -1,0 +1,7 @@
+try on a value: 42
+try on none: none
+try below the receiver: none
+check on none: Attempted to access a value that is absent.
+check on a value: 42
+record: 8, none
+DONE

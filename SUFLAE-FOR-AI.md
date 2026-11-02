@@ -813,6 +813,11 @@ routine start()
     return
 ```
 
+- **A call on a `T?` under the keyword.** `try box.doubled()` with `box: Box?` (or a record `Pt?`) is allowed: a `none`
+  receiver counts as an `AbsentValueError` failure that the same keyword receives (`try`: `None`, `check`: the
+  `AbsentValueError`), otherwise the call runs on the value, and a failure below the call is received as usual. It
+  holds for every `T?` and any routine the optional has none of itself. Without a keyword, a call through a `T?` is
+  still SF-S619 or an unknown routine.
 - **`try`/`check` receive a failure from any depth below them.** Code inside calls plainly (`var l =
   eval(e.left)` in a recursive `eval`), and a failure anywhere under the keyword comes back to it: a `throw`, a
   fixed-width `+ - *` that overflows (`IntegerOverflowError`), `a // b` by zero (`DivisionByZeroError`), `items[9]`
