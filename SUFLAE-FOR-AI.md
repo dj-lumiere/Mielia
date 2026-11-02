@@ -328,8 +328,9 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   Converting a value to its own type is SF-S646 too (use the value as it is), and so is building a type from a
   value of that type (`Int(1)`: `1` is an `Int` already).
 - A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
-  SF-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`, and for a
-  literal (`U8(200)`) to a declaration of the type (`var level: U8 = 200`), where the builder checks that it fits.
+  SF-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`. A number
+  written out is different: `S32(3)`, `U8(255)` read that literal as the type (checked against its range, SF-S010
+  when it does not fit), so `[(Step.CALL, S32(3), 'a')]` is a `List[(Step, S32, Char)]`.
   In a generic routine `T(x)` is checked per use: `make[U8](x: 300)` with `return T(x)` is SF-S655 naming
   `make[U8]` and pointing to `x.to[T]()`. `Char(n)` (bits taken as a codepoint, unchecked) and `Bool(x)` (lowest
   bit only, `Bool(2)` is `false`) are SF-S655 too, pointing to `Char.from_codepoint(n: n)` (takes an `Int`) and
