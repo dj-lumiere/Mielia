@@ -51,6 +51,12 @@ through a `.rf` module the program imports (section 18).
    (a copy would keep its own record and diverge), a service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
    `record` with no member variables (body `nothing`, routines `common`, called on the type). The console is the
    free routines `show` / `ask` / `alert`.
+   Kinds of type (a way to read a type, nothing is marked): a **data type** is its fields and each routine answers
+   from them alone (`List[Int]`). A **service** answers from state you do not hold as a value. A *stateless* service
+   answers only from something outside (`Clock`, `Entropy`). A *stateful* service keeps part of its state itself: a
+   **manager** hands out a resource, takes it back and answers for its end (`FileManager`), and an **emitter** reads a
+   source and gives the next value on each request. A `Mailbox` mixes both (`count()` from what waits, `for x in box`
+   waits for another job). No `Service` suffix; `Manager` stays; no annotation, no builder check.
 4. **Bare numbers are `Int` and `Decimal`**, not 64-bit machine numbers. `42` is an `Int`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`, and a whole number written in base 10
    to a float or decimal type: `price: 5` for a `Decimal` parameter, but not `0xFF`), but variables of different
@@ -1102,7 +1108,10 @@ for (name, age) in ages
   grow. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
   holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
   `Memory[T]`).
-- **Emitters.** What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
+- **Emitters.** An emitter reads a source (a collection, a range, the step before it) and gives the next value each
+  time it is asked. An adapter is an emitter whose source is the step before it. So changing the source's shape while
+  it walks crashes, and one that handed out everything cannot be used again (SF-S517).
+  What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
   with `emitter()`. `for` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
   for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `for x in it`,
   which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
