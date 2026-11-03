@@ -1,0 +1,4 @@
+chain head: 999999
+short chain head: 2
+tree root: 32768
+DONE

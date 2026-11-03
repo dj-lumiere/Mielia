@@ -116,7 +116,7 @@ public sealed class ExitCodeTests
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Contains(expectedSubstring: "shallow 100", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "Out of memory error", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "Call depth error", actualString: stdout + stderr);
         Assert.DoesNotContain(expectedSubstring: "SegmentationFault", actualString: stdout + stderr);
     }
 
