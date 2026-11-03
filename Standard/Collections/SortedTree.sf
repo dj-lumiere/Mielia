@@ -1,5 +1,7 @@
 module Collections
 
+import BuilderQuery
+
 # The B-tree under Suflae's SortedList, SortedSet and SortedDict. A node is an entity holding its entries and its
 # branches in fixed arrays, so one node is one allocation. A place no entry or branch uses is zero (empty), and an
 # entry or branch moves between nodes by being written into an empty place of one and erased from the other.
@@ -39,6 +41,14 @@ secret entity SortedTree[K, V]
 needs K obeys Comparable
     ### The top node, a leaf with no entries when the tree is empty.
     root: SortedNode[K, V]
+    ### Stands for the tree where another task is concerned: it escapes together with the tree and is never replaced.
+    gate: SortedGate
+
+### What an entity stored into a tree asks whether the tree has escaped to another task: the nodes come and go, so
+### none of them can say it.
+secret entity SortedGate
+    ### Nothing is kept here, an entity needs a member variable.
+    unused: U64
 
 # ============================================================================
 # Creators
@@ -59,7 +69,7 @@ routine SortedNode[K, V](leaf: Bool) -> SortedNode[K, V]
 
 ### Creates an empty tree.
 routine SortedTree[K, V]() -> SortedTree[K, V]
-    return SortedTree[K, V](root: SortedNode[K, V](leaf: true))
+    return SortedTree[K, V](root: SortedNode[K, V](leaf: true), gate: SortedGate(unused: 0))
 
 # ============================================================================
 # Inside a node
@@ -277,6 +287,7 @@ secret routine SortedTree[K, V].value_of_in(node: SortedNode[K, V], key: K) -> V
 
 ### Gives the first entry with the key `key`, which must be in the tree, the value `value`.
 secret routine SortedTree[K, V].replace(key: K, value: V)
+    admit_entry(gate: me.gate, key: key, value: value)
     me.replace_in(node: me.root, key: key, value: value)
     return
 
@@ -295,6 +306,7 @@ secret routine SortedTree[K, V].replace_in(node: SortedNode[K, V], key: K, value
 
 ### Adds an entry, after every entry with the same key.
 secret routine SortedTree[K, V].insert(key: K, value: V)
+    admit_entry(gate: me.gate, key: key, value: value)
     if me.root.count == SORTED_MOST
         var grown = SortedNode[K, V](leaf: false)
         grown.insert_branch(at: 0, branch: me.root)
@@ -455,4 +467,26 @@ secret routine SortedTree[K, V].merge(node: SortedNode[K, V], at: U64)
     left.size = left.size + right.size + 1
     node.remove_entry(at: at)
     node.remove_branch(at: at + 1)
+    return
+
+# ============================================================================
+# Entities stored into a tree
+# ============================================================================
+
+### Called before an entry goes into a tree whose gate is `gate`. When the tree has escaped to another task, the
+### entities the key and the value hold a handle to escape first (with everything they reach), since the store makes
+### them reachable from that task. A key or value of a type that holds no handle costs nothing.
+### :param gate: The gate of the tree.
+### :param key: The key about to be stored.
+### :param value: The value about to be stored.
+@inline
+secret routine admit_entry[K, V](gate: SortedGate, key: K, value: V)
+    if K.shares_entity_across_tasks() or V.shares_entity_across_tasks()
+        danger
+            if C::ingrid_roam_store_begin(holder: LLVM::reinterpret_bits[SortedGate, Addr](value: gate))
+                if K.shares_entity_across_tasks()
+                    key.roam_trace()
+                if V.shares_entity_across_tasks()
+                    value.roam_trace()
+                C::ingrid_roam_store_end()
     return

@@ -859,7 +859,8 @@ routine Memory[T].diagnose() -> Text
 
 ### Called before `value` goes into the places of the block `holder`. When the block has escaped to another task, the
 ### entities `value` holds a handle to escape first (with everything they reach), since the store makes them reachable
-### from that task. A value of a type that holds no handle costs nothing.
+### from that task. A value of a type that holds no handle costs nothing. A library routine that stores a value for the
+### user outside the places asks the same way through a handle its container keeps, as a sorted tree does.
 ### :param holder: The block the places belong to.
 ### :param value: The value about to be stored.
 @inline
