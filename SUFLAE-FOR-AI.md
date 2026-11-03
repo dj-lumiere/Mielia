@@ -1314,7 +1314,7 @@ routine start()
   code from you. An entity reaches another job as a Work's argument, inside a value sent on a channel, as an
   element of a list the jobs share, and when a lambda captures it (the capture alone counts, since the lambda can
   be handed anywhere). As with globals, one statement is atomic; a read-then-write spread over several
-  statements is not.
+  statements is not. A program that uses Work checks every entity access, and a program without Work doesn't.
 - **Jobs waiting on each other stop the program.** Two jobs that use two shared entities in one statement
   each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`
   build, off in the release modes except in a program with globals, `= false` / `= true` in config.toml overrides)

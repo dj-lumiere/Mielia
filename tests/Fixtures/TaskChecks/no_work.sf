@@ -1,0 +1,18 @@
+module Tests/TaskChecks/NoWork
+
+import IO/Console
+
+entity Counter
+    n: S64
+
+routine bump(counter: Counter, times: S64)
+    for i in 0 til times
+        counter.n += 1
+
+routine start()
+    var counter = Counter(n: 0)
+    bump(counter: counter, times: 10)
+    var boxes = List[Counter]()
+    boxes.add_last(counter)
+    show(f"{boxes[0].n}")
+    return
