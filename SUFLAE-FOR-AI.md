@@ -468,7 +468,7 @@ routine start()
   decides the direction by its sign. A literal `by 0` is SF-S516, and a zero step held in a variable crashes
   with `RangeStepZeroError` when the range is iterated. `(0 to 10).has(10)` is `true`, and `has` follows the
   step (`(10 to 0 by -2).has(4)` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
-  A type after the loop's name types the bounds of the range written in the loop: `for i: S64 in 1 to 10**10`
+  A type after the loop's name types the bounds of the range written in the loop: `for i: S64 in 1 to 10 ** 10`
   counts in `S64` instead of `Int`, `for k: U8 in 250 to 255` stops at 255 (a bound that doesn't fit is SF-S010).
   Only with a range literal: `for x: S64 in xs` is SF-G150 (a collection's elements already have their type).
 - Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
