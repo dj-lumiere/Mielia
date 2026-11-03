@@ -1100,7 +1100,7 @@ for (name, age) in ages
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
 - Making room up front is failable: `reserve(new_capacity:)` on `List`, `RotatableList`, `BitList` and
   `PriorityQueue`, and the creators `List[T](capacity:)`, `List[T](count:, fill_value:)`, `RotatableList[T](capacity:)`,
-  `BitList(capacity:)`, `PriorityQueue[P, E](capacity:)`, `Memory[T](capacity:)` and `Memory[T](count:, fill:)`
+  `BitList(capacity:)`, `BitList(count:, fill_value:)`, `PriorityQueue[P, E](capacity:)`, `Memory[T](capacity:)` and `Memory[T](count:, fill:)`
   throw `OutOfMemoryError` when the elements take more bytes than a `U64` counts or there is no memory left for
   them, and `NegativeIndexError` for a negative count. `check xs.reserve(new_capacity: n)` receives the failure,
   and the collection then stays as it was. Growing on the way (`add_last` past the capacity) is not failable:

@@ -100,6 +100,20 @@ secret routine BitList(capacity: U64) -> BitList
 routine BitList(capacity: Int) -> BitList
     return BitList(capacity: room_of(capacity: capacity))
 
+### Creates a bit list of `count` bits that all start as `fill_value`.
+### :param count: The number of bits.
+### :param fill_value: The value every bit starts as.
+### :throws: {NegativeIndexError} if `count` is negative.
+### :throws: {OutOfMemoryError} if `count` is more than a `U64` counts, or there is no memory left for the bits.
+routine BitList(count: Int, fill_value: Bool) -> BitList
+    var bits = room_of(capacity: count)
+    if bits == 0
+        return BitList()
+    var result = BitList(capacity: bits)
+    result.count = bits
+    result.set_all(value: fill_value)
+    return result
+
 ### Returns how many 64-bit words hold `bits` bits.
 secret routine bit_words(bits: U64) -> U64
     var words = bits >> 6
