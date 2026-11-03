@@ -19,6 +19,13 @@ crashable EmptyCollectionError
     ### Stores the operation name or summary that could not be completed.
     operation: Text
 
+### Represents the crashable raised when a value is added to a collection whose fixed capacity is all in use (a
+### `PartialItems` holding `capacity` elements).
+@rf("FullCollectionError")
+crashable FullCollectionError
+    ### Stores how many elements the collection holds at most.
+    capacity: U64
+
 ### Represents the crashable raised when a search operation cannot find any
 ### matching element.
 @rf("ElementNotFoundError")
@@ -53,3 +60,8 @@ routine EmptyCollectionError.crash_message() -> Text
 ### :returns: The resulting `Text` value.
 @rf("ElementNotFoundError.crash_message")
 routine ElementNotFoundError.crash_message() -> Text
+
+### Returns the default message for adding to a collection that has no room left.
+### :returns: The resulting `Text` value.
+@rf("FullCollectionError.crash_message")
+routine FullCollectionError.crash_message() -> Text

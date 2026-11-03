@@ -1,0 +1,23 @@
+empty=true count=0 capacity=4 full=false
+[10, 20] first=10 last=20
+7 20 has20=true lacks5=true
+walk 7
+walk 20
+PartialItems[Int, 4]([7, 20])
+removed 20
+[7]
+[7] [7, 99]
+Index 3 is out of bounds: the collection holds 1 element
+Cannot add to a collection that holds at most 2 elements and is full
+["a", "bb"] full=true
+[] count=0
+["third", "second", "first", "b", "a"]
+run a
+run b
+run first
+run second
+run third
+[100, 3, 2, 1]
+run 1
+run 2
+run 3

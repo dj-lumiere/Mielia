@@ -166,6 +166,19 @@ routine List[T].add_at(index: Int, value: T)
     me.count = me.count + 1
     return
 
+### Adds the steps that run next, given in the order they run, so that `remove_last` gives them back in that order.
+### `stack.add_next(a, b, c)` leaves `a` at the back, then `b`, then `c`.
+### :param steps: The steps in the order they should come back out.
+routine List[T].add_next(steps...: T)
+    var i: U64 = 0
+    var n: U64 = steps.count()
+    # Each step moves into the list: `add_last` makes the list's holder, and the caller releases the
+    # literal's own afterwards.
+    until i >= n
+        me.add_last(value: steps.get_raw(index: n - 1 - i))
+        i = i +% 1
+    return
+
 ### Removes and returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
 routine List[T].remove_last() -> T

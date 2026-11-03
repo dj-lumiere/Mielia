@@ -58,6 +58,12 @@ needs U64 COUNT
 @rf("Items.get_raw")
 infallible routine Items[T, COUNT].get_raw(index: U64) -> T
 
+### Writes `value` at `index` without tearing down what is there: for a place that holds nothing yet.
+### :param index: The zero-based position, already known to be in range.
+### :param value: The value that goes in.
+@rf("Items.put_raw")
+secret routine Items[T, COUNT].put_raw(index: U64, value: T)
+
 ### Returns true when the buildtime size is zero.
 ### :returns: `true` if `COUNT == 0`.
 @rf("Items.is_empty")
