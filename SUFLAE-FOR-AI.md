@@ -1121,7 +1121,7 @@ for (name, age) in ages
   protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
   works on the program's entities the same way.
 - Emitter adapters (`import EmitterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
-  `reverse`, `enumerate`, `zip(a:, b:)`, `min_by`, … are lazy (there is no `chain` or `extend` routine in Suflae yet: `add_range(you:)` appends one list to another); finish with `for` or by collecting:
+  `reverse`, `enumerate`, `zip(a:, b:)`, `min_by`, … are lazy (there is no `chain` routine in Suflae yet: `add_range(you:)` appends one list to another); finish with `for` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`

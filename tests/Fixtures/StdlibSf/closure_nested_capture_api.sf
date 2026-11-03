@@ -8,10 +8,10 @@ routine offset_row(dy: Int) -> List[(Int, Int)]
 
 routine start()
     var width: Int = 3
-    var grid = (0 til 2).select_many(transform: y given width => (0 til width).select(transform: x given y => (x, y)).to[List]())
+    var grid = (0 til 2).select_chained(transform: y given width => (0 til width).select(transform: x given y => (x, y)).to[List]())
         .to[List]()
     show(f"{grid}")
 
-    var around = (-1 to 1).select_many(transform: dy => offset_row(dy)).to[List]()
+    var around = (-1 to 1).select_chained(transform: dy => offset_row(dy)).to[List]()
     show(f"{around}")
     return

@@ -10,9 +10,9 @@ module EmitterTools
 ### :typeparam TInner: The CONCRETE inner-emittable type the transform returns (the transform's
 ###   return type).
 ### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
-@rf("SelectManyEmittable")
-entity SelectManyEmittable[T, TResult, TInner, TSource]
-relates SelectManyEmitter[T, TResult, TInner, TSource/Emitter] as Emitter
+@rf("SelectChainedEmittable")
+entity SelectChainedEmittable[T, TResult, TInner, TSource]
+relates SelectChainedEmitter[T, TResult, TInner, TSource/Emitter] as Emitter
 obeys Emittable[TResult]
 needs TSource obeys Emittable[T]
 needs TInner obeys Emittable[TResult]
@@ -24,30 +24,30 @@ needs TInner obeys Emittable[TResult]
 ### :typeparam TResult: The element type yielded by each inner emittable.
 ### :typeparam TInner: The concrete inner-emittable type returned by the transform.
 ### :typeparam TSourceEmitter: The concrete source emitter type (owned).
-@rf("SelectManyEmitter")
-entity SelectManyEmitter[T, TResult, TInner, TSourceEmitter]
+@rf("SelectChainedEmitter")
+entity SelectChainedEmitter[T, TResult, TInner, TSourceEmitter]
 obeys Emitter[TResult]
 needs TSourceEmitter obeys Emitter[T]
 needs TInner obeys Emittable[TResult]
     nothing
 
 ### Returns the stateful emitter that drives the flat-map expansion.
-### :returns: The resulting `SelectManyEmitter[T, TResult, TInner, TSource/Emitter]` value.
-@rf("SelectManyEmittable.emitter")
-routine SelectManyEmittable[T, TResult, TInner, TSource].emitter() -> SelectManyEmitter[T, TResult, TInner, TSource/Emitter]
+### :returns: The resulting `SelectChainedEmitter[T, TResult, TInner, TSource/Emitter]` value.
+@rf("SelectChainedEmittable.emitter")
+routine SelectChainedEmittable[T, TResult, TInner, TSource].emitter() -> SelectChainedEmitter[T, TResult, TInner, TSource/Emitter]
 
 ### Returns the next value from the current inner buffer, refilling it as needed.
 ### The emitter calls `emit!` on the outer source whenever the buffer is exhausted.
 ### :returns: The resulting `TResult` value.
-@rf("SelectManyEmitter.emit")
-routine SelectManyEmitter[T, TResult, TInner, TSourceEmitter].emit() -> TResult
+@rf("SelectChainedEmitter.emit")
+routine SelectChainedEmitter[T, TResult, TInner, TSourceEmitter].emit() -> TResult
 
 ### Returns a lazy adapter that applies `transform` to each element and yields values from all
 ### resulting inner emittables in sequence. The inner-emittable type `TInner` is an explicit type
-### argument (e.g. `select_many[S64, List[S64]]`) because the builder resolves the dispatch on it
+### argument (e.g. `select_chained[S64, List[S64]]`) because the builder resolves the dispatch on it
 ### at build time.
 ### :param transform: The routine that maps each source element to an inner emittable.
-### :returns: The resulting `SelectManyEmittable[T, TResult, TInner, Me]` value.
-@rf("Emittable.select_many")
-routine Emittable[T].select_many[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectManyEmittable[T, TResult, TInner, Me]
+### :returns: The resulting `SelectChainedEmittable[T, TResult, TInner, Me]` value.
+@rf("Emittable.select_chained")
+routine Emittable[T].select_chained[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectChainedEmittable[T, TResult, TInner, Me]
 needs TInner obeys Emittable[TResult]
