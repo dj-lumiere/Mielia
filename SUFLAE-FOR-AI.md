@@ -215,7 +215,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 
 - Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
   `B128` and `C256` are the widest, and exact arithmetic is `Int` and the decimals.
-- Complex `* / abs norm reciprocal` round each part once from the exact value. `sqrt`, `ln`, the inverse functions
+- Complex `* / abs norm reciprocal` round each part once from the exact value. `sqrt`, `ln`, the inverse routines
   and `tan`/`tanh` take principal branches, a `-0` part picking the side of a cut (`sqrt` of `-4 - 0i` is `0-2i`).
   `exp_unchecked`/`sinh_unchecked`/`cosh_unchecked` give inf past the range, the checked forms crash.
 - Geometry takes `import Math3D` (`B32` elements): `Vector2D`/`Vector3D`/`Vector4D`, `Q128`/`Q256`, and the
