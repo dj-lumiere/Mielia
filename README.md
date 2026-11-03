@@ -85,8 +85,8 @@ fixed-width type (`S32`, `U64`, `B64`, …) when its declaration names one: `var
 mutable state. Globals initialize once, in dependency order, and every global is thread-safe: a
 single-statement update such as `COUNT = COUNT + 1` is atomic across parallel tasks.
 
-**Failure is loud, and recovery takes one keyword.** A routine that can `throw` is declared
-`failable routine parse(...)`, and calls to it are written like any other call. A bare call that fails
+**Failure is loud, and recovery takes one keyword.** A `throw` passes the failure to the caller,
+and nothing marks a routine that can fail or a call to it. A bare call that fails
 crashes with a message (exit status 82). `try` or `check` in front of the call recovers it as `T?` (`Optional[T]`)
 or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
