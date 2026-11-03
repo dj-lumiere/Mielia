@@ -9,9 +9,9 @@ module System
 ### comparing keys.
 entity HashIndex
     ### The tag of every slot.
-    secret tags: Memory[U8]
+    secret tags: Places[U8]
     ### The entry position of every used slot.
-    secret entries: Memory[U64]
+    secret entries: Places[U64]
     ### How many slots hold a removed entry's tag.
     secret removed: U64
 
@@ -19,7 +19,7 @@ entity HashIndex
 ### :param capacity: How many entries the table should hold before growing.
 secret routine new_hash_index(capacity: U64) -> HashIndex
     var slots = hash_index_slots(wanted: capacity)
-    return HashIndex(tags: Memory[U8](room: slots), entries: Memory[U64](room: slots), removed: 0)
+    return HashIndex(tags: Places[U8](room: slots), entries: Places[U64](room: slots), removed: 0)
 
 ### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
 secret routine hash_index_slots(wanted: U64) -> U64

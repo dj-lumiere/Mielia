@@ -30,11 +30,11 @@ needs TKey obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
     ### The keys, in insertion order. A removed entry's place is empty until the entries are packed again.
-    secret keys: Memory[TKey]
+    secret keys: Places[TKey]
     ### The values, at the same places as their keys.
-    secret vals: Memory[TValue]
+    secret vals: Places[TValue]
     ### Whether each entry place holds a live entry.
-    secret live: Memory[Bool]
+    secret live: Places[Bool]
     ### How many live entries there are.
     secret count: U64
     ### How many entry places, from the front, have been used.
@@ -93,9 +93,9 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Int) -> Dict[TKey, TVal
         room = capacity.to[U64]()
     return Dict[TKey, TValue](
         index: new_hash_index(capacity: room),
-        keys: Memory[TKey](room: room),
-        vals: Memory[TValue](room: room),
-        live: Memory[Bool](room: room),
+        keys: Places[TKey](room: room),
+        vals: Places[TValue](room: room),
+        live: Places[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,

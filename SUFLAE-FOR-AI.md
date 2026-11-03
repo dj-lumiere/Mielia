@@ -1116,7 +1116,8 @@ for (name, age) in ages
   `grow(capacity:)` work on it. A range `mem[1 til 4]` is a `Span[T]`: a view that shares the places with no copy
   (writing through it changes the memory) and keeps the memory alive. A span has the same reading, writing and
   arranging routines over its own places, counted from 0, and a range of a span is a span, but a span does not
-  grow. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
+  grow. A memory is one row however many names it has: after `var b = a`, `a.grow(capacity: 9)` and `a[0] = 1` are
+  seen through `b`, also when a routine grows a memory it was given. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
   holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
   `Memory[T]`).
 - **Emitters.** An emitter reads a source (a collection, a range, the step before it) and gives the next value each

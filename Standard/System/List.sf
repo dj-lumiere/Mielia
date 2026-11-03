@@ -30,7 +30,7 @@ entity List[T]
 relates MemoryEmitter[T] as Emitter
 obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
-    secret items: Memory[T]
+    secret items: Places[T]
     ### How many elements there are.
     secret count: U64
 
@@ -40,14 +40,14 @@ obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
 
 ### Creates an empty list.
 routine List[T]() -> List[T]
-    return List[T](items: Memory[T](capacity: 0), count: 0)
+    return List[T](items: Places[T](capacity: 0), count: 0)
 
 ### Creates an empty list with room for at least `capacity` elements.
 ### :param capacity: The number of elements to make room for.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
 routine List[T](capacity: Int) -> List[T]
-    return List[T](items: Memory[T](capacity: capacity), count: 0)
+    return List[T](items: Places[T](capacity: capacity), count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
 ### :param count: The number of elements.
@@ -55,7 +55,7 @@ routine List[T](capacity: Int) -> List[T]
 ### :throws: {NegativeIndexError} if `count` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
 routine List[T](count: Int, fill_value: T) -> List[T]
-    return List[T](items: Memory[T](count: count, fill: fill_value), count: count.to[U64]())
+    return List[T](items: Places[T](count: count, fill: fill_value), count: count.to[U64]())
 
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
 routine List[T].to[RF::System.List[T]]() -> RF::System.List[T]

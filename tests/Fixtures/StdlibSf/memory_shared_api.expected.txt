@@ -1,0 +1,5 @@
+after grow: a=5 b=5
+after writes: a=Memory([10, 1, 1, 0, 40]) b=Memory([10, 1, 1, 0, 40])
+after a routine grew it: a=8 b=8 last=99
+box through the other name: 7
+DONE

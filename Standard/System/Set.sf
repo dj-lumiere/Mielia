@@ -24,9 +24,9 @@ needs T obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
     ### The values, in insertion order. A removed value's place is empty until the entries are packed again.
-    secret values: Memory[T]
+    secret values: Places[T]
     ### Whether each entry place holds a live value.
-    secret live: Memory[Bool]
+    secret live: Places[Bool]
     ### How many live values there are.
     secret count: U64
     ### How many entry places, from the front, have been used.
@@ -81,8 +81,8 @@ routine Set[T](key: SecureHashKey, capacity: Int) -> Set[T]
         room = capacity.to[U64]()
     return Set[T](
         index: new_hash_index(capacity: room),
-        values: Memory[T](room: room),
-        live: Memory[Bool](room: room),
+        values: Places[T](room: room),
+        live: Places[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,

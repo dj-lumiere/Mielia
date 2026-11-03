@@ -36,9 +36,9 @@ entity PriorityQueue[TPriority, TElement]
 obeys DictLiteral[TPriority, TElement]
 needs TPriority obeys Comparable
     ### The priorities, in heap order.
-    secret priorities: Memory[TPriority]
+    secret priorities: Places[TPriority]
     ### The elements, at the same places as their priorities.
-    secret elements: Memory[TElement]
+    secret elements: Places[TElement]
     ### How many entries there are: the first `count` places of both buffers.
     secret count: U64
 
@@ -70,8 +70,8 @@ routine PriorityQueue[TPriority, TElement]() -> PriorityQueue[TPriority, TElemen
 ### :throws: {OutOfMemoryError} if the entries take more bytes than a `U64` counts, or there is no memory left for them.
 routine PriorityQueue[TPriority, TElement](capacity: Int) -> PriorityQueue[TPriority, TElement]
     return PriorityQueue[TPriority, TElement](
-        priorities: Memory[TPriority](capacity: capacity),
-        elements: Memory[TElement](capacity: capacity),
+        priorities: Places[TPriority](capacity: capacity),
+        elements: Places[TElement](capacity: capacity),
         count: 0,
     )
 

@@ -33,7 +33,7 @@ entity RotatableList[T]
 relates MemoryEmitter[T] as Emitter
 obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
-    secret items: Memory[T]
+    secret items: Places[T]
     ### The place the first element sits in.
     secret head: U64
     ### How many elements there are.
@@ -45,14 +45,14 @@ obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
 
 ### Creates an empty list.
 routine RotatableList[T]() -> RotatableList[T]
-    return RotatableList[T](items: Memory[T](capacity: 0), head: 0, count: 0)
+    return RotatableList[T](items: Places[T](capacity: 0), head: 0, count: 0)
 
 ### Creates an empty list with room for at least `capacity` elements.
 ### :param capacity: The number of elements to make room for.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
 routine RotatableList[T](capacity: Int) -> RotatableList[T]
-    return RotatableList[T](items: Memory[T](capacity: capacity), head: 0, count: 0)
+    return RotatableList[T](items: Places[T](capacity: capacity), head: 0, count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
 ### :param count: The number of elements.
@@ -60,7 +60,7 @@ routine RotatableList[T](capacity: Int) -> RotatableList[T]
 ### :throws: {NegativeIndexError} if `count` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
 routine RotatableList[T](count: Int, fill_value: T) -> RotatableList[T]
-    return RotatableList[T](items: Memory[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
+    return RotatableList[T](items: Places[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
 
 ### Builds a list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
