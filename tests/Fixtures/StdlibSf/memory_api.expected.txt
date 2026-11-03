@@ -20,6 +20,6 @@ part reversed and swapped: 0 39 30
 sorted part: Memory(["m", "a", "c", "m"])
 read through a field: 1
 cycle alive: true
-collected: 4 alive: false
+collected: 3 alive: false
 released: true
 DONE

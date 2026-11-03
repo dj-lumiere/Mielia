@@ -28,7 +28,7 @@ import BuilderQuery
 ### | Iteration | O(capacity) |
 ###
 ### :typeparam T: The element type stored in the memory.
-entity Memory[T]
+record Memory[T]
 relates MemoryEmitter[T] as Emitter
 obeys Emittable[T], Container
     ### The places, a handle shared with every span and walk of this memory.
@@ -622,7 +622,7 @@ routine Span[T].diagnose() -> Text
 ### :param value: The value about to be stored.
 @inline
 secret routine admit_stored[T, E](holder: E, value: T)
-    if T.reaches_entity()
+    if T.shares_entity_across_tasks()
         danger
             if C::ingrid_roam_store_begin(holder: LLVM::reinterpret_bits[E, Addr](value: holder))
                 value.roam_trace()
