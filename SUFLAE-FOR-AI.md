@@ -48,7 +48,7 @@ through a `.rf` module the program imports (section 18).
    object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
    A manager type (`FileManager`, `PartitionManager`, `StorageManager`, `CpuEventManager`) is always an `entity`
-   (a copy would keep its own record and diverge), a service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
+   (a copy would keep its own record and diverge), a stateless service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
    `record` with no member variables (body `nothing`, routines `common`, called on the type). The console is the
    free routines `show` / `ask` / `alert`.
    Kinds of type (a way to read a type, nothing is marked): a **data type** is its fields and each routine answers
