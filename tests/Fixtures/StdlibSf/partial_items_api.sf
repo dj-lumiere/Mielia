@@ -5,6 +5,9 @@ import IO/Console
 # PartialItems[T, N] holds up to N values in place: the count changes while the program runs, nothing is allocated,
 # and adding when every place holds a value is a failure try and check can receive.
 
+entity Task
+    name: Text
+
 routine start()
     var p = PartialItems[Int, 4]()
     show(f"empty={p.is_empty()} count={p.count()} capacity={p.capacity()} full={p.is_full()}")
@@ -53,4 +56,18 @@ routine start()
     show(f"{stack}")
     until stack.count() == 1
         show(f"run {stack.remove_last()}")
+
+    # An entity step goes in with a handle of its own, and a full PartialItems is a failure add_next gives.
+    var plan = PartialItems[Task, 2]()
+    plan.add_next(Task(name: "plan"), Task(name: "build"))
+    var tasks = List[Task]()
+    tasks.add_next(Task(name: "x"), Task(name: "y"), Task(name: "z"))
+    show(f"{tasks.remove_last().name} {tasks.remove_last().name} {tasks.remove_last().name}")
+    var over = check plan.add_next(Task(name: "late"))
+    when over
+        is Crashables as e => show(e.crash_message())
+        else => show("added")
+    var first = plan.remove_last()
+    var second = plan.remove_last()
+    show(f"{first.name} {second.name}")
     return

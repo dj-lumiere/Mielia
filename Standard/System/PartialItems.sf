@@ -86,7 +86,7 @@ routine PartialItems[T, COUNT].add_next(steps...: T)
     var i = steps.count()
     until i == 0
         i = i -% 1
-        me.add_last(value: steps.get_raw(index: i))
+        me.add_last(value: steps.at(position: i.to[U64]()))
     return
 
 ### Removes the last element and gives it back.

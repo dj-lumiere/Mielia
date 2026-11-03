@@ -981,6 +981,12 @@ internal sealed class EntityLoweringPass
             ListLiteralExpression list when expr.ResolvedType is EntityTypeSymbol le => WrapLiteralInRoam(
                 inner: list with { Elements = list.Elements.Select(selector: LowerExpression).ToList() },
                 entity: le),
+            // The pack of a variadic call (`take(Step(...), Step(...))`) is a list literal of an array type, not an entity:
+            // its elements are lowered the same way, so each entity argument reaches the routine in its own handle.
+            ListLiteralExpression pack when expr.ResolvedType is not EntityTypeSymbol && pack.Elements.Count > 0 => pack with
+            {
+                Elements = pack.Elements.Select(selector: LowerExpression).ToList()
+            },
             // A tuple's items are values like any other: `(seen[k], i)` reaches the dict through its handle.
             TupleLiteralExpression tuple => LowerTupleItems(tuple: tuple),
             SetLiteralExpression set when expr.ResolvedType is EntityTypeSymbol se => WrapLiteralInRoam(

@@ -172,10 +172,10 @@ routine List[T].add_at(index: Int, value: T)
 routine List[T].add_next(steps...: T)
     var i: U64 = 0
     var n: U64 = steps.count()
-    # Each step moves into the list: `add_last` makes the list's holder, and the caller releases the
+    # Each step is shared into the list (an entity step gets a holder of its own), and the caller releases the
     # literal's own afterwards.
     until i >= n
-        me.add_last(value: steps.get_raw(index: n - 1 - i))
+        me.add_last(value: steps.at(position: n - 1 - i))
         i = i +% 1
     return
 
