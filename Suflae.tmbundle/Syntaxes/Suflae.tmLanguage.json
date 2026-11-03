@@ -48,6 +48,18 @@
           "match": "\\b(secret|posted|global|suspended|failable|dangerous)\\b"
         },
         {
+          "comment": "A named jump (break to rows, continue to rows) and a loop named with loop as rows",
+          "match": "\\b(break|continue)\\s+(to)\\s+([A-Za-z_][A-Za-z0-9_]*)|\\b(loop)\\s+(as)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.control.sf" },
+            "2": { "name": "keyword.control.sf" },
+            "3": { "name": "entity.name.label.sf" },
+            "4": { "name": "keyword.control.sf" },
+            "5": { "name": "keyword.control.sf" },
+            "6": { "name": "entity.name.label.sf" }
+          }
+        },
+        {
           "comment": "Control flow",
           "name": "keyword.control.sf",
           "match": "\\b(if|elseif|else|then|for|loop|when|break|continue|return|throw|try|check|todo|danger|until|becomes)\\b"
