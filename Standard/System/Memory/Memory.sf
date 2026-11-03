@@ -182,6 +182,7 @@ routine Span[T].at(position: U64) -> T
 ### :param value: The new value.
 @inline
 routine Memory[T].put(position: U64, value: T)
+    admit_stored(holder: me.block, value: value)
     places_put[T](base: me.block.data, room: me.block.room, position: position, value: value)
     return
 
@@ -190,6 +191,7 @@ routine Memory[T].put(position: U64, value: T)
 ### :param value: The new value.
 @inline
 routine Span[T].put(position: U64, value: T)
+    admit_stored(holder: me.block, value: value)
     places_put[T](base: me.base(), room: me.room, position: position, value: value)
     return
 
@@ -207,6 +209,7 @@ infallible dangerous routine Memory[T].at_unchecked(position: U64) -> T
 ### :param value: The new value.
 @inline
 infallible dangerous routine Memory[T].put_unchecked(position: U64, value: T)
+    admit_stored(holder: me.block, value: value)
     places_write[T](base: me.block.data, position: position, value: value)
     return
 
@@ -394,12 +397,14 @@ routine Span[T].swap_at(first: U64, second: U64)
 ### Sets every place to `value`.
 ### :param value: The value every place becomes.
 routine Memory[T].fill(value: T)
+    admit_stored(holder: me.block, value: value)
     places_fill[T](base: me.block.data, room: me.block.room, value: value)
     return
 
 ### Sets every place of the span to `value`.
 ### :param value: The value every place becomes.
 routine Span[T].fill(value: T)
+    admit_stored(holder: me.block, value: value)
     places_fill[T](base: me.base(), room: me.room, value: value)
     return
 
@@ -428,6 +433,7 @@ routine Memory[T].grow_to(room: U64)
                 size: T.data_size() * old,
             )
         places_clear[T](base: me.block.data, from: 0, count: old)
+    admit_stored(holder: me.block, value: moved)
     me.block = moved
     return
 
@@ -608,6 +614,20 @@ routine Span[T].diagnose() -> Text
 # ============================================================================
 # Inside the memory
 # ============================================================================
+
+### Called before `value` goes into the places of the block `holder`. When the block has escaped to another task, the
+### entities `value` holds a handle to escape first (with everything they reach), since the store makes them reachable
+### from that task. A value of a type that holds no handle costs nothing.
+### :param holder: The block the places belong to.
+### :param value: The value about to be stored.
+@inline
+secret routine admit_stored[T, E](holder: E, value: T)
+    if T.reaches_entity()
+        danger
+            if C::ingrid_roam_store_begin(holder: LLVM::reinterpret_bits[E, Addr](value: holder))
+                value.roam_trace()
+                C::ingrid_roam_store_end()
+    return
 
 ### The span's first place in its memory.
 @inline

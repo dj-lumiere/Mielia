@@ -1,0 +1,72 @@
+module Tests/StdlibSf/WorksLateStoreApi
+
+# An entity put into something a job already shares is shared with the job too: both sides keep every update. The
+# entity goes into a list, a dict and a member variable after the job started.
+
+import IO/Console
+
+entity Box
+    n: S64
+
+entity Holder
+    ready: Bool
+    item: Box
+
+routine bump_list(boxes: List[Box], rounds: S64) -> S64
+    until boxes.count() > 0
+        waitfor(1ms)
+    var box = boxes[0]
+    for i in 0 til rounds
+        box.n += 1
+    return rounds
+
+routine bump_dict(boxes: Dict[S64, Box], rounds: S64) -> S64
+    until boxes.count() > 0
+        waitfor(1ms)
+    var box = boxes[7]
+    for i in 0 til rounds
+        box.n += 1
+    return rounds
+
+routine bump_holder(holder: Holder, rounds: S64) -> S64
+    until holder.ready
+        waitfor(1ms)
+    var box = holder.item
+    for i in 0 til rounds
+        box.n += 1
+    return rounds
+
+routine start()
+    var rounds: S64 = 300000
+
+    var list = List[Box]()
+    var in_list = bump_list.to[Work](boxes: list, rounds: rounds)
+    in_list.start_now()
+    var first = Box(n: 0)
+    list.add_last(first)
+    for i in 0 til rounds
+        first.n += 1
+    in_list.retrieve()
+    show(f"list {first.n}")
+
+    var dict = Dict[S64, Box]()
+    var in_dict = bump_dict.to[Work](boxes: dict, rounds: rounds)
+    in_dict.start_now()
+    var second = Box(n: 0)
+    dict[7] = second
+    for i in 0 til rounds
+        second.n += 1
+    in_dict.retrieve()
+    show(f"dict {second.n}")
+
+    var holder = Holder(ready: false, item: Box(n: -1))
+    var in_holder = bump_holder.to[Work](holder: holder, rounds: rounds)
+    in_holder.start_now()
+    var third = Box(n: 0)
+    holder.item = third
+    holder.ready = true
+    for i in 0 til rounds
+        third.n += 1
+    in_holder.retrieve()
+    show(f"holder {third.n}")
+    return
