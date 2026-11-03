@@ -1225,11 +1225,16 @@ routine start()
 ```suflae
 var out = FileManager.make_file(at: File(at: "out.txt"), replacing: true)
 using FileManager.open_write(at: out) as sink
-    sink.push(data: "hello\n".encode_as_utf8())
+    sink.write("hello")
 ```
 
   A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
   There is no `defer`.
+- **Text over a session:** `FileSink.write(value, end: "\n")` works like `show` (Text as UTF-8, any value in its
+  representable form, `Bytes` as they are). `FileSource` reads like the console's `ask` family: `read_line()`,
+  `read[T]()` (a line as a `T`), `read_word()`, `read_all()`, `read_lines()`, `read_words()`, `read_raw()` (the rest
+  as `Bytes`), `read_bytes(count)`. At the end `read_line`/`read[T]`/`read_word` throw `EndOfInputError`, the others
+  give an empty result. There is no bare `read()` without a type.
 - A byte flow (`FileSource`, `FileSink`, `stdin()`, `stdout()`) is read with `pull(max:)` and written with
   `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places (a memory cell), where
   reading again gives the same value. `migrate --step verbs` rewrites the old `load` / `store` on a flow.

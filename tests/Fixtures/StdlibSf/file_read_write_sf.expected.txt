@@ -1,0 +1,6 @@
+first line
+2.5
+42
+ words
+["tail"]
+none

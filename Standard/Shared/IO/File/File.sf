@@ -507,6 +507,54 @@ common routine FileManager.walk(at: Directory) -> List[Text]
 @rf("FileSource.pull")
 routine FileSource.pull(max: U64) -> Bytes
 
+### Reads one line as text (UTF-8, lossy), without its line ending.
+### :returns: The line.
+### :throws: {EndOfInputError} when the file has ended before another line.
+@rf("FileSource.read_line")
+routine FileSource.read_line() -> Text
+
+### Reads one line as a `T`: `var n: S64 = f.read()` (the type the value goes to), or `f.read[S64]()`. The line
+### becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like that does.
+### :typeparam T: The type the line becomes.
+### :returns: The line as a `T`.
+### :throws: {InvalidValueError} or what else `to[T]()` throws when the line isn't a `T`, {EndOfInputError} when the
+### file has ended.
+@rf("FileSource.read")
+routine FileSource.read[T]() -> T
+
+### Reads one whitespace-delimited word as text (UTF-8, lossy).
+### :returns: The word.
+### :throws: {EndOfInputError} when the file has ended before another word.
+@rf("FileSource.read_word")
+routine FileSource.read_word() -> Text
+
+### Reads the rest of the file as text (UTF-8, lossy).
+### :returns: The text, empty at the end of the file.
+@rf("FileSource.read_all")
+routine FileSource.read_all() -> Text
+
+### Reads the rest of the file and splits it into lines, as {Text.lines} does: the line ending after the last line
+### starts no new one.
+### :returns: The lines.
+@rf("FileSource.read_lines")
+routine FileSource.read_lines() -> List[Text]
+
+### Reads the rest of the file and splits it into whitespace-delimited words.
+### :returns: The words.
+@rf("FileSource.read_words")
+routine FileSource.read_words() -> List[Text]
+
+### Reads the rest of the file as raw bytes.
+### :returns: The bytes, empty at the end of the file.
+@rf("FileSource.read_raw")
+routine FileSource.read_raw() -> Bytes
+
+### Reads up to `count` bytes: fewer only at the end of the file.
+### :param count: The most bytes to read.
+### :returns: The bytes, empty at the end of the file.
+@rf("FileSource.read_bytes")
+routine FileSource.read_bytes(count: U64) -> Bytes
+
 ### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destruct` never
 ### double-close.
 @rf("FileSource.close")
@@ -531,6 +579,27 @@ routine FileSource.destruct()
 ### :returns: The number of bytes accepted.
 @rf("FileSink.push")
 routine FileSink.push(data: Bytes) -> U64
+
+### Writes `value` and then `end` at the current position, encoded as UTF-8.
+### :param value: The text to write.
+### :param end: The text written after it.
+### :throws: {IOError} when the file can't take the bytes.
+@rf("FileSink.write")
+routine FileSink.write(value: Text, end: Text = "\n")
+
+### Writes raw bytes and then `end` (encoded as UTF-8) at the current position.
+### :param value: The bytes to write.
+### :param end: The text written after them.
+### :throws: {IOError} when the file can't take the bytes.
+@rf("FileSink.write")
+routine FileSink.write(value: Bytes, end: Text = "\n")
+
+### Writes a value in its representable form and then `end` at the current position, encoded as UTF-8.
+### :param value: The value to write.
+### :param end: The text written after it.
+### :throws: {IOError} when the file can't take the bytes.
+@rf("FileSink.write")
+routine FileSink.write[T](value: T, end: Text = "\n")
 
 ### Flushes buffered output to the underlying file.
 @rf("FileSink.flush")
