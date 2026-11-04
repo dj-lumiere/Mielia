@@ -1,64 +1,64 @@
 module System/Numerics
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### e^me.
-@ra("Decimal.exp")
+@rv("Decimal.exp")
 routine Decimal.exp() -> Decimal
 
 ### e^me - 1, accurate for small me.
-@ra("Decimal.exp_m1")
+@rv("Decimal.exp_m1")
 routine Decimal.exp_m1() -> Decimal
 
 ### 2^me.
-@ra("Decimal.exp2")
+@rv("Decimal.exp2")
 routine Decimal.exp2() -> Decimal
 
 ### 10^me.
-@ra("Decimal.exp10")
+@rv("Decimal.exp10")
 routine Decimal.exp10() -> Decimal
 
 ### Natural logarithm ln(me).
-@ra("Decimal.ln")
+@rv("Decimal.ln")
 routine Decimal.ln() -> Decimal
 
 ### ln(1 + me), accurate for small me.
-@ra("Decimal.ln_1p")
+@rv("Decimal.ln_1p")
 routine Decimal.ln_1p() -> Decimal
 
 ### Base-2 logarithm log2(me).
-@ra("Decimal.log2")
+@rv("Decimal.log2")
 routine Decimal.log2() -> Decimal
 
 ### Base-10 logarithm log10(me).
-@ra("Decimal.log10")
+@rv("Decimal.log10")
 routine Decimal.log10() -> Decimal
 
 ### me raised to the power `you`.
 ### :param you: The exponent.
 ### :returns: `me` to the power `you`.
-@ra("Decimal.pow")
+@rv("Decimal.pow")
 routine Decimal.pow(you: Decimal) -> Decimal
 
 ### Square root of me.
-@ra("Decimal.sqrt")
+@rv("Decimal.sqrt")
 routine Decimal.sqrt() -> Decimal
 
 ### 1 / sqrt(me), correctly rounded to 34 digits (a tie half up), not `1 / me.sqrt()` (two roundings).
 ### :throws: {NumericDomainError} when `me` is zero or below.
-@ra("Decimal.rsqrt")
+@rv("Decimal.rsqrt")
 routine Decimal.rsqrt() -> Decimal
 
 ### Cube root of me.
-@ra("Decimal.cbrt")
+@rv("Decimal.cbrt")
 routine Decimal.cbrt() -> Decimal
 
 ### Euclidean norm sqrt(x^2 + y^2), computed without overflow/underflow.
 ### :param x: One leg.
 ### :param y: The other leg.
 ### :returns: The length of the hypotenuse.
-@ra("hypot")
+@rv("hypot")
 routine hypot(x: Decimal, y: Decimal) -> Decimal
 
 ### 3D Euclidean norm sqrt(x^2 + y^2 + z^2), computed without overflow/underflow.
@@ -66,167 +66,167 @@ routine hypot(x: Decimal, y: Decimal) -> Decimal
 ### :param y: Second leg.
 ### :param z: Third leg.
 ### :returns: The length of the 3D hypotenuse.
-@ra("hypot")
+@rv("hypot")
 routine hypot(x: Decimal, y: Decimal, z: Decimal) -> Decimal
 
 ### Fused multiply-add me*b + c with a single rounding.
 ### :param b: The second factor.
 ### :param c: The value added to the product.
 ### :returns: `me * b + c`, rounded once.
-@ra("Decimal.mul_add")
+@rv("Decimal.mul_add")
 routine Decimal.mul_add(b: Decimal, c: Decimal) -> Decimal
 
 ### Sine of me (radians).
-@ra("Decimal.sin")
+@rv("Decimal.sin")
 routine Decimal.sin() -> Decimal
 
 ### Cosine of me (radians).
-@ra("Decimal.cos")
+@rv("Decimal.cos")
 routine Decimal.cos() -> Decimal
 
 ### Tangent of me (radians).
-@ra("Decimal.tan")
+@rv("Decimal.tan")
 routine Decimal.tan() -> Decimal
 
 ### Arcsine of me (result in radians).
-@ra("Decimal.asin")
+@rv("Decimal.asin")
 routine Decimal.asin() -> Decimal
 
 ### Arccosine of me (result in radians).
-@ra("Decimal.acos")
+@rv("Decimal.acos")
 routine Decimal.acos() -> Decimal
 
 ### Arctangent of me (result in radians).
-@ra("Decimal.atan")
+@rv("Decimal.atan")
 routine Decimal.atan() -> Decimal
 
 ### Two-argument arctangent atan2(y, x) (result in radians).
 ### :param y: The vertical coordinate.
 ### :param x: The horizontal coordinate.
 ### :returns: The angle in radians, in the range -pi to pi.
-@ra("atan2")
+@rv("atan2")
 routine atan2(y: Decimal, x: Decimal) -> Decimal
 
 ### Hyperbolic sine of me.
-@ra("Decimal.sinh")
+@rv("Decimal.sinh")
 routine Decimal.sinh() -> Decimal
 
 ### Hyperbolic cosine of me.
-@ra("Decimal.cosh")
+@rv("Decimal.cosh")
 routine Decimal.cosh() -> Decimal
 
 ### Hyperbolic tangent of me.
-@ra("Decimal.tanh")
+@rv("Decimal.tanh")
 routine Decimal.tanh() -> Decimal
 
 ### Inverse hyperbolic sine of me.
-@ra("Decimal.asinh")
+@rv("Decimal.asinh")
 routine Decimal.asinh() -> Decimal
 
 ### Inverse hyperbolic cosine of me.
-@ra("Decimal.acosh")
+@rv("Decimal.acosh")
 routine Decimal.acosh() -> Decimal
 
 ### Inverse hyperbolic tangent of me.
-@ra("Decimal.atanh")
+@rv("Decimal.atanh")
 routine Decimal.atanh() -> Decimal
 
 ### Error function erf(me).
-@ra("Decimal.erf")
+@rv("Decimal.erf")
 routine Decimal.erf() -> Decimal
 
 ### Complementary error function erfc(me) = 1 - erf(me).
-@ra("Decimal.erfc")
+@rv("Decimal.erfc")
 routine Decimal.erfc() -> Decimal
 
 ### Gamma function gamma(me).
-@ra("Decimal.gamma")
+@rv("Decimal.gamma")
 routine Decimal.gamma() -> Decimal
 
 ### Natural logarithm of the absolute value of the gamma function, ln_gamma(me).
-@ra("Decimal.ln_gamma")
+@rv("Decimal.ln_gamma")
 routine Decimal.ln_gamma() -> Decimal
 
 ### True if me has its sign bit set (a Decimal below zero: there is no -0).
-@ra("Decimal.is_sign_negative")
+@rv("Decimal.is_sign_negative")
 routine Decimal.is_sign_negative() -> Bool
 
 ### True if me is finite and nonzero.
-@ra("Decimal.is_normal")
+@rv("Decimal.is_normal")
 routine Decimal.is_normal() -> Bool
 
 ### True if me is +-0.
-@ra("Decimal.is_zero")
+@rv("Decimal.is_zero")
 routine Decimal.is_zero() -> Bool
 
 ### True if me is below zero (a Decimal zero is always +0).
-@ra("Decimal.is_negative")
+@rv("Decimal.is_negative")
 routine Decimal.is_negative() -> Bool
 
 ### True if me is strictly positive.
-@ra("Decimal.is_positive")
+@rv("Decimal.is_positive")
 routine Decimal.is_positive() -> Bool
 
 ### True if me is subnormal (finite, nonzero, below the smallest normal).
-@ra("Decimal.is_subnormal")
+@rv("Decimal.is_subnormal")
 routine Decimal.is_subnormal() -> Bool
 
 ### -1, 0, or +1 matching the sign of me.
-@ra("Decimal.signum")
+@rv("Decimal.signum")
 routine Decimal.signum() -> Decimal
 
 ### C99 fpclassify code (ZERO / SUBNORMAL / NORMAL; a well-formed Decimal is never inf/NaN).
-@ra("Decimal.fpclassify")
+@rv("Decimal.fpclassify")
 routine Decimal.fpclassify() -> FpClass
 
 ### Absolute value of me.
-@ra("Decimal.abs")
+@rv("Decimal.abs")
 routine Decimal.abs() -> Decimal
 
 ### Negation of me (flips the sign: zero stays +0).
-@ra("Decimal.neg")
+@rv("Decimal.neg")
 routine Decimal.neg() -> Decimal
 
 ### Magnitude of me with the sign of `you`.
 ### :param you: The value whose sign is used.
 ### :returns: The magnitude of `me` with the sign of `you`.
-@ra("Decimal.copysign")
+@rv("Decimal.copysign")
 routine Decimal.copysign(you: Decimal) -> Decimal
 
 ### Positive difference max(me - you, 0).
 ### :param you: The value to subtract.
 ### :returns: `me - you` when `me` is greater, otherwise zero.
-@ra("Decimal.fdim")
+@rv("Decimal.fdim")
 routine Decimal.fdim(you: Decimal) -> Decimal
 
 ### IEEE minimumNumber(me, you).
 ### :param you: The value to compare against.
 ### :returns: The smaller value, or the other one if one is a NaN.
-@ra("Decimal.min_num")
+@rv("Decimal.min_num")
 routine Decimal.min_num(you: Decimal) -> Decimal
 
 ### IEEE maximumNumber(me, you).
 ### :param you: The value to compare against.
 ### :returns: The larger value, or the other one if one is a NaN.
-@ra("Decimal.max_num")
+@rv("Decimal.max_num")
 routine Decimal.max_num(you: Decimal) -> Decimal
 
 ### IEEE minimum(me, you).
 ### :param you: The value to compare against.
 ### :returns: The smaller value, or a NaN if either is a NaN.
-@ra("Decimal.minimum")
+@rv("Decimal.minimum")
 routine Decimal.minimum(you: Decimal) -> Decimal
 
 ### IEEE maximum(me, you).
 ### :param you: The value to compare against.
 ### :returns: The larger value, or a NaN if either is a NaN.
-@ra("Decimal.maximum")
+@rv("Decimal.maximum")
 routine Decimal.maximum(you: Decimal) -> Decimal
 
 ### Floating remainder of me / you (C fmod; result has me's sign).
 ### :param you: The divisor.
 ### :returns: `me - trunc(me / you) * you`.
-@ra("Decimal.mod_trunc")
+@rv("Decimal.mod_trunc")
 routine Decimal.mod_trunc(you: Decimal) -> Decimal
 
 ### Returns the Euclidean remainder of `me` divided by `you`, computed exactly: the r with `me = q * you + r` for a whole
@@ -235,61 +235,61 @@ routine Decimal.mod_trunc(you: Decimal) -> Decimal
 ### :returns: The remainder.
 ### :throws: {DivisionByZeroError} when `you` is zero, and {NumericOverflowError} when the remainder needs more than 34
 ###     significant digits (-1e-40 by 7 is 7 - 1e-40).
-@ra("Decimal.rem")
+@rv("Decimal.rem")
 routine Decimal.rem(you: Decimal) -> Decimal
 
 ### The base-10 exponent of me (floor(log10(|me|)) as a Decimal).
-@ra("Decimal.logb")
+@rv("Decimal.logb")
 routine Decimal.logb() -> Decimal
 
 ### Truncates toward zero to an integral value.
-@ra("Decimal.trunc")
+@rv("Decimal.trunc")
 routine Decimal.trunc() -> Decimal
 
 ### Rounds toward negative infinity (floor).
-@ra("Decimal.floor")
+@rv("Decimal.floor")
 routine Decimal.floor() -> Decimal
 
 ### Rounds toward positive infinity (ceil).
-@ra("Decimal.ceil")
+@rv("Decimal.ceil")
 routine Decimal.ceil() -> Decimal
 
 ### Rounds the way Decimal rounds, half up: the same as `round()`.
-@ra("Decimal.rint")
+@rv("Decimal.rint")
 routine Decimal.rint() -> Decimal
 
 ### Rounds to the nearest integral value, ties away from zero.
-@ra("Decimal.round_ties_away")
+@rv("Decimal.round_ties_away")
 routine Decimal.round_ties_away() -> Decimal
 
 ### The fractional part of me (me - trunc(me), carrying me's sign).
-@ra("Decimal.fract")
+@rv("Decimal.fract")
 routine Decimal.fract() -> Decimal
 
 ### Splits me into its integer and fractional parts, both carrying me's sign.
-@ra("Decimal.modf")
+@rv("Decimal.modf")
 routine Decimal.modf() -> (Decimal, Decimal)
 
 ### True if me and you have the same quantum (exponent).
 ### :param you: The value to compare against.
 ### :returns: `true` if both have the same exponent.
-@ra("Decimal.same_quantum")
+@rv("Decimal.same_quantum")
 routine Decimal.same_quantum(you: Decimal) -> Bool
 
 ### Rounds me to the quantum (exponent) of you.
 ### :param you: The value that gives the target exponent.
 ### :returns: `me` with the exponent of `you`, or a NaN if it does not fit.
-@ra("Decimal.quantize")
+@rv("Decimal.quantize")
 routine Decimal.quantize(you: Decimal) -> Decimal
 
 ### IEEE totalOrder predicate (a total order over all values).
 ### :param you: The value to compare against.
 ### :returns: `true` if `me` precedes or equals `you` in the total order.
-@ra("Decimal.total_compare")
+@rv("Decimal.total_compare")
 routine Decimal.total_compare(you: Decimal) -> Bool
 
 ### IEEE totalOrderMag predicate (total order over magnitudes).
 ### :param you: The value to compare against.
 ### :returns: `true` if `|me|` precedes or equals `|you|` in the total order.
-@ra("Decimal.total_order_mag")
+@rv("Decimal.total_order_mag")
 routine Decimal.total_order_mag(you: Decimal) -> Bool

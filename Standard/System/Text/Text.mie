@@ -10,7 +10,7 @@ routine Text() -> Text
 ### Creates a text of the characters of `from_list`, in order.
 ### :param from_list: The characters.
 routine Text(from_list: List[Char]) -> Text
-    return Text(from_list: from_list.to[RA::List]())
+    return Text(from_list: from_list.to[RV::List]())
 
 ### Returns the number of characters.
 routine Text.count() -> Int

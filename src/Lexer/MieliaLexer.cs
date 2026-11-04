@@ -42,7 +42,7 @@ public partial class MieliaLexer
 
     /// <summary>
     /// Dictionary mapping keywords to their corresponding token types.
-    /// Guarded keywords are always present; RA-only keywords are added conditionally.
+    /// Guarded keywords are always present; RV-only keywords are added conditionally.
     /// </summary>
     private readonly Dictionary<string, TokenType> _keywords;
 
@@ -181,7 +181,7 @@ public partial class MieliaLexer
             language: language);
         _language = language;
 
-        // Guarded keywords (both RA and MI)
+        // Guarded keywords (both RV and MI)
         _keywords = new Dictionary<string, TokenType>
         {
             // Type declarations
@@ -277,8 +277,8 @@ public partial class MieliaLexer
             // `needs P everywhere` — the structural-conferral gate of the protocol model (a `needs`-clause
             // modifier, NOT a reflection construct). It lives with `needs`/`obeys`/`protocol`, which MI
             // shares, so it is a SHARED keyword. The derive TEMPLATES it gates (e.g. `routine T.eq` with an
-            // `expand` body) are RA stdlib that MI reuses wholesale; authoring such a template needs
-            // `expand` (RA-only), but the gate itself and the built-in structural protocols apply to MI
+            // `expand` body) are RV stdlib that MI reuses wholesale; authoring such a template needs
+            // `expand` (RV-only), but the gate itself and the built-in structural protocols apply to MI
             // types just as well.
             [key: "everywhere"] = TokenType.Everywhere,
             // `until cond` loops while the condition is false, `becomes v` gives a block arm of a value `when` its value.

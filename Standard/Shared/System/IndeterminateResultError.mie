@@ -1,15 +1,15 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the crashable raised when an arithmetic expression has no single
 ### mathematically meaningful result in the current domain.
-@ra("IndeterminateResultError")
+@rv("IndeterminateResultError")
 crashable IndeterminateResultError
     nothing
 
 ### Returns the default message for indeterminate arithmetic results.
 ### :returns: The resulting `Text` value.
-@ra("IndeterminateResultError.crash_message")
+@rv("IndeterminateResultError.crash_message")
 routine IndeterminateResultError.crash_message() -> Text

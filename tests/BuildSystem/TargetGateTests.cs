@@ -21,7 +21,7 @@ public sealed class TargetGateTests
     }
 
     [Fact]
-    public void NonRaFile_NeverGated()
+    public void NonRvFile_NeverGated()
     {
         // A `.mie` file is Mielia — never subject to conditional compilation, even with a directive.
         string f = WriteTemp(name: "x.mie", body: "@target(os: \"windows\")\nmodule M\n");

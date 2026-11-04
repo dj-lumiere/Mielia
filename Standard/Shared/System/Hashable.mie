@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for keyed, attack-resistant hashing.
@@ -9,7 +9,7 @@ module System
 ### attackers, so it is safe to use with untrusted input.
 ### `needs Hashable everywhere` auto-confers Hashable on any member-bearing type all of whose
 ### members are themselves Hashable — the structural gate that drives the auto-derived `hash`.
-@ra("Hashable")
+@rv("Hashable")
 protocol Hashable
 needs Hashable everywhere
     ### Returns a keyed hash of this value using SipHash-2-4 semantics.

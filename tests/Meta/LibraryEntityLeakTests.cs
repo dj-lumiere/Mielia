@@ -113,7 +113,7 @@ public sealed class LibraryEntityLeakTests
         string[] roots = [Path.Combine(path1: repo, path2: "Standard"), Path.Combine(paths: [repo, "..", "Revare", "Standard"])];
         return roots.Where(predicate: Directory.Exists)
                     .SelectMany(selector: root => Directory.EnumerateFiles(path: root, searchPattern: "*.*", searchOption: SearchOption.AllDirectories))
-                    .Where(predicate: f => f.EndsWith(value: ".mie") || f.EndsWith(value: ".rr"))
+                    .Where(predicate: f => f.EndsWith(value: ".mie") || f.EndsWith(value: ".rvr"))
                     .ToArray();
     }
 

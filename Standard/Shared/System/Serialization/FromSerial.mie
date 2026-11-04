@@ -1,18 +1,18 @@
 module System/Serialization
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Raised when a `SerialValue` does not have the shape `sv.to[T]()` expects: a
 ### missing member variable, a text where a number was expected, an unknown choice case, and so on.
-@ra("SerialShapeError")
+@rv("SerialShapeError")
 crashable SerialShapeError
     ### What was expected and what was found.
     detail: Text
 
 ### Returns the message for a serialized value that does not fit its target type.
 ### :returns: The resulting `Text` value.
-@ra("SerialShapeError.crash_message")
+@rv("SerialShapeError.crash_message")
 routine SerialShapeError.crash_message() -> Text
 
 ### The serialized value of member variable `name` inside a serialized record or entity (the
@@ -21,14 +21,14 @@ routine SerialShapeError.crash_message() -> Text
 ### :param name: The member variable to look up.
 ### :returns: The member variable's serialized value.
 ### :throws: {SerialShapeError} when `value` is not a member-variable table or has no entry for `name`.
-@ra("serial_field")
+@rv("serial_field")
 routine serial_field(value: SerialValue, name: Text) -> SerialValue
 
 ### The text inside a serialized `Text` value.
 ### :param value: The serialized value.
 ### :returns: The text.
 ### :throws: {SerialShapeError} when `value` is not text.
-@ra("serial_text")
+@rv("serial_text")
 routine serial_text(value: SerialValue) -> Text
 
 ### The key a serialized dictionary entry names: a `Text` key is the name itself and any other key is read back
@@ -37,7 +37,7 @@ routine serial_text(value: SerialValue) -> Text
 ### :param key: The entry's name.
 ### :returns: The key.
 ### :throws: A parse error when `key` does not read as a `T`.
-@ra("serial_key")
+@rv("serial_key")
 routine serial_key[T](key: Text) -> T
 
 ### Builds a `T` from its serialized form: the generic entry point the builder-synthesized `from_serial`
@@ -47,7 +47,7 @@ routine serial_key[T](key: Text) -> T
 ### :param value: The serialized value.
 ### :returns: The rebuilt value.
 ### :throws: {SerialShapeError} or a parse error when `value` does not have the shape `T` needs.
-@ra("serial_decode")
+@rv("serial_decode")
 routine serial_decode[T](value: SerialValue) -> T
 
 ### Builds a choice value from its serialized case name.
@@ -55,7 +55,7 @@ routine serial_decode[T](value: SerialValue) -> T
 ### :param value: The serialized case name.
 ### :returns: The matching case.
 ### :throws: {SerialShapeError} when the name is not a case of `T`.
-@ra("choice_from_serial")
+@rv("choice_from_serial")
 routine choice_from_serial[T](value: SerialValue) -> T
 needs ChoiceType T
 
@@ -64,7 +64,7 @@ needs ChoiceType T
 ### :param value: The serialized list of member names.
 ### :returns: The flags value with exactly those members set.
 ### :throws: {SerialShapeError} when `value` is not a list of names or a name is not a member of `T`.
-@ra("flags_from_serial")
+@rv("flags_from_serial")
 routine flags_from_serial[T](value: SerialValue) -> T
 needs FlagsType T
 
@@ -74,7 +74,7 @@ needs FlagsType T
 ### :param value: The serialized variant.
 ### :returns: The variant holding the rebuilt payload in the named arm.
 ### :throws: {SerialShapeError} when `value` is not a one-entry table naming an arm of `T`.
-@ra("variant_from_serial")
+@rv("variant_from_serial")
 routine variant_from_serial[T](value: SerialValue) -> T
 needs VariantType T
 
@@ -83,19 +83,19 @@ needs VariantType T
 ### the builder writes it for records, entities, choices, flags and variants, and a type may write its own.
 ### :returns: The rebuilt value.
 ### :throws: {SerialShapeError} when the value does not have the shape `T` needs.
-@ra("SerialValue.to")
+@rv("SerialValue.to")
 routine SerialValue.to[T]() -> T
 needs AnyType T
 
 ### Builds a `Byte` from its serialized form (a `U8`). :throws: {SerialShapeError} on any other arm.
 ### :param value: The serialized value to read.
 ### :returns: The Byte value stored in `value`.
-@ra("Byte.from_serial")
+@rv("Byte.from_serial")
 common routine Byte.from_serial(value: SerialValue) -> Byte
 
 ### Builds a `Char` from its serialized form (a one-character `Text`).
 ### :param value: The serialized value to read.
 ### :returns: The Char value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a one-character text.
-@ra("Char.from_serial")
+@rv("Char.from_serial")
 common routine Char.from_serial(value: SerialValue) -> Char

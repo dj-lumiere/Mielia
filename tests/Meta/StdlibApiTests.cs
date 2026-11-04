@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Mielia.Tests.Meta;
 
 /// <summary>
-/// Runs each <c>tests/Fixtures/Stdlib/*.rr</c> fixture through <c>buildandrun</c> and
+/// Runs each <c>tests/Fixtures/Stdlib/*.rvr</c> fixture through <c>buildandrun</c> and
 /// diffs its stdout against the sibling <c>.expected.txt</c> snapshot. Provides
 /// end-to-end behavior coverage for stdlib types/routines that <c>validate-stdlib</c>
 /// (parse-and-typecheck only) does not catch.
@@ -30,8 +30,8 @@ public sealed partial class StdlibApiTests
 
     // Mielia (.mie) sibling harness. MI fixtures live under a DISTINCT namespace prefix
     // (Tests/StdlibMi/*) and their own fixtures dir so the MI bundle's prefix import pulls only `.mie`
-    // files — a shared prefix would drag `.rr` fixtures into the MI project and trip BuildDriver's
-    // cross-language import guard. MI reuses the Revare stdlib wholesale (MI's System IS RA's System),
+    // files — a shared prefix would drag `.rvr` fixtures into the MI project and trip BuildDriver's
+    // cross-language import guard. MI reuses the Revare stdlib wholesale (MI's System IS RV's System),
     // so the ONLY difference here is the fixtures dir, entry extension, module name, and library path.
     private static readonly string MieliaFixturesDir = Path.Combine(path1: RepoRoot,
         path2: "tests",
@@ -50,14 +50,14 @@ public sealed partial class StdlibApiTests
 
     [GeneratedRegex(
         pattern:
-        @"error\[RA-|Warning:|Codegen bug|Synthesized body codegen failed|Unresolved generic|Error type found|undefined symbol|never defined|MARKER-LEAK|Unhandled exception|\bE0\d")]
+        @"error\[RV-|Warning:|Codegen bug|Synthesized body codegen failed|Unresolved generic|Error type found|undefined symbol|never defined|MARKER-LEAK|Unhandled exception|\bE0\d")]
     private static partial Regex StderrDiagnosticRe();
 
     /// <summary>
     /// Mielia (.mie) sibling of the stdlib harness. Bundles every <c>StdlibMi/*.mie</c> fixture into one
     /// <c>all_mielia.mie</c> (an MI project — entry extension picks the language), compiles + runs it
     /// ONCE over the shared Revare stdlib, and diffs each fixture's section against its snapshot.
-    /// Proves MI programs behave correctly on the borrowed RA System; where a <c>StdlibMi</c> fixture
+    /// Proves MI programs behave correctly on the borrowed RV System; where a <c>StdlibMi</c> fixture
     /// shares a stem with a <c>Stdlib</c> fixture, the equivalence test below locks their snapshots
     /// identical so the two frontends are held to the same observable behavior.
     /// </summary>
@@ -85,12 +85,12 @@ public sealed partial class StdlibApiTests
     }
 
     /// <summary>
-    /// Equivalence lock: every fixture stem present in BOTH <c>Stdlib</c> (.rr) and <c>StdlibMi</c>
+    /// Equivalence lock: every fixture stem present in BOTH <c>Stdlib</c> (.rvr) and <c>StdlibMi</c>
     /// (.mie) must have byte-identical (normalized) expected output. This is what makes the MI fixture
-    /// an equivalence test rather than a standalone one — porting a .rr fixture to .mie and keeping the
+    /// an equivalence test rather than a standalone one — porting a .rvr fixture to .mie and keeping the
     /// same snapshot asserts the two frontends produce the SAME observable behavior over the shared
     /// stdlib. If the MI output legitimately differs (e.g. a genuinely MI-only surface), give that
-    /// fixture a stem with no .rr counterpart so it is exempt.
+    /// fixture a stem with no .rvr counterpart so it is exempt.
     /// </summary>
     [Fact]
     public void MieliaAndRevare_SharedFixtures_HaveIdenticalExpected()
@@ -105,8 +105,8 @@ public sealed partial class StdlibApiTests
                      searchPattern: "*.expected.txt"))
         {
             string stem = Path.GetFileName(path: miExpected);
-            string raExpected = Path.Combine(path1: FixturesDir, path2: stem);
-            if (!File.Exists(path: raExpected))
+            string rvExpected = Path.Combine(path1: FixturesDir, path2: stem);
+            if (!File.Exists(path: rvExpected))
             {
                 continue; // MI-only fixture — exempt.
             }
@@ -114,7 +114,7 @@ public sealed partial class StdlibApiTests
             // Canonicalize the namespace before comparing. MI fixtures live under `Tests/StdlibMi/*`
             // (their own namespace so the MI bundle's prefix import pulls only `.mie` files), so any
             // fixture that prints its own fully-qualified type name (via `diagnose` / `:?`) emits
-            // `Tests/StdlibMi/...` where its `.rr` twin emits `Tests/Stdlib/...`. That's a naming
+            // `Tests/StdlibMi/...` where its `.rvr` twin emits `Tests/Stdlib/...`. That's a naming
             // artifact of the split, NOT a behavioral difference — fold it out so equivalence tracks
             // real observable behavior only.
             static string Canon(string s)
@@ -123,7 +123,7 @@ public sealed partial class StdlibApiTests
                    .Replace(oldValue: "Tests/StdlibMi", newValue: "Tests/Stdlib");
             }
 
-            if (Canon(s: File.ReadAllText(path: raExpected)) !=
+            if (Canon(s: File.ReadAllText(path: rvExpected)) !=
                 Canon(s: File.ReadAllText(path: miExpected)))
             {
                 mismatches.Add(item: stem);
@@ -132,7 +132,7 @@ public sealed partial class StdlibApiTests
 
         Assert.True(condition: mismatches.Count == 0,
             userMessage:
-            "Guarded RA/MI fixtures have divergent expected output (equivalence broken): " +
+            "Guarded RV/MI fixtures have divergent expected output (equivalence broken): " +
             string.Join(separator: ", ", values: mismatches) +
             ". Reconcile the snapshots, or rename the MI fixture stem to exempt it.");
     }
@@ -142,7 +142,7 @@ public sealed partial class StdlibApiTests
     /// <paramref name="glob"/> (importing each by its declared module, calling its <c>start()</c> via the
     /// module leaf), compiles + runs the ONE program, splits combined stdout on the
     /// <c>##### stem #####</c> delimiters, and diffs each section against its <c>.expected.txt</c>. Guarded
-    /// by the Revare (.rr) and Mielia (.mie) harnesses — the language is selected by the entry file's
+    /// by the Revare (.rvr) and Mielia (.mie) harnesses — the language is selected by the entry file's
     /// extension, so the only per-language inputs are the fixtures dir, glob, module name, and paths.
     /// Returns the number of fixtures discovered and bundled (0 = nothing ran).
     /// </summary>
@@ -253,7 +253,7 @@ public sealed partial class StdlibApiTests
                                         .OrderBy(keySelector: p => p,
                                              comparer: StringComparer.Ordinal))
         {
-            string? module = ReadDeclaredModule(raPath: src);
+            string? module = ReadDeclaredModule(rvPath: src);
             if (module == null)
             {
                 continue;
@@ -267,7 +267,7 @@ public sealed partial class StdlibApiTests
                 throw new Xunit.Sdk.XunitException(
                     userMessage:
                     $"Harness leaf collision '{leaf}': {other} vs {module} — module-qualified leaf calls " +
-                    "would be ambiguous (RA-S513). Rename one fixture's module leaf.");
+                    "would be ambiguous (RV-S513). Rename one fixture's module leaf.");
             }
 
             leaves[key: leaf] = module;
@@ -332,9 +332,9 @@ public sealed partial class StdlibApiTests
     }
 
     /// <summary>Reads the declared <c>module</c> path of a fixture (utf-8-sig for BOM), or null.</summary>
-    private static string? ReadDeclaredModule(string raPath)
+    private static string? ReadDeclaredModule(string rvPath)
     {
-        foreach (string line in File.ReadLines(path: raPath))
+        foreach (string line in File.ReadLines(path: rvPath))
         {
             Match m = ModuleRe()
                .Match(input: line);
@@ -416,7 +416,7 @@ public sealed partial class StdlibApiTests
                 [key: "DOTNET_gcServer"] = "0", [key: "DOTNET_GCConserveMemory"] = "9",
                 // The compiled program flushes every line, so output written before a hang or a
                 // crash (the last ##### fixture ##### marker) reaches the failure message.
-                [key: "RA_FLUSH_STDOUT"] = "1"
+                [key: "RV_FLUSH_STDOUT"] = "1"
             }
         };
         using var p = Process.Start(startInfo: psi)!;
@@ -506,14 +506,14 @@ public sealed partial class StdlibApiTests
     /// </summary>
     private const int MaxRunAttempts = 2;
 
-    private static string RunFixture(string raPath)
+    private static string RunFixture(string rvPath)
     {
-        string fixture = Path.GetFileName(path: raPath);
+        string fixture = Path.GetFileName(path: rvPath);
         FixtureRun last = default;
 
         for (int attempt = 1; attempt <= MaxRunAttempts; attempt++)
         {
-            last = RunFixtureOnce(raPath: raPath);
+            last = RunFixtureOnce(rvPath: rvPath);
 
             if (last.TimedOut)
             {
@@ -571,7 +571,7 @@ public sealed partial class StdlibApiTests
         bool TimedOut,
         int TimeoutMs);
 
-    private static FixtureRun RunFixtureOnce(string raPath)
+    private static FixtureRun RunFixtureOnce(string rvPath)
     {
         // Invoke the already-built builder assembly directly. Using
         // `dotnet run --project …` here would re-evaluate the project file on
@@ -580,7 +580,7 @@ public sealed partial class StdlibApiTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: raPath), "buildandrun", raPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "buildandrun", rvPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -597,7 +597,7 @@ public sealed partial class StdlibApiTests
                 [key: "DOTNET_gcServer"] = "0", [key: "DOTNET_GCConserveMemory"] = "9",
                 // The compiled program flushes every line, so output written before a hang or a
                 // crash (the last ##### fixture ##### marker) reaches the failure message.
-                [key: "RA_FLUSH_STDOUT"] = "1"
+                [key: "RV_FLUSH_STDOUT"] = "1"
             }
         };
         using var p = Process.Start(startInfo: psi)!;

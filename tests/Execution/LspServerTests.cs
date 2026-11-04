@@ -13,7 +13,7 @@ namespace Mielia.Tests.Execution;
 /// </summary>
 public sealed class LspServerTests
 {
-    private const string Uri = "file:///test/Sample.rr";
+    private const string Uri = "file:///test/Sample.rvr";
 
     // A symbol-rich Revare document: free routines, a record with a member routine, a generic
     // container use, variables, calls, an f-string, and control flow — enough surface to exercise
@@ -92,7 +92,7 @@ public sealed class LspServerTests
             LspTestHarness.DidOpen(uri: Uri, text: Source),
             Exit);
 
-        // A .rr file is the Revare server's: this one publishes nothing for it.
+        // A .rvr file is the Revare server's: this one publishes nothing for it.
         Assert.Null(@object: LspTestHarness.Diagnostics(replies: replies, uri: Uri));
     }
 
@@ -123,7 +123,7 @@ public sealed class LspServerTests
     [InlineData("### Two numbers side by side.\nrecord Pair\n    a: S64\n    b: S64\n\nroutine start()\n    var p = Pair(a: 1, b: 2)\n    return\n", "Pair(", "side by side")]
     public void Hover_OverType_ShowsItsDocComment(string source, string needle, string doc)
     {
-        // A Mielia standard library type is shown with `@ra(...)` between its doc comment and its header.
+        // A Mielia standard library type is shown with `@rv(...)` between its doc comment and its header.
         string dir = Directory.CreateTempSubdirectory(prefix: "lsp_hover_").FullName;
         string path = Path.Combine(path1: dir, path2: "main.mie");
         File.WriteAllText(path: path, contents: source);

@@ -1,18 +1,18 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the crashable raised when the runtime cannot satisfy an
 ### allocation request.
-@ra("OutOfMemoryError")
+@rv("OutOfMemoryError")
 crashable OutOfMemoryError
     ### Stores the number of bytes requested by the failed allocation.
     requested_bytes: U64
 
 ### Represents the crashable raised when a raw memory access extends beyond the
 ### allocated region.
-@ra("MemoryBoundsError")
+@rv("MemoryBoundsError")
 crashable MemoryBoundsError
     ### Stores the starting offset of the attempted access.
     offset: U64
@@ -23,10 +23,10 @@ crashable MemoryBoundsError
 
 ### Returns the default message for allocation failure.
 ### :returns: The resulting `Text` value.
-@ra("OutOfMemoryError.crash_message")
+@rv("OutOfMemoryError.crash_message")
 routine OutOfMemoryError.crash_message() -> Text
 
 ### Returns the default message for out-of-bounds memory access.
 ### :returns: The resulting `Text` value.
-@ra("MemoryBoundsError.crash_message")
+@rv("MemoryBoundsError.crash_message")
 routine MemoryBoundsError.crash_message() -> Text

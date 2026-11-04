@@ -11,7 +11,7 @@ routine Bytes() -> Bytes
 ### Creates bytes of the bytes of `from_list`, in order.
 ### :param from_list: The bytes.
 routine Bytes(from_list: List[Byte]) -> Bytes
-    return Bytes(from_list: from_list.to[RA::List]())
+    return Bytes(from_list: from_list.to[RV::List]())
 
 ### Creates bytes of one byte.
 ### :param from_byte: The byte.

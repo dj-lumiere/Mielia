@@ -83,7 +83,7 @@ routine BytesPiece.repeat_at_least(count: Int) -> BytesPiece
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
 routine either_longer(pieces: List[TextPiece]) -> TextPiece
-    return either_longer(pieces: pieces.to[RA::List]())
+    return either_longer(pieces: pieces.to[RV::List]())
 
 ### One of the pieces: the one that matches the shortest text at that place (the first one written, of those as
 ### short): `either_shorter([text("category"), text("cat")])` takes "cat" in "category".
@@ -91,14 +91,14 @@ routine either_longer(pieces: List[TextPiece]) -> TextPiece
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
 routine either_shorter(pieces: List[TextPiece]) -> TextPiece
-    return either_shorter(pieces: pieces.to[RA::List]())
+    return either_shorter(pieces: pieces.to[RV::List]())
 
 ### One of the pieces: the one that matches the most bytes at that place (the first one written, of those as long).
 ### :param pieces: The alternatives.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
 routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
-    return either_longer(pieces: pieces.to[RA::List]())
+    return either_longer(pieces: pieces.to[RV::List]())
 
 ### One of the pieces: the one that matches the fewest bytes at that place (the first one written, of those as
 ### short).
@@ -106,14 +106,14 @@ routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The list is empty.
 routine either_shorter(pieces: List[BytesPiece]) -> BytesPiece
-    return either_shorter(pieces: pieces.to[RA::List]())
+    return either_shorter(pieces: pieces.to[RV::List]())
 
 ### A pattern of pieces matched one after another.
 ### :param pieces: The pieces, in order.
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
 common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
-    return TextPattern.of(pieces: pieces.to[RA::List]())
+    return TextPattern.of(pieces: pieces.to[RV::List]())
 
 ### A pattern of pieces matched one after another, every letter in either case when `ignore_case` is true.
 ### :param pieces: The pieces, in order.
@@ -121,7 +121,7 @@ common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
 common routine TextPattern.of(pieces: List[TextPiece], ignore_case: Bool) -> TextPattern
-    return TextPattern.of(pieces: pieces.to[RA::List](), ignore_case: ignore_case)
+    return TextPattern.of(pieces: pieces.to[RV::List](), ignore_case: ignore_case)
 
 ### Every place the pattern matches in `text`, in order and none overlapping: after a match the search goes on where
 ### it ended (one character further after a match of no characters).
@@ -142,7 +142,7 @@ routine TextPattern.split(text: Text) -> List[Text]
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
 common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPattern
-    return BytesPattern.of(pieces: pieces.to[RA::List]())
+    return BytesPattern.of(pieces: pieces.to[RV::List]())
 
 ### A pattern of bytes pieces matched one after another, every ASCII letter in either case when `ignore_case` is
 ### true.
@@ -151,7 +151,7 @@ common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPattern
 ### :returns: The pattern.
 ### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
 common routine BytesPattern.of(pieces: List[BytesPiece], ignore_case: Bool) -> BytesPattern
-    return BytesPattern.of(pieces: pieces.to[RA::List](), ignore_case: ignore_case)
+    return BytesPattern.of(pieces: pieces.to[RV::List](), ignore_case: ignore_case)
 
 ### Every place the pattern matches in `bytes`, in order and none overlapping.
 ### :param bytes: The bytes.

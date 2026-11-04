@@ -1,6 +1,6 @@
 module IO/BytesIO
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Parses a signed decimal integer directly from a byte buffer. Skips leading
@@ -10,7 +10,7 @@ module IO/BytesIO
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed `S64` value.
 ### :throws: {InvalidValueError} if no digits were found after the optional sign.
-@ra("S64.from_digit_bytes")
+@rv("S64.from_digit_bytes")
 common routine S64.from_digit_bytes(bytes: Bytes) -> S64
 
 ### Streaming variant: parses a signed decimal integer starting at `start` and
@@ -22,7 +22,7 @@ common routine S64.from_digit_bytes(bytes: Bytes) -> S64
 ###               are treated as EOF and produce {InvalidValueError}.
 ### :returns: A tuple `(parsed_value, index_one_past_last_digit)`.
 ### :throws: {InvalidValueError} if no digits were found after the optional sign.
-@ra("S64.from_digit_bytes_at")
+@rv("S64.from_digit_bytes_at")
 common routine S64.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S64, U64]
 
 ### Formats this `S64` as ASCII decimal digit bytes. The result includes a
@@ -33,7 +33,7 @@ common routine S64.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S64, U
 ### the failure path is unreachable in practice — but propagating via `!`
 ### avoids `danger` and lets callers recover with `try x.to_digit_bytes()` for free.
 ### :returns: A freshly allocated `Bytes` carrying the digit sequence.
-@ra("S64.to_digit_bytes")
+@rv("S64.to_digit_bytes")
 routine S64.to_digit_bytes() -> Bytes
 
 ### Parses an unsigned decimal integer directly from a byte buffer. Skips leading
@@ -43,14 +43,14 @@ routine S64.to_digit_bytes() -> Bytes
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed `U64` value.
 ### :throws: {InvalidValueError} if no digits were found or a `-` sign appeared.
-@ra("U64.from_digit_bytes")
+@rv("U64.from_digit_bytes")
 common routine U64.from_digit_bytes(bytes: Bytes) -> U64
 
 ### Streaming variant of `U64.from_digit_bytes!` — see that routine's doc.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("U64.from_digit_bytes_at")
+@rv("U64.from_digit_bytes_at")
 common routine U64.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U64, U64]
 
 ### Formats this `U64` as ASCII decimal digit bytes. Zero produces a single
@@ -59,128 +59,128 @@ common routine U64.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U64, U
 ### Marked `!` for the same reason as `S64.to_digit_bytes!` — the per-iteration
 ### `U8(from: U64)` narrowing is failable in general but unreachable here.
 ### :returns: A freshly allocated `Bytes` carrying the digit sequence.
-@ra("U64.to_digit_bytes")
+@rv("U64.to_digit_bytes")
 routine U64.to_digit_bytes() -> Bytes
 
 ### Parses an S8 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("S8.from_digit_bytes")
+@rv("S8.from_digit_bytes")
 common routine S8.from_digit_bytes(bytes: Bytes) -> S8
 
 ### Parses an S8 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("S8.from_digit_bytes_at")
+@rv("S8.from_digit_bytes_at")
 common routine S8.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S8, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes, with a leading `-` for a negative value.
-@ra("S8.to_digit_bytes")
+@rv("S8.to_digit_bytes")
 routine S8.to_digit_bytes() -> Bytes
 
 ### Parses an S16 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("S16.from_digit_bytes")
+@rv("S16.from_digit_bytes")
 common routine S16.from_digit_bytes(bytes: Bytes) -> S16
 
 ### Parses an S16 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("S16.from_digit_bytes_at")
+@rv("S16.from_digit_bytes_at")
 common routine S16.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S16, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes, with a leading `-` for a negative value.
-@ra("S16.to_digit_bytes")
+@rv("S16.to_digit_bytes")
 routine S16.to_digit_bytes() -> Bytes
 
 ### Parses an S32 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("S32.from_digit_bytes")
+@rv("S32.from_digit_bytes")
 common routine S32.from_digit_bytes(bytes: Bytes) -> S32
 
 ### Parses an S32 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("S32.from_digit_bytes_at")
+@rv("S32.from_digit_bytes_at")
 common routine S32.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S32, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes, with a leading `-` for a negative value.
-@ra("S32.to_digit_bytes")
+@rv("S32.to_digit_bytes")
 routine S32.to_digit_bytes() -> Bytes
 
 ### Parses a U8 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("U8.from_digit_bytes")
+@rv("U8.from_digit_bytes")
 common routine U8.from_digit_bytes(bytes: Bytes) -> U8
 
 ### Parses a U8 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("U8.from_digit_bytes_at")
+@rv("U8.from_digit_bytes_at")
 common routine U8.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U8, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes.
-@ra("U8.to_digit_bytes")
+@rv("U8.to_digit_bytes")
 routine U8.to_digit_bytes() -> Bytes
 
 ### Parses a U16 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("U16.from_digit_bytes")
+@rv("U16.from_digit_bytes")
 common routine U16.from_digit_bytes(bytes: Bytes) -> U16
 
 ### Parses a U16 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("U16.from_digit_bytes_at")
+@rv("U16.from_digit_bytes_at")
 common routine U16.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U16, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes.
-@ra("U16.to_digit_bytes")
+@rv("U16.to_digit_bytes")
 routine U16.to_digit_bytes() -> Bytes
 
 ### Parses a U32 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("U32.from_digit_bytes")
+@rv("U32.from_digit_bytes")
 common routine U32.from_digit_bytes(bytes: Bytes) -> U32
 
 ### Parses a U32 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("U32.from_digit_bytes_at")
+@rv("U32.from_digit_bytes_at")
 common routine U32.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U32, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes.
-@ra("U32.to_digit_bytes")
+@rv("U32.to_digit_bytes")
 routine U32.to_digit_bytes() -> Bytes
 
 ### Parses an S128 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("S128.from_digit_bytes")
+@rv("S128.from_digit_bytes")
 common routine S128.from_digit_bytes(bytes: Bytes) -> S128
 
 ### Parses an S128 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("S128.from_digit_bytes_at")
+@rv("S128.from_digit_bytes_at")
 common routine S128.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S128, U64]
 
 ### The decimal digits of a POSITIVE U128 magnitude, least-significant first (caller reverses).
@@ -189,46 +189,46 @@ common routine S128.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[S128,
 ### constant divisor to a reciprocal multiply). Requires `mag > 0`.
 ### :param mag: The magnitude to format. It must be above zero.
 ### :returns: The digit bytes, least significant digit first.
-@ra("u128_digits_lsd")
+@rv("u128_digits_lsd")
 routine u128_digits_lsd(mag: U128) -> List[Byte]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes, with a leading `-` for a negative value.
-@ra("S128.to_digit_bytes")
+@rv("S128.to_digit_bytes")
 routine S128.to_digit_bytes() -> Bytes
 
 ### Parses a U128 from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("U128.from_digit_bytes")
+@rv("U128.from_digit_bytes")
 common routine U128.from_digit_bytes(bytes: Bytes) -> U128
 
 ### Parses a U128 from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("U128.from_digit_bytes_at")
+@rv("U128.from_digit_bytes_at")
 common routine U128.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[U128, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes.
-@ra("U128.to_digit_bytes")
+@rv("U128.to_digit_bytes")
 routine U128.to_digit_bytes() -> Bytes
 
 ### Parses an Int from the decimal ASCII digits in `bytes`, after leading ASCII whitespace.
 ### :param bytes: The buffer to read from.
 ### :returns: The parsed value.
-@ra("Int.from_digit_bytes")
+@rv("Int.from_digit_bytes")
 common routine Int.from_digit_bytes(bytes: Bytes) -> Int
 
 ### Parses an Int from decimal ASCII digits in `bytes`, starting at `start`. It also gives the index where scanning stopped.
 ### :param bytes: The buffer to read from.
 ### :param start: The index where scanning starts.
 ### :returns: The parsed value and the index just after the last byte read.
-@ra("Int.from_digit_bytes_at")
+@rv("Int.from_digit_bytes_at")
 common routine Int.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[Int, U64]
 
 ### Formats `me` as decimal ASCII digits.
 ### :returns: The digits as bytes, with a leading `-` for a negative value.
-@ra("Int.to_digit_bytes")
+@rv("Int.to_digit_bytes")
 routine Int.to_digit_bytes() -> Bytes

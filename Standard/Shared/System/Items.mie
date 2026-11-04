@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A fixed-size, inline array of `COUNT` elements with value semantics.
@@ -36,7 +36,7 @@ module System
 ### :typeparam COUNT: The buildtime element count, supplied as a `U64` literal.
 ### :see: {List[T]} for a heap-backed growable sequence.
 ### :see: {Bits[COUNT]} for a compact fixed-size bit sequence.
-@ra("Items")
+@rv("Items")
 record Items[T, COUNT]
 relates ItemsEmitter[T, COUNT] as Emitter
 obeys Comparable, Emittable[T], ModifyingIndexable[T], Sized, Container
@@ -47,7 +47,7 @@ needs U64 COUNT
 ### Because `Items` is a record type, the emitter holds its own copy of the array data.
 ### :typeparam T: The element type yielded by the emitter.
 ### :typeparam COUNT: The buildtime element count.
-@ra("ItemsEmitter")
+@rv("ItemsEmitter")
 entity ItemsEmitter[T, COUNT]
 obeys Emitter[T]
 needs U64 COUNT
@@ -57,67 +57,67 @@ needs U64 COUNT
 ### its own. Only call this when the index is already proven to be in range.
 ### :param index: The position to read. It must be in range.
 ### :returns: The element at `index`.
-@ra("Items.get_raw")
+@rv("Items.get_raw")
 infallible routine Items[T, COUNT].get_raw(index: U64) -> T
 
 ### Writes `value` at `index` without tearing down what is there: for a place that holds nothing yet.
 ### :param index: The zero-based position, already known to be in range.
 ### :param value: The value that goes in.
-@ra("Items.put_raw")
+@rv("Items.put_raw")
 secret routine Items[T, COUNT].put_raw(index: U64, value: T)
 
 ### Returns true when the buildtime size is zero.
 ### :returns: `true` if `COUNT == 0`.
-@ra("Items.is_empty")
+@rv("Items.is_empty")
 routine Items[T, COUNT].is_empty() -> Bool
 
 ### Returns the first element of the array.
 ### :returns: The element at index `0`.
 ### :throws: {AbsentValueError} The array has zero elements (`COUNT == 0`).
-@ra("Items.first")
+@rv("Items.first")
 routine Items[T, COUNT].first() -> T
 
 ### Returns the last element of the array.
 ### :returns: The element at index `COUNT - 1`.
 ### :throws: {AbsentValueError} The array has zero elements (`COUNT == 0`).
-@ra("Items.last")
+@rv("Items.last")
 routine Items[T, COUNT].last() -> T
 
 ### Returns true if any element equals `value`.
 ### Scans from index 0 to N - 1 using the element type's equality operator.
 ### :param value: The value to search for.
 ### :returns: `true` if `value` is found; `false` otherwise.
-@ra("Items.has")
+@rv("Items.has")
 routine Items[T, COUNT].has(value: T) -> Bool
 needs T obeys Equatable
 
 ### Returns whether `value` is not in this value: the opposite of `has`.
 ### :param value: The value to look for.
 ### :returns: `true` when `value` is absent.
-@ra("Items.has")
+@rv("Items.has")
 routine Items[T, COUNT].lacks(value: T) -> Bool
 needs T obeys Equatable
 
 ### Returns an emitter over the elements in ascending index order. It reads each element where the array holds it,
 ### so the array must stay where it is while the loop runs (the builder keeps it from being reshaped, MI-S625).
-@ra("Items.emitter")
+@rv("Items.emitter")
 routine Items[T, COUNT].emitter() -> ItemsEmitter[T, COUNT]
 
 ### Returns the next element from the emitter in ascending index order, read in place: for an entity element it is
 ### the array's own element, which the loop only reads (as `List`'s emitter does).
 ### :returns: The element at the current index.
 ### :throws: {AbsentValueError} All `COUNT` elements have been yielded.
-@ra("ItemsEmitter.emit")
+@rv("ItemsEmitter.emit")
 routine ItemsEmitter[T, COUNT].emit() -> T
 
 ### Returns the text form of `me`: the elements of the array in brackets, separated by commas.
 ### :returns: The text form of `me`.
-@ra("Items.represent")
+@rv("Items.represent")
 routine Items[T, COUNT].represent() -> Text
 
 ### Returns the diagnostic text of `me`: its type and elements.
 ### :returns: The diagnostic text of `me`.
-@ra("Items.diagnose")
+@rv("Items.diagnose")
 routine Items[T, COUNT].diagnose() -> Text
 
 ### Returns true when both arrays contain equal elements in the same order.
@@ -126,7 +126,7 @@ routine Items[T, COUNT].diagnose() -> Text
 ### :note: Requires `T` to obey `Equatable`. Arrays of non-equatable element types
 ###        (e.g. a `U` that is not equatable) do not get an `eq`
 ###        operator — `==` on such arrays is a build error.
-@ra("Items.eq")
+@rv("Items.eq")
 routine Items[T, COUNT].eq(you: Items[T, COUNT]) -> Bool
 needs T obeys Equatable
 
@@ -136,6 +136,6 @@ needs T obeys Equatable
 ### :param you: The other array to compare against.
 ### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
 ### :note: Requires `T` to obey `Comparable`.
-@ra("Items.compare")
+@rv("Items.compare")
 routine Items[T, COUNT].compare(you: Items[T, COUNT]) -> ComparisonSign
 needs T obeys Comparable

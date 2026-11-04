@@ -1,11 +1,11 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the crashable raised when indexed access uses a position outside
 ### the valid range of a collection or view.
-@ra("IndexOutOfBoundsError")
+@rv("IndexOutOfBoundsError")
 crashable IndexOutOfBoundsError
     ### Stores the index that was requested.
     index: U64
@@ -14,27 +14,27 @@ crashable IndexOutOfBoundsError
 
 ### Represents the crashable raised when an operation requires at least one
 ### element but the collection is empty.
-@ra("EmptyCollectionError")
+@rv("EmptyCollectionError")
 crashable EmptyCollectionError
     ### Stores the operation name or summary that could not be completed.
     operation: Text
 
 ### Represents the crashable raised when a value is added to a collection whose fixed capacity is all in use (a
 ### `PartialItems` holding `capacity` elements).
-@ra("FullCollectionError")
+@rv("FullCollectionError")
 crashable FullCollectionError
     ### Stores how many elements the collection holds at most.
     capacity: U64
 
 ### Represents the crashable raised when a search operation cannot find any
 ### matching element.
-@ra("ElementNotFoundError")
+@rv("ElementNotFoundError")
 crashable ElementNotFoundError
     nothing
 
 ### Represents the crashable raised when values are collected into a collection of a fixed size (an `Items[T, N]`)
 ### and there are fewer or more of them than it holds.
-@ra("ElementCountMismatchError")
+@rv("ElementCountMismatchError")
 crashable ElementCountMismatchError
     ### Stores how many elements the collection holds.
     expected: U64
@@ -43,25 +43,25 @@ crashable ElementCountMismatchError
 
 ### Returns the default message for a fixed-size collection filled with the wrong number of values.
 ### :returns: The resulting `Text` value.
-@ra("ElementCountMismatchError.crash_message")
+@rv("ElementCountMismatchError.crash_message")
 routine ElementCountMismatchError.crash_message() -> Text
 
 ### Returns the default message for failed indexed access.
 ### :returns: The resulting `Text` value.
-@ra("IndexOutOfBoundsError.crash_message")
+@rv("IndexOutOfBoundsError.crash_message")
 routine IndexOutOfBoundsError.crash_message() -> Text
 
 ### Returns the default message for invalid empty-collection operations.
 ### :returns: The resulting `Text` value.
-@ra("EmptyCollectionError.crash_message")
+@rv("EmptyCollectionError.crash_message")
 routine EmptyCollectionError.crash_message() -> Text
 
 ### Returns the default message for failed element search.
 ### :returns: The resulting `Text` value.
-@ra("ElementNotFoundError.crash_message")
+@rv("ElementNotFoundError.crash_message")
 routine ElementNotFoundError.crash_message() -> Text
 
 ### Returns the default message for adding to a collection that has no room left.
 ### :returns: The resulting `Text` value.
-@ra("FullCollectionError.crash_message")
+@rv("FullCollectionError.crash_message")
 routine FullCollectionError.crash_message() -> Text

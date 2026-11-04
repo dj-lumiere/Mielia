@@ -1,9 +1,9 @@
 import Tally
 
-# A Counter from the `.rr` module is shared like a Mielia entity: a second name reaches the same Counter.
+# A Counter from the `.rvr` module is shared like a Mielia entity: a second name reaches the same Counter.
 routine start()
     var xs = List[Text]()
-    var c = Counter(n: 0, names: xs.to[RA::List]())
+    var c = Counter(n: 0, names: xs.to[RV::List]())
     var d = c
     d.bump(name: "x")
     c.bump(name: "y")

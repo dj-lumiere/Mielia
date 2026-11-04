@@ -254,7 +254,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
 @override
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
-    var result = RA::System.Dict[Text, SerialValue]()
+    var result = RV::System.Dict[Text, SerialValue]()
     for entry in me
         result[entry.item0.represent()] = entry.item1.serialize()
     return SerialValue(result.duplicate())
@@ -267,7 +267,7 @@ routine SortedDict[TKey, TValue].serialize() -> SerialValue
 common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
     var result = SortedDict[TKey, TValue]()
     when value
-        is RA::System.Dict[Text, SerialValue] as entries =>
+        is RV::System.Dict[Text, SerialValue] as entries =>
             for entry in entries
                 result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
         else =>

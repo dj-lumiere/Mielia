@@ -1,13 +1,13 @@
 module System/Temporal
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents an absolute point in time with nanosecond precision.
 ### `Moment` is stored as Unix-epoch seconds plus a normalized nanosecond component and uses the proleptic Gregorian calendar.
 ### It is the canonical UTC time-point type for timestamps, deadlines, and duration arithmetic.
 ### :see: {Duration}, {LocalMoment}
-@ra("Moment")
+@rv("Moment")
 record Moment
 obeys Comparable, DurationAddable, DurationSubtractable
     nothing
@@ -17,7 +17,7 @@ obeys Comparable, DurationAddable, DurationSubtractable
 ### :param seconds: The whole-second component.
 ### :param nanoseconds: The nanosecond component within the current second.
 ### :returns: The resulting `Moment` value.
-@ra("normalize_moment")
+@rv("normalize_moment")
 routine normalize_moment(seconds: S64, nanoseconds: S64) -> Moment
 
 ### Converts a civil year-month-day triple to days since the Unix epoch.
@@ -25,25 +25,25 @@ routine normalize_moment(seconds: S64, nanoseconds: S64) -> Moment
 ### :param month: The `month` value.
 ### :param day: The `day` value.
 ### :returns: The resulting `S64` value.
-@ra("ymd_to_days")
+@rv("ymd_to_days")
 routine ymd_to_days(year: S64, month: S64, day: S64) -> S64
 
 ### Converts an epoch-day count to its calendar year component.
 ### :param days_since_epoch: The day count relative to the Unix epoch.
 ### :returns: The resulting `S64` value.
-@ra("days_to_year")
+@rv("days_to_year")
 routine days_to_year(days_since_epoch: S64) -> S64
 
 ### Converts an epoch-day count to its calendar month component.
 ### :param days_since_epoch: The day count relative to the Unix epoch.
 ### :returns: The resulting `S64` value.
-@ra("days_to_month")
+@rv("days_to_month")
 routine days_to_month(days_since_epoch: S64) -> S64
 
 ### Converts an epoch-day count to its day-of-month component.
 ### :param days_since_epoch: The day count relative to the Unix epoch.
 ### :returns: The resulting `S64` value.
-@ra("days_to_day")
+@rv("days_to_day")
 routine days_to_day(days_since_epoch: S64) -> S64
 
 ### Creates a UTC moment from civil date-time components.
@@ -57,145 +57,145 @@ routine days_to_day(days_since_epoch: S64) -> S64
 ### :returns: The resulting `Moment` value.
 ### :throws: {InvalidMomentError} when a part is out of its range: a month outside `1..12`, a day the month doesn't
 ### have, an hour outside `0..23`, or a minute or second outside `0..59`.
-@ra("Moment")
+@rv("Moment")
 routine Moment(year: S64, month: S64, day: S64, hour: S64, minute: S64, second: S64) -> Moment
 
 ### Returns the Unix epoch.
 ### This is `1970-01-01 00:00:00 UTC`.
 ### :returns: The resulting `Moment` value.
-@ra("Moment.epoch")
+@rv("Moment.epoch")
 common routine Moment.epoch() -> Moment
 
 ### Creates a value from timestamp.
 ### :param seconds: The whole-second component.
 ### :returns: The resulting `Moment` value.
-@ra("Moment.from_timestamp")
+@rv("Moment.from_timestamp")
 common routine Moment.from_timestamp(seconds: S64) -> Moment
 
 ### Returns the UTC calendar year of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.year")
+@rv("Moment.year")
 routine Moment.year() -> S64
 
 ### Returns the UTC calendar month of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.month")
+@rv("Moment.month")
 routine Moment.month() -> S64
 
 ### Returns the UTC day of month of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.day")
+@rv("Moment.day")
 routine Moment.day() -> S64
 
 ### Returns the UTC day of week for this moment.
 ### The result uses `0 = Monday` through `6 = Sunday`.
 ### :returns: The resulting `S64` value.
-@ra("Moment.day_of_week")
+@rv("Moment.day_of_week")
 routine Moment.day_of_week() -> S64
 
 ### Returns the UTC hour component of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.hour")
+@rv("Moment.hour")
 routine Moment.hour() -> S64
 
 ### Returns the UTC minute component of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.minute")
+@rv("Moment.minute")
 routine Moment.minute() -> S64
 
 ### Returns the UTC second component of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.second")
+@rv("Moment.second")
 routine Moment.second() -> S64
 
 ### Returns the millisecond component within the current second.
 ### :returns: The resulting `S64` value.
-@ra("Moment.millisecond")
+@rv("Moment.millisecond")
 routine Moment.millisecond() -> S64
 
 ### Returns the microsecond component within the current millisecond.
 ### :returns: The resulting `S64` value.
-@ra("Moment.microsecond")
+@rv("Moment.microsecond")
 routine Moment.microsecond() -> S64
 
 ### Returns the nanosecond component within the current microsecond.
 ### :returns: The resulting `S64` value.
-@ra("Moment.nanosecond")
+@rv("Moment.nanosecond")
 routine Moment.nanosecond() -> S64
 
 ### Returns the whole-second Unix timestamp of this moment.
 ### :returns: The resulting `S64` value.
-@ra("Moment.timestamp")
+@rv("Moment.timestamp")
 routine Moment.timestamp() -> S64
 
 ### Returns the Unix timestamp of this moment in milliseconds.
 ### :returns: The resulting `S64` value.
-@ra("Moment.timestamp_ms")
+@rv("Moment.timestamp_ms")
 routine Moment.timestamp_ms() -> S64
 
 ### Adds a value using `add_duration`.
 ### :param duration: The `duration` value.
 ### :returns: The resulting `Moment` value.
-@ra("Moment.add_duration")
+@rv("Moment.add_duration")
 routine Moment.add_duration(duration: Duration) -> Moment
 
 ### Returns this moment shifted backward by `duration`.
 ### :param duration: The time span to subtract.
 ### :returns: The resulting `Moment` value.
-@ra("Moment.subtract_duration")
+@rv("Moment.subtract_duration")
 routine Moment.subtract_duration(duration: Duration) -> Moment
 
 ### Returns the elapsed duration from `earlier` to this moment.
 ### Positive results mean this moment occurs after `earlier`.
 ### :param earlier: The earlier comparison instant.
 ### :returns: The resulting `Duration` value.
-@ra("Moment.elapsed_since")
+@rv("Moment.elapsed_since")
 routine Moment.elapsed_since(earlier: Moment) -> Duration
 
 ### Returns the moment reached by advancing this one by `you`.
 ### :param you: The duration to advance by.
 ### :returns: The resulting `Moment`.
-@ra("Moment.add")
+@rv("Moment.add")
 routine Moment.add(you: Duration) -> Moment
 
 ### Returns the moment reached by retreating this one by `you`.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `Moment`.
-@ra("Moment.sub")
+@rv("Moment.sub")
 routine Moment.sub(you: Duration) -> Moment
 
 ### Returns the elapsed time from `you` to this moment.
 ### :param you: The earlier moment to measure from.
 ### :returns: The `Duration` between the two moments.
-@ra("Moment.sub")
+@rv("Moment.sub")
 routine Moment.sub(you: Moment) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `Bool` value.
-@ra("Moment.eq")
+@rv("Moment.eq")
 routine Moment.eq(you: Moment) -> Bool
 
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@ra("Moment.compare")
+@rv("Moment.compare")
 routine Moment.compare(you: Moment) -> ComparisonSign
 
 ### Returns the display form of this moment in a compact UTC civil-time style.
 ### :returns: The resulting `Text` value.
-@ra("Moment.represent")
+@rv("Moment.represent")
 routine Moment.represent() -> Text
 
 ### Returns the diagnostic form of this moment using its normalized internal
 ### representation.
 ### :returns: The resulting `Text` value.
-@ra("Moment.diagnose")
+@rv("Moment.diagnose")
 routine Moment.diagnose() -> Text
 
 ### Returns a SipHash-2-4 keyed hash of this moment.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("Moment.hash")
+@rv("Moment.hash")
 routine Moment.hash(k0: U64, k1: U64) -> U64

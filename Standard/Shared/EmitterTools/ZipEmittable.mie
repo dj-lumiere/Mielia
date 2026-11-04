@@ -1,6 +1,6 @@
 module EmitterTools
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents a lazy adapter that pairs elements from two sources into tuples.
@@ -9,7 +9,7 @@ module EmitterTools
 ### :typeparam TSecond: The element type of the second source sequence.
 ### :typeparam TFirstSource: The concrete first source emittable type (referenced, not owned).
 ### :typeparam TSecondSource: The concrete second source emittable type (referenced, not owned).
-@ra("ZipEmittable")
+@rv("ZipEmittable")
 entity ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource]
 relates ZipEmitter[TFirst, TSecond, TFirstSource/Emitter, TSecondSource/Emitter] as Emitter
 obeys Emittable[Tuple[TFirst, TSecond]]
@@ -23,7 +23,7 @@ needs TSecondSource obeys Emittable[TSecond]
 ### :typeparam TSecond: The element type of the second source.
 ### :typeparam TFirstEmitter: The concrete first source emitter type (referenced, not owned).
 ### :typeparam TSecondEmitter: The concrete second source emitter type (referenced, not owned).
-@ra("ZipEmitter")
+@rv("ZipEmitter")
 entity ZipEmitter[TFirst, TSecond, TFirstEmitter, TSecondEmitter]
 obeys Emitter[Tuple[TFirst, TSecond]]
 needs TFirstEmitter obeys Emitter[TFirst]
@@ -38,7 +38,7 @@ needs TSecondEmitter obeys Emitter[TSecond]
 ### :typeparam TFirstSource: The concrete first source emittable type (referenced, not owned).
 ### :typeparam TSecondSource: The concrete second source emittable type (referenced, not owned).
 ### :typeparam TThirdSource: The concrete third source emittable type (referenced, not owned).
-@ra("Zip3Emittable")
+@rv("Zip3Emittable")
 entity Zip3Emittable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource]
 relates Zip3Emitter[TFirst, TSecond, TThird, TFirstSource/Emitter, TSecondSource/Emitter, TThirdSource/Emitter] as Emitter
 obeys Emittable[Tuple[TFirst, TSecond, TThird]]
@@ -55,7 +55,7 @@ needs TThirdSource obeys Emittable[TThird]
 ### :typeparam TFirstEmitter: The concrete first source emitter type (referenced, not owned).
 ### :typeparam TSecondEmitter: The concrete second source emitter type (referenced, not owned).
 ### :typeparam TThirdEmitter: The concrete third source emitter type (referenced, not owned).
-@ra("Zip3Emitter")
+@rv("Zip3Emitter")
 entity Zip3Emitter[TFirst, TSecond, TThird, TFirstEmitter, TSecondEmitter, TThirdEmitter]
 obeys Emitter[Tuple[TFirst, TSecond, TThird]]
 needs TFirstEmitter obeys Emitter[TFirst]
@@ -73,7 +73,7 @@ needs TThirdEmitter obeys Emitter[TThird]
 ### :typeparam TSecondSource: The concrete second source emittable type (referenced, not owned).
 ### :typeparam TThirdSource: The concrete third source emittable type (referenced, not owned).
 ### :typeparam TFourthSource: The concrete fourth source emittable type (referenced, not owned).
-@ra("Zip4Emittable")
+@rv("Zip4Emittable")
 entity Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource]
 relates Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstSource/Emitter, TSecondSource/Emitter, TThirdSource/Emitter, TFourthSource/Emitter] as Emitter
 obeys Emittable[Tuple[TFirst, TSecond, TThird, TFourth]]
@@ -93,7 +93,7 @@ needs TFourthSource obeys Emittable[TFourth]
 ### :typeparam TSecondEmitter: The concrete second source emitter type (referenced, not owned).
 ### :typeparam TThirdEmitter: The concrete third source emitter type (referenced, not owned).
 ### :typeparam TFourthEmitter: The concrete fourth source emitter type (referenced, not owned).
-@ra("Zip4Emitter")
+@rv("Zip4Emitter")
 entity Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstEmitter, TSecondEmitter, TThirdEmitter, TFourthEmitter]
 obeys Emitter[Tuple[TFirst, TSecond, TThird, TFourth]]
 needs TFirstEmitter obeys Emitter[TFirst]
@@ -104,35 +104,35 @@ needs TFourthEmitter obeys Emitter[TFourth]
 
 ### Returns the stateful emitter that produces paired tuples lazily.
 ### :returns: The resulting `ZipEmitter[TFirst, TSecond, TFirstSource/Emitter, TSecondSource/Emitter]` value.
-@ra("ZipEmittable.emitter")
+@rv("ZipEmittable.emitter")
 routine ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource].emitter() -> ZipEmitter[TFirst, TSecond, TFirstSource/Emitter, TSecondSource/Emitter]
 
 ### Returns the next paired tuple from both source emitters.
 ### Propagates absence as soon as either source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond]` value.
-@ra("ZipEmitter.emit")
+@rv("ZipEmitter.emit")
 routine ZipEmitter[TFirst, TSecond, TFirstEmitter, TSecondEmitter].emit() -> Tuple[TFirst, TSecond]
 
 ### Returns the stateful emitter that produces paired triples lazily.
 ### :returns: The resulting `Zip3Emitter[TFirst, TSecond, TThird, TFirstSource/Emitter, TSecondSource/Emitter, TThirdSource/Emitter]` value.
-@ra("Zip3Emittable.emitter")
+@rv("Zip3Emittable.emitter")
 routine Zip3Emittable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource].emitter() -> Zip3Emitter[TFirst, TSecond, TThird, TFirstSource/Emitter, TSecondSource/Emitter, TThirdSource/Emitter]
 
 ### Returns the next paired triple from all three source emitters.
 ### Propagates absence as soon as any source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond, TThird]` value.
-@ra("Zip3Emitter.emit")
+@rv("Zip3Emitter.emit")
 routine Zip3Emitter[TFirst, TSecond, TThird, TFirstEmitter, TSecondEmitter, TThirdEmitter].emit() -> Tuple[TFirst, TSecond, TThird]
 
 ### Returns the stateful emitter that produces paired quadruples lazily.
 ### :returns: The resulting `Zip4Emitter[...]` value.
-@ra("Zip4Emittable.emitter")
+@rv("Zip4Emittable.emitter")
 routine Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource].emitter() -> Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstSource/Emitter, TSecondSource/Emitter, TThirdSource/Emitter, TFourthSource/Emitter]
 
 ### Returns the next paired quadruple from all four source emitters.
 ### Propagates absence as soon as any source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond, TThird, TFourth]` value.
-@ra("Zip4Emitter.emit")
+@rv("Zip4Emitter.emit")
 routine Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstEmitter, TSecondEmitter, TThirdEmitter, TFourthEmitter].emit() -> Tuple[TFirst, TSecond, TThird, TFourth]
 
 ### Returns a lazy adapter that pairs each value of `a` with a value of `b`: `for (name, age) in zip(a: names, b: ages)`.
@@ -140,7 +140,7 @@ routine Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstEmitter, TSecondEmit
 ### :param a: The first source.
 ### :param b: The second source.
 ### :returns: The pairs, as a `ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource]`.
-@ra("zip")
+@rv("zip")
 routine zip[TFirst, TSecond, TFirstSource, TSecondSource](a: TFirstSource, b: TSecondSource) -> ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource]
 needs TFirstSource obeys Emittable[TFirst]
 needs TSecondSource obeys Emittable[TSecond]
@@ -151,7 +151,7 @@ needs TSecondSource obeys Emittable[TSecond]
 ### :param b: The second source.
 ### :param c: The third source.
 ### :returns: The triples, as a `Zip3Emittable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource]`.
-@ra("zip")
+@rv("zip")
 routine zip[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource](
     a: TFirstSource,
     b: TSecondSource,
@@ -168,7 +168,7 @@ needs TThirdSource obeys Emittable[TThird]
 ### :param c: The third source.
 ### :param d: The fourth source.
 ### :returns: The quadruples, as a `Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource]`.
-@ra("zip")
+@rv("zip")
 routine zip[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource](
     a: TFirstSource,
     b: TSecondSource,

@@ -1,7 +1,7 @@
 module System
 
 # The crossing from Revare's list to Mielia's, written in Revare because its receiver is Revare's list.
-# The other direction, `xs.to[RA::List]()`, is in List.mie.
+# The other direction, `xs.to[RV::List]()`, is in List.mie.
 
 ### Makes a Mielia list of the elements of a list from Revare code (a Revare library routine's result):
 ### `rf_list.to[List]()`.

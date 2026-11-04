@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Opt-in for types constructible from a **dict literal** `{k: v, …}` (brace literal WITH `:`). A
@@ -9,7 +9,7 @@ module System
 ### `{a, b}` is a set literal (see `SetLiteral`). Analogous to Swift's `ExpressibleByDictionaryLiteral`.
 ### :typeparam TKey: The key type.
 ### :typeparam TValue: The value type.
-@ra("DictLiteral")
+@rv("DictLiteral")
 protocol DictLiteral[TKey, TValue]
     ### Builds an instance holding the given key-value `pairs`.
     ### :param pairs: The literal key-value pairs as `(TKey, TValue)` values.

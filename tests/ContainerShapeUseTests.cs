@@ -66,11 +66,11 @@ public sealed class ContainerShapeUseTests
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
     {
-        string raPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ShapeUse", fixture]);
+        string rvPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ShapeUse", fixture]);
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: raPath), "buildandrun", raPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "buildandrun", rvPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,

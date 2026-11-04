@@ -1,12 +1,12 @@
 module System/Numerics
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A complex number with double-precision real and imaginary components.
 ### `C128` stores two `B64` values and is the standard complex type for general
 ### scientific and numeric code. Use `C256` when quadruple precision is needed.
-@ra("C128")
+@rv("C128")
 record C128
 obeys Numeric, Equatable, Hashable
     ### The real part.
@@ -15,398 +15,398 @@ obeys Numeric, Equatable, Hashable
     imag: B64
 
 ### The complex zero value (0 + 0i). :returns: The resulting `C128` value.
-@ra("C128.zero")
+@rv("C128.zero")
 common routine C128.zero() -> C128
 
 ### The complex unit value (1 + 0i). :returns: The resulting `C128` value.
-@ra("C128.one")
+@rv("C128.one")
 common routine C128.one() -> C128
 
 ### The imaginary unit (0 + 1i). :returns: The resulting `C128` value.
-@ra("C128.i")
+@rv("C128.i")
 common routine C128.i() -> C128
 
 ### Constructs a `C128` from polar coordinates: `r·cos(θ) + r·sin(θ)·i`.
 ### :param r: The modulus (distance from origin).
 ### :param theta: The argument (angle in radians).
 ### :returns: The complex value at that polar position.
-@ra("C128.from_polar")
+@rv("C128.from_polar")
 routine C128.from_polar(r: B64, theta: B64) -> C128
 
 ### Returns the complex sum `me + you` (component-wise addition).
 ### :param you: The addend.
 ### :returns: A `C128` whose components are the sums of the corresponding components.
-@ra("C128.add")
+@rv("C128.add")
 routine C128.add(you: C128) -> C128
 
 ### Returns the complex difference `me - you` (component-wise subtraction).
 ### :param you: The value to subtract.
 ### :returns: A `C128` whose components are the differences of the corresponding components.
-@ra("C128.sub")
+@rv("C128.sub")
 routine C128.sub(you: C128) -> C128
 
 ### Returns `me + you`, promoting the real `you` to complex (imaginary part 0). `+`/`-`/`*`/`/` accept
 ### a real operand; the component width must match (B64 pairs with C128).
 ### :param you: The real addend.
 ### :returns: The complex sum.
-@ra("C128.add")
+@rv("C128.add")
 routine C128.add(you: B64) -> C128
 
 ### Returns `me - you`, promoting the real `you` to complex (imaginary part 0).
 ### :param you: The real value to subtract.
 ### :returns: The complex difference.
-@ra("C128.sub")
+@rv("C128.sub")
 routine C128.sub(you: B64) -> C128
 
 ### Returns `me * you` for a real `you` (both components scaled).
 ### :param you: The real factor.
 ### :returns: The scaled complex value.
-@ra("C128.mul")
+@rv("C128.mul")
 routine C128.mul(you: B64) -> C128
 
 ### Returns `me / you` for a real `you` (both components divided).
 ### :param you: The real divisor.
 ### :returns: The divided complex value.
-@ra("C128.truediv")
+@rv("C128.truediv")
 routine C128.truediv(you: B64) -> C128
 
 ### Returns the complex product `me * you` using the formula `(ac−bd) + (ad+bc)i`.
 ### :param you: The right operand.
 ### :returns: The Gaussian product.
-@ra("C128.mul")
+@rv("C128.mul")
 routine C128.mul(you: C128) -> C128
 
 ### Returns the complex quotient `me / you`.
 ### Divides by the squared modulus of `you`.
 ### :param you: The divisor.
 ### :returns: The complex quotient.
-@ra("C128.truediv")
+@rv("C128.truediv")
 routine C128.truediv(you: C128) -> C128
 
 ### Returns the arithmetic negation of this value.
 ### :returns: A `C128` with both components negated.
-@ra("C128.neg")
+@rv("C128.neg")
 routine C128.neg() -> C128
 
 ### Returns `true` if both components compare equal.
 ### :param you: The value to compare against.
 ### :returns: `true` if `me.real == you.real` and `me.imag == you.imag`.
-@ra("C128.eq")
+@rv("C128.eq")
 routine C128.eq(you: C128) -> Bool
 
 ### Returns the modulus (absolute value) of this complex number.
 ### :returns: `√(real² + imag²)`.
-@ra("C128.abs")
+@rv("C128.abs")
 routine C128.abs() -> B64
 
 ### Returns the phase angle of this complex value in radians.
 ### :returns: `atan2(imag, real)`, in the range (−π, π].
-@ra("C128.arg")
+@rv("C128.arg")
 routine C128.arg() -> B64
 
 ### Returns the complex conjugate (negates the imaginary part).
 ### :returns: `real - imag·i`.
-@ra("C128.conjugate")
+@rv("C128.conjugate")
 routine C128.conjugate() -> C128
 
 ### Returns the squared modulus (avoids the square root of `abs`).
 ### :returns: `real² + imag²`.
-@ra("C128.norm")
+@rv("C128.norm")
 routine C128.norm() -> B64
 
 ### Returns the complex sine using the identity `sin(a+bi) = sin(a)cosh(b) + i·cos(a)sinh(b)`.
 ### :returns: The complex sine of this value.
-@ra("C128.sin")
+@rv("C128.sin")
 routine C128.sin() -> C128
 
 ### Returns the complex cosine using the identity `cos(a+bi) = cos(a)cosh(b) − i·sin(a)sinh(b)`.
 ### :returns: The complex cosine of this value.
-@ra("C128.cos")
+@rv("C128.cos")
 routine C128.cos() -> C128
 
 ### Returns the complex tangent of this value.
 ### :returns: The complex tangent.
-@ra("C128.tan")
+@rv("C128.tan")
 routine C128.tan() -> C128
 
 ### Returns the complex arcsine of this value.
 ### :returns: The principal value of `arcsin(me)`.
-@ra("C128.asin")
+@rv("C128.asin")
 routine C128.asin() -> C128
 
 ### Returns the complex arccosine of this value.
 ### :returns: The principal value of `arccos(me)`.
-@ra("C128.acos")
+@rv("C128.acos")
 routine C128.acos() -> C128
 
 ### Returns the complex arctangent of this value.
 ### :returns: The principal value of `arctan(me)`.
-@ra("C128.atan")
+@rv("C128.atan")
 routine C128.atan() -> C128
 
 ### Returns the complex hyperbolic sine of this value.
 ### :returns: The complex hyperbolic sine.
-@ra("C128.sinh_unchecked")
+@rv("C128.sinh_unchecked")
 routine C128.sinh_unchecked() -> C128
 
 ### Returns the complex hyperbolic cosine of this value.
 ### :returns: The complex hyperbolic cosine.
-@ra("C128.cosh_unchecked")
+@rv("C128.cosh_unchecked")
 routine C128.cosh_unchecked() -> C128
 
 ### Returns the complex hyperbolic tangent of this value.
 ### :returns: The complex hyperbolic tangent.
-@ra("C128.tanh")
+@rv("C128.tanh")
 routine C128.tanh() -> C128
 
 ### Returns the complex inverse hyperbolic sine of this value.
 ### :returns: The principal value of `arcsinh(me)`.
-@ra("C128.asinh")
+@rv("C128.asinh")
 routine C128.asinh() -> C128
 
 ### Returns the complex inverse hyperbolic cosine of this value.
 ### :returns: The principal value of `arccosh(me)`.
-@ra("C128.acosh")
+@rv("C128.acosh")
 routine C128.acosh() -> C128
 
 ### Returns the complex inverse hyperbolic tangent of this value.
 ### :returns: The principal value of `arctanh(me)`.
-@ra("C128.atanh")
+@rv("C128.atanh")
 routine C128.atanh() -> C128
 
 ### Returns `e` raised to this complex value using `exp(a+bi) = eᵃ(cos(b) + i·sin(b))`.
 ### :returns: The complex exponential.
-@ra("C128.exp_unchecked")
+@rv("C128.exp_unchecked")
 routine C128.exp_unchecked() -> C128
 
 ### Returns the principal natural logarithm of this complex value.
 ### :returns: `ln(|me|) + i·arg(me)`.
-@ra("C128.ln_unchecked")
+@rv("C128.ln_unchecked")
 routine C128.ln_unchecked() -> C128
 
 ### Returns the base-10 logarithm of this complex value.
 ### :returns: `ln(me) / ln(10)`.
-@ra("C128.log10")
+@rv("C128.log10")
 routine C128.log10() -> C128
 
 ### Returns the base-2 logarithm of this complex value.
 ### :returns: `ln(me) / ln(2)`.
-@ra("C128.log2")
+@rv("C128.log2")
 routine C128.log2() -> C128
 
 ### Returns the multiplicative inverse `1/me` (conjugate over the squared modulus).
 ### :returns: `conj(me) / |me|²`.
-@ra("C128.reciprocal")
+@rv("C128.reciprocal")
 routine C128.reciprocal() -> C128
 
 ### Returns the polar form `(magnitude, angle-in-radians)` — the inverse of `from_polar`.
 ### :returns: A tuple `(abs, arg)`.
-@ra("C128.to_polar")
+@rv("C128.to_polar")
 routine C128.to_polar() -> (B64, B64)
 
 ### Returns the complex square root, choosing the root with non-negative real part.
 ### :returns: The principal square root of this value.
-@ra("C128.sqrt_unchecked")
+@rv("C128.sqrt_unchecked")
 routine C128.sqrt_unchecked() -> C128
 
 ### Returns this complex value raised to the complex power `you`.
 ### :param you: The complex exponent.
 ### :returns: `me ** you`, computed as `exp(you · log(me))`.
-@ra("C128.pow")
+@rv("C128.pow")
 routine C128.pow(you: C128) -> C128
 
 ### Crashes unless both parts of `r` are finite: a NaN part is a domain error, an infinite part an
 ### overflow. The check behind the `!` forms of `exp`/`ln`/`sqrt`/`sinh`/`cosh`.
 ### :param r: The result to check.
 ### :returns: `r`, known to be finite.
-@ra("c128_checked")
+@rv("c128_checked")
 routine c128_checked(r: C128) -> C128
 
 ### Returns `e` raised to this value. Checked: crashes if a part of the result is not finite.
 ### Use `exp_unchecked` for raw IEEE 754 propagation.
 ### :returns: The complex exponential.
-@ra("C128.exp")
+@rv("C128.exp")
 routine C128.exp() -> C128
 
 ### Returns the principal natural logarithm. Checked: crashes on `ln(0)` (an infinite real part).
 ### Use `ln_unchecked` for raw IEEE 754 propagation.
 ### :returns: `ln(|me|) + i·arg(me)`.
-@ra("C128.ln")
+@rv("C128.ln")
 routine C128.ln() -> C128
 
 ### Returns the principal square root. Checked: crashes if a part of the result is not finite.
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
 ### :returns: The square root with non-negative real part.
-@ra("C128.sqrt")
+@rv("C128.sqrt")
 routine C128.sqrt() -> C128
 
 ### Returns the hyperbolic sine. Checked: crashes if a part of the result is not finite.
 ### :returns: The complex hyperbolic sine.
-@ra("C128.sinh")
+@rv("C128.sinh")
 routine C128.sinh() -> C128
 
 ### Returns the hyperbolic cosine. Checked: crashes if a part of the result is not finite.
 ### :returns: The complex hyperbolic cosine.
-@ra("C128.cosh")
+@rv("C128.cosh")
 routine C128.cosh() -> C128
 
 ### Returns this value raised to the integer power `exp` by repeated squaring (exact up to rounding of
 ### each product, no `ln`/`exp` round trip). A negative `exp` inverts first; `exp` 0 gives `1`.
 ### :param exp: The integer exponent.
 ### :returns: `me ** exp`.
-@ra("C128.pow")
+@rv("C128.pow")
 routine C128.pow(exp: S64) -> C128
 
 ### Returns `true` if both the real and imaginary parts are exactly zero.
 ### :returns: `true` if `me == C128.zero()`.
-@ra("C128.is_zero")
+@rv("C128.is_zero")
 routine C128.is_zero() -> Bool
 
 ### Returns `true` if the imaginary part is exactly zero (the value lies on the real axis).
 ### :returns: `true` if `me.imag == 0.0`.
-@ra("C128.is_real")
+@rv("C128.is_real")
 routine C128.is_real() -> Bool
 
 ### Returns `true` if the real part is exactly zero (the value lies on the imaginary axis).
 ### :returns: `true` if `me.real == 0.0`.
-@ra("C128.is_imaginary")
+@rv("C128.is_imaginary")
 routine C128.is_imaginary() -> Bool
 
 ### Returns `true` if either part is NaN.
-@ra("C128.is_nan")
+@rv("C128.is_nan")
 routine C128.is_nan() -> Bool
 
 ### Returns `true` if either part is infinite.
-@ra("C128.is_infinite")
+@rv("C128.is_infinite")
 routine C128.is_infinite() -> Bool
 
 ### Returns `true` if both parts are finite.
-@ra("C128.is_finite")
+@rv("C128.is_finite")
 routine C128.is_finite() -> Bool
 
 ### Formats this value compactly as `a+bi` / `a-bi` (e.g. `1.5+2i`). The `i`
 ### spelling matches the imaginary literal suffixes, so output is valid
 ### literal syntax. Standard `represent` shape (no args) for f-string dispatch.
 ### :returns: The resulting `Text` value.
-@ra("C128.represent")
+@rv("C128.represent")
 routine C128.represent() -> Text
 
 ### Returns the real component (the `real` field is also public).
 ### :returns: The real part as `B64`.
-@ra("C128.real_part")
+@rv("C128.real_part")
 routine C128.real_part() -> B64
 
 ### Returns the imaginary component (the `imag` field is also public).
 ### :returns: The imaginary part as `B64`.
-@ra("C128.imag_part")
+@rv("C128.imag_part")
 routine C128.imag_part() -> B64
 
 ### Returns a diagnostic string wrapping the value with its type name (e.g. `C128(1.5+2i)`).
 ### Standard `diagnose` shape (no args) for f-string dispatch.
 ### :returns: The resulting `Text` value.
-@ra("C128.diagnose")
+@rv("C128.diagnose")
 routine C128.diagnose() -> Text
 
 ### Returns a SipHash-2-4 keyed hash of this complex value.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("C128.hash")
+@rv("C128.hash")
 routine C128.hash(k0: U64, k1: U64) -> U64
 
 ### Constructs a `C128` with the given real component and zero imaginary part.
 ### :returns: The corresponding `C128` value.
-@ra("B64.to")
+@rv("B64.to")
 routine B64.to[C128]() -> C128
 
 ### Widens a `C64` to `C128` by extending each component to `B64`.
 ### :returns: A `C128` carrying the same numeric value.
-@ra("C64.to")
+@rv("C64.to")
 routine C64.to[C128]() -> C128
 
 ### Narrows a `C256` to `C128` by truncating each component to `B64`.
 ### :returns: The nearest representable `C128`.
-@ra("C256.to")
+@rv("C256.to")
 routine C256.to[C128]() -> C128
 
 ### Real scalar -> `C128` (imaginary part 0), routing the value through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S8.to")
+@rv("S8.to")
 routine S8.to[C128]() -> C128
 
 ### Real `S16` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S16.to")
+@rv("S16.to")
 routine S16.to[C128]() -> C128
 
 ### Real `S32` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S32.to")
+@rv("S32.to")
 routine S32.to[C128]() -> C128
 
 ### Real `S64` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S64.to")
+@rv("S64.to")
 routine S64.to[C128]() -> C128
 
 ### Real `S128` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S128.to")
+@rv("S128.to")
 routine S128.to[C128]() -> C128
 
 ### Real `S256` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("S256.to")
+@rv("S256.to")
 routine S256.to[C128]() -> C128
 
 ### Real `U8` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U8.to")
+@rv("U8.to")
 routine U8.to[C128]() -> C128
 
 ### Real `U16` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U16.to")
+@rv("U16.to")
 routine U16.to[C128]() -> C128
 
 ### Real `U32` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U32.to")
+@rv("U32.to")
 routine U32.to[C128]() -> C128
 
 ### Real `U64` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U64.to")
+@rv("U64.to")
 routine U64.to[C128]() -> C128
 
 ### Real `U128` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U128.to")
+@rv("U128.to")
 routine U128.to[C128]() -> C128
 
 ### Real `U256` scalar -> `C128` (imaginary part 0), value routed through `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("U256.to")
+@rv("U256.to")
 routine U256.to[C128]() -> C128
 
 ### Real `B16` scalar -> `C128` (imaginary part 0), value widened to `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("B16.to")
+@rv("B16.to")
 routine B16.to[C128]() -> C128
 
 ### Real `B32` scalar -> `C128` (imaginary part 0), value widened to `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("B32.to")
+@rv("B32.to")
 routine B32.to[C128]() -> C128
 
 ### Real `B128` scalar -> `C128` (imaginary part 0), value narrowed to `B64`.
 ### :returns: `me + 0i` in double precision.
-@ra("B128.to")
+@rv("B128.to")
 routine B128.to[C128]() -> C128
 
 ### Parses `a`, `bi`, `a+bi` or `a-bi` (a bare `i` / `-i` is a unit imaginary part), the form
 ### `represent` writes. Each part uses `B64`'s own number syntax.
 ### :returns: The parsed value.
 ### :throws: {InvalidValueError} if the text is not a complex number.
-@ra("Text.to")
+@rv("Text.to")
 routine Text.to[C128]() -> C128

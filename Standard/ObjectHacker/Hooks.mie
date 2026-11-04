@@ -1,12 +1,12 @@
 module ObjectHacker
 
-# The change hooks and implants of objects: `when_changed` and `remove_hook` (Hooks.rr) add and remove hooks, and the
+# The change hooks and implants of objects: `when_changed` and `remove_hook` (Hooks.rvr) add and remove hooks, and the
 # routines the builder writes around every change of a member variable run them. `implant` and `remove_implant`
 # (written by the builder from `implant(target: hero, replacing: Hero.attack, with: f)`) replace a member routine for one
 # object, and the builder writes a test for a replacement at the top of every member routine of an entity.
 #
 # Every thread reaches the registry, so each routine here looks at it or changes it between `hooks_enter()` and
-# `hooks_leave()` (Hooks.rr), one thread at a time, and the registry and its tables are reached only there: the
+# `hooks_leave()` (Hooks.rvr), one thread at a time, and the registry and its tables are reached only there: the
 # `_held` routines do the work, and what they keep is let go before the lock is. A value that leaves the lock
 # (an implant's replacement) is shared across threads when it is stored. The hooks themselves run after the lock is
 # left, so a hook may wait for another thread that changes a hooked object.

@@ -1,114 +1,114 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the crashable raised when code tries to consume an absent optional
 ### result as though a value were present.
-@ra("AbsentValueError")
+@rv("AbsentValueError")
 crashable AbsentValueError
     nothing
 
 ### Represents the crashable used when program execution is terminated by the
 ### user or hosting environment.
-@ra("UserTerminationError")
+@rv("UserTerminationError")
 crashable UserTerminationError
     nothing
 
 ### Represents the crashable raised when a runtime verification check fails.
 ### This is used by generic verification surfaces that enforce invariants and
 ### preconditions explicitly.
-@ra("VerificationFailedError")
+@rv("VerificationFailedError")
 crashable VerificationFailedError
     nothing
 
 ### Represents the crashable raised when code reaches a state that should be
 ### impossible if surrounding logic is correct.
-@ra("LogicBreachedError")
+@rv("LogicBreachedError")
 crashable LogicBreachedError
     nothing
 
 ### Represents the crashable raised when a lookup cannot find a requested key.
-@ra("KeyNotFoundError")
+@rv("KeyNotFoundError")
 crashable KeyNotFoundError
     ### Stores the key that could not be resolved.
     key: Text
 
 ### Raised when a Work could not be started (thread or allocation failure).
-@ra("TaskSpawnError")
+@rv("TaskSpawnError")
 crashable TaskSpawnError
     nothing
 
 ### Raised when a Work is started a second time.
-@ra("WorkStartError")
+@rv("WorkStartError")
 crashable WorkStartError
     ### What went wrong.
     reason: Text
 
 ### Raised when a Work that was cancelled is retrieved: its work stopped, or never ran, so it has no value.
-@ra("CancelRequested")
+@rv("CancelRequested")
 crashable CancelRequested
     nothing
 
 ### Raised when a Work did not finish before its `waitfor` deadline.
-@ra("TaskTimeoutError")
+@rv("TaskTimeoutError")
 crashable TaskTimeoutError
     nothing
 
 ### Raised when transmitting to a channel that has been closed, or whose every consumer has gone — the item
 ### can never be delivered. Closing itself is not an error (it is the normal end-of-stream signal);
 ### only a `transmit` after close is.
-@ra("ChannelClosedError")
+@rv("ChannelClosedError")
 crashable ChannelClosedError
     nothing
 
 ### Returns the default message for absent-value failures.
 ### :returns: The resulting `Text` value.
-@ra("AbsentValueError.crash_message")
+@rv("AbsentValueError.crash_message")
 routine AbsentValueError.crash_message() -> Text
 
 ### Returns the default message for user-requested termination.
 ### :returns: The resulting `Text` value.
-@ra("UserTerminationError.crash_message")
+@rv("UserTerminationError.crash_message")
 routine UserTerminationError.crash_message() -> Text
 
 ### Returns the default message for verification failures.
 ### :returns: The resulting `Text` value.
-@ra("VerificationFailedError.crash_message")
+@rv("VerificationFailedError.crash_message")
 routine VerificationFailedError.crash_message() -> Text
 
 ### Returns the default message for breached logic invariants.
 ### :returns: The resulting `Text` value.
-@ra("LogicBreachedError.crash_message")
+@rv("LogicBreachedError.crash_message")
 routine LogicBreachedError.crash_message() -> Text
 
 ### Returns the default message for failed keyed lookup.
 ### :returns: The resulting `Text` value.
-@ra("KeyNotFoundError.crash_message")
+@rv("KeyNotFoundError.crash_message")
 routine KeyNotFoundError.crash_message() -> Text
 
 ### Returns the default message for task-spawn failures.
 ### :returns: The resulting `Text` value.
-@ra("TaskSpawnError.crash_message")
+@rv("TaskSpawnError.crash_message")
 routine TaskSpawnError.crash_message() -> Text
 
 ### Returns the default message for a cancelled Work.
 ### :returns: The resulting `Text` value.
-@ra("CancelRequested.crash_message")
+@rv("CancelRequested.crash_message")
 routine CancelRequested.crash_message() -> Text
 
 ### Returns the reason the Work could not start.
 ### :returns: The resulting `Text` value.
-@ra("WorkStartError.crash_message")
+@rv("WorkStartError.crash_message")
 routine WorkStartError.crash_message() -> Text
 
 ### Returns the default message for task-timeout failures.
 ### :returns: The resulting `Text` value.
-@ra("TaskTimeoutError.crash_message")
+@rv("TaskTimeoutError.crash_message")
 routine TaskTimeoutError.crash_message() -> Text
 
 ### Returns the default message for transmitting to a closed channel.
 ### :returns: The resulting `Text` value.
-@ra("ChannelClosedError.crash_message")
+@rv("ChannelClosedError.crash_message")
 routine ChannelClosedError.crash_message() -> Text
 

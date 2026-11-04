@@ -1,12 +1,12 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for Euclidean quotient and remainder.
 ### `FloorDivisible` is for integer-like types whose division surface produces a
 ### quotient and remainder pair rather than a true fractional quotient.
-@ra("FloorDivisible")
+@rv("FloorDivisible")
 protocol FloorDivisible
     ### Returns the quotient of this value and the other value.
     ### Implementations should keep the result consistent with the associated

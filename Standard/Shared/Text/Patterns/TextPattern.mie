@@ -1,6 +1,6 @@
 module Text/Patterns
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A pattern over text, made once from pieces and then looked for in texts:
@@ -21,7 +21,7 @@ module Text/Patterns
 ### length times the pattern's size, never by trying the text again and again: no pattern and no text make it blow
 ### up. A match is the leftmost one, and from there every repetition takes as many rounds as it can and each either
 ### chooses by its rule (`either_longer`, `either_shorter`).
-@ra("TextPattern")
+@rv("TextPattern")
 record TextPattern
     ### The compiled program, as the engine reads it. Written by `of` and `from_regex`.
     program: Text
@@ -33,24 +33,24 @@ record TextPattern
 ### :returns: The pattern.
 ### :throws: {PatternSyntaxError} The expression can't be read, or asks for what the patterns don't do: a
 ###   backreference, lookahead or lookbehind, a shortest repetition (`*?`).
-@ra("TextPattern.from_regex")
+@rv("TextPattern.from_regex")
 common routine TextPattern.from_regex(regex: Text) -> TextPattern
 
 ### Whether all of `text` matches the pattern.
 ### :param text: The text.
 ### :returns: `true` when the whole text matches.
-@ra("TextPattern.matches")
+@rv("TextPattern.matches")
 routine TextPattern.matches(text: Text) -> Bool
 
 ### The leftmost place the pattern matches in `text`.
 ### :param text: The text.
 ### :returns: The match, or `none` when the pattern matches nowhere in the text.
-@ra("TextPattern.find")
+@rv("TextPattern.find")
 routine TextPattern.find(text: Text) -> TextMatch?
 
 ### `text` with every match (as `find_all` finds them) replaced by `with`.
 ### :param text: The text.
 ### :param with: What each match becomes.
 ### :returns: The new text.
-@ra("TextPattern.replace")
+@rv("TextPattern.replace")
 routine TextPattern.replace(text: Text, `with`: Text) -> Text

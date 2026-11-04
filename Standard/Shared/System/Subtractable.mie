@@ -1,12 +1,12 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for non-mutating subtraction.
 ### Types that obey `Subtractable` define a difference operation that returns a
 ### new value while preserving both inputs.
-@ra("Subtractable")
+@rv("Subtractable")
 protocol Subtractable
     ### Returns the difference between this value and the other value.
     ### The exact interpretation of subtraction depends on the conforming type's

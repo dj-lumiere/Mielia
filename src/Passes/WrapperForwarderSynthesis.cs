@@ -6,7 +6,7 @@ namespace Mielia.Passes;
 /// <summary>
 /// Auto-forwarding synthesis for the Mielia wrapper standard library.
 ///
-/// A Mielia-realm <c>entity X { secret inner: RA::System.Y[..] }</c> re-surfaces the Revare-realm type
+/// A Mielia-realm <c>entity X { secret inner: RV::System.Y[..] }</c> re-surfaces the Revare-realm type
 /// <c>Y</c>: for every PUBLIC member routine <c>Y</c> declares that <c>X</c> does not hand-define, this
 /// synthesizes a transparent forwarder
 /// <code>routine X[..].m(args) -> ret
@@ -17,7 +17,7 @@ namespace Mielia.Passes;
 /// partial-wrapper trap that sank the old overlay.
 ///
 /// v1 scope (deferred bits noted): forwards public, non-lifecycle member routines whose return type is NOT
-/// the inner container type itself (a <c>RA::Y -&gt; MI Y</c> return re-wrap is not built yet, so
+/// the inner container type itself (a <c>RV::Y -&gt; MI Y</c> return re-wrap is not built yet, so
 /// container-returning methods like <c>copy</c>/<c>sorted</c> are skipped for now). Constructors and
 /// <c>destruct</c> are excluded — the wrapper hand-writes its constructor and gets a synthesized field-walk
 /// <c>destruct</c> (called by RoamManager).
@@ -113,16 +113,16 @@ internal static class WrapperForwarderSynthesis
 
         // Index Revare-realm member-routine declarations by MODULE-QUALIFIED owner (e.g. "System.List" →
         // List's own methods).
-        Dictionary<string, List<RoutineDeclaration>> raMembersByOwner =
-            IndexRaMembersByOwner(allProgs: allProgs);
-        if (raMembersByOwner.Count == 0)
+        Dictionary<string, List<RoutineDeclaration>> rvMembersByOwner =
+            IndexRvMembersByOwner(allProgs: allProgs);
+        if (rvMembersByOwner.Count == 0)
         {
             return;
         }
 
-        // The set of MI wrapper entity names (every MI-realm `entity X { secret inner: RA::… }`). A forwarded
+        // The set of MI wrapper entity names (every MI-realm `entity X { secret inner: RV::… }`). A forwarded
         // method whose return type names one of these (whether X itself — `copy` — or a SIBLING wrapper —
-        // `Dict.keys() -> List[K]`) returns a bare RA value that must be re-wrapped into the MI wrapper.
+        // `Dict.keys() -> List[K]`) returns a bare RV value that must be re-wrapped into the MI wrapper.
         HashSet<string> miWrapperNames = CollectMiWrapperNames(allProgs: allProgs);
 
         foreach ((Program prog, string filePath, string _) in allProgs)
@@ -138,7 +138,7 @@ internal static class WrapperForwarderSynthesis
                 GenerateForwardersForEntity(prog: prog,
                     entity: entity,
                     filePath: filePath,
-                    raMembersByOwner: raMembersByOwner,
+                    rvMembersByOwner: rvMembersByOwner,
                     miWrapperNames: miWrapperNames,
                     generated: generated);
             }
@@ -150,16 +150,16 @@ internal static class WrapperForwarderSynthesis
     /// <summary>
     /// Indexes Revare-realm member-routine declarations by MODULE-QUALIFIED owner (e.g.
     /// "System.List" → List's own methods). Keying by module (not bare owner) is load-bearing: an
-    /// EXTENSION method in another module — `Random.rr`'s `List[T].shuffle()` — has bare owner "List"
+    /// EXTENSION method in another module — `Random.rvr`'s `List[T].shuffle()` — has bare owner "List"
     /// too, but forwarding it onto the MI List produced a `me.inner.shuffle()` body that fails to
-    /// resolve (shuffle is not a System.List member) → RA-S458 in the MI stdlib validation. The wrapper's
-    /// `inner: RA::System.List` names module System, so only System-module List members are forwarded;
+    /// resolve (shuffle is not a System.List member) → RV-S458 in the MI stdlib validation. The wrapper's
+    /// `inner: RV::System.List` names module System, so only System-module List members are forwarded;
     /// `Random.List` is excluded.
     /// </summary>
-    private static Dictionary<string, List<RoutineDeclaration>> IndexRaMembersByOwner(
+    private static Dictionary<string, List<RoutineDeclaration>> IndexRvMembersByOwner(
         List<(Program Program, string FilePath, string Module)> allProgs)
     {
-        var raMembersByOwner =
+        var rvMembersByOwner =
             new Dictionary<string, List<RoutineDeclaration>>(comparer: StringComparer.Ordinal);
         foreach ((Program prog, string filePath, string module) in allProgs)
         {
@@ -176,10 +176,10 @@ internal static class WrapperForwarderSynthesis
                     } r)
                 {
                     string key = $"{module}.{owner}";
-                    if (!raMembersByOwner.TryGetValue(key: key,
+                    if (!rvMembersByOwner.TryGetValue(key: key,
                             value: out List<RoutineDeclaration>? list))
                     {
-                        raMembersByOwner[key: key] = list = [];
+                        rvMembersByOwner[key: key] = list = [];
                     }
 
                     list.Add(item: r);
@@ -187,13 +187,13 @@ internal static class WrapperForwarderSynthesis
             }
         }
 
-        return raMembersByOwner;
+        return rvMembersByOwner;
     }
 
     /// <summary>
     /// Collects the bare names of every MI wrapper entity (an MI-realm
-    /// <c>entity X { secret inner: RA::… }</c>). A forwarded method returning one of these yields a bare
-    /// RA value that must be re-wrapped into the MI wrapper.
+    /// <c>entity X { secret inner: RV::… }</c>). A forwarded method returning one of these yields a bare
+    /// RV value that must be re-wrapped into the MI wrapper.
     /// </summary>
     private static HashSet<string> CollectMiWrapperNames(
         List<(Program Program, string FilePath, string Module)> allProgs)
@@ -219,14 +219,14 @@ internal static class WrapperForwarderSynthesis
 
     /// <summary>
     /// Generates the inner-forwarders for one MI wrapper entity, appending them to
-    /// <paramref name="generated"/>. No-op for an entity that is not a `secret inner: RA::…` wrapper or
-    /// whose inner owner has no indexed RA members.
+    /// <paramref name="generated"/>. No-op for an entity that is not a `secret inner: RV::…` wrapper or
+    /// whose inner owner has no indexed RV members.
     /// </summary>
     private static void GenerateForwardersForEntity(Program prog, EntityDeclaration entity,
-        string filePath, Dictionary<string, List<RoutineDeclaration>> raMembersByOwner,
+        string filePath, Dictionary<string, List<RoutineDeclaration>> rvMembersByOwner,
         HashSet<string> miWrapperNames, List<RoutineDeclaration> generated)
     {
-        // The wrapper's backing field: `secret inner: RA::System.Y[..]`.
+        // The wrapper's backing field: `secret inner: RV::System.Y[..]`.
         VariableDeclaration? innerField = entity.Members
                                                 .OfType<VariableDeclaration>()
                                                 .FirstOrDefault(predicate: v =>
@@ -241,7 +241,7 @@ internal static class WrapperForwarderSynthesis
         // TypeExpression keeps its args in GenericArguments, so Name has no `[..]` to strip. This is
         // the exact key of the member index, so only that module's own members are forwarded.
         string innerModuleOwner = innerType.Name;
-        if (!raMembersByOwner.TryGetValue(key: innerModuleOwner,
+        if (!rvMembersByOwner.TryGetValue(key: innerModuleOwner,
                 value: out List<RoutineDeclaration>? innerMembers))
         {
             return;
@@ -265,9 +265,9 @@ internal static class WrapperForwarderSynthesis
             }
 
             // A method whose return type IS the inner container type (`copy`/`sorted` → the same
-            // container; a value type's `trim`/`add` → itself) returns a bare `RA::System.Y` that must
+            // container; a value type's `trim`/`add` → itself) returns a bare `RV::System.Y` that must
             // be RE-WRAPPED into the MI `X` before it re-surfaces — else the MI caller would receive
-            // a raw RA value. `reWrap` drives the forwarder to build `return X[..](inner: <call>)`.
+            // a raw RV value. `reWrap` drives the forwarder to build `return X[..](inner: <call>)`.
             bool reWrap = inner.ReturnType is { } rt &&
                           miWrapperNames.Contains(item: BareTypeName(name: rt.Name));
             if (!defined.Add(item: ForwarderSignatureKey(r: inner)))
@@ -284,7 +284,7 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>
-    /// Whether an inner RA member routine should be forwarded onto the MI wrapper: excludes lifecycle
+    /// Whether an inner RV member routine should be forwarded onto the MI wrapper: excludes lifecycle
     /// (destroy), @dangerous and secret surface, builder-internal borrow-token helpers, and
     /// specialized-receiver methods (only the PLAIN generic form <c>X[T,..].m</c> forwards cleanly).
     /// </summary>
@@ -300,7 +300,7 @@ internal static class WrapperForwarderSynthesis
         }
 
         // A forwarder is a plain routine, so it cannot carry a @dangerous member: unsafe code reaches the
-        // inner value through RA surface (`danger` + Hijacked), not the wrapper. (`iter`/`access`/`control` are
+        // inner value through RV surface (`danger` + Hijacked), not the wrapper. (`iter`/`access`/`control` are
         // builder-internal — direct calls are banned so an iterator/borrow can't outlive its
         // source — but STDLIB bodies may chain them, and a forwarder carrying its wrapper file's
         // path IS stdlib, so `iter` forwards fine and the MI list stays `for`-iterable.)
@@ -331,7 +331,7 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
-        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RA::System.Y[T,..]`).
+        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RV::System.Y[T,..]`).
         // A SPECIALIZED-receiver method (`List[Work[V]].gather`, `List[U16]…`) targets a different
         // instantiation than the wrapper's inner field — skip (its `me.inner` would mistype).
         if (!IsPlainGenericReceiver(receiver: inner.ReceiverType, ownerParams: ownerParams))
@@ -362,11 +362,11 @@ internal static class WrapperForwarderSynthesis
     /// location so builder-internal chains (e.g. <c>me.inner.iter()</c>) pass the stdlib exemption.</summary>
     /// <param name="entity">The MI wrapper entity that will own the synthesized forwarder routine.</param>
     /// <param name="ownerParams">The generic parameter names of the wrapper entity (e.g. <c>["T"]</c> for <c>List[T]</c>).</param>
-    /// <param name="inner">The RA inner-type member routine being forwarded.</param>
+    /// <param name="inner">The RV inner-type member routine being forwarded.</param>
     /// <param name="filePath">The stdlib source file path, used as the forwarder's source location.</param>
-    /// <param name="reWrap">When true the inner call returns a bare <c>RA::System.Y</c> that must be
+    /// <param name="reWrap">When true the inner call returns a bare <c>RV::System.Y</c> that must be
     /// re-surfaced as the MI wrapper — the body becomes <c>return X[..](inner: me.inner.m(args))</c>
-    /// instead of returning the raw RA value.</param>
+    /// instead of returning the raw RV value.</param>
     private static RoutineDeclaration BuildForwarder(EntityDeclaration entity,
         List<string> ownerParams, RoutineDeclaration inner, string filePath,
         bool reWrap)
@@ -411,7 +411,7 @@ internal static class WrapperForwarderSynthesis
         Expression call =
             new CallExpression(Callee: callee, Arguments: forwardedArgs, Location: loc);
 
-        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RA::System.Y`; surface it as
+        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RV::System.Y`; surface it as
         // the MI wrapper via the memberwise `X[..](inner: <call>)` constructor (mirrors the hand-written
         // ctor), at the return type's own generic arguments. The wrapper's name resolves to the Mielia type
         // because the forwarder carries the wrapper file's location.

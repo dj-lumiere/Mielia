@@ -1,8 +1,8 @@
 module Tests/StdlibMi/EntityReprApi
 
 import IO/Console
-# MI twin of Stdlib/entity_repr_api.rr. The `Point` local lowers to `Roamed[Point]`, but `f"{p}"`
-# must ALWAYS read the inner entity — the shared snapshot locks MI-Roamed render == RA-bare render.
+# MI twin of Stdlib/entity_repr_api.rvr. The `Point` local lowers to `Roamed[Point]`, but `f"{p}"`
+# must ALWAYS read the inner entity — the shared snapshot locks MI-Roamed render == RV-bare render.
 entity Point
     x: S64
     y: S64

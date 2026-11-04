@@ -1,6 +1,6 @@
 module System/Numerics
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A 128-bit signed integer in the range −170,141,183,460,469,231,731,687,303,715,884,105,728
@@ -8,7 +8,7 @@ module System/Numerics
 ###
 ### `S128` holds values that can't fit in `S64`: wide intermediate results, cryptographic computations,
 ### and large counters. `S256` goes wider still.
-@ra("S128")
+@rv("S128")
 record S128
 obeys SignedIntegral, Comparable, Copyable
     nothing
@@ -16,40 +16,40 @@ obeys SignedIntegral, Comparable, Copyable
 ### Returns the sum and a flag indicating whether the result overflowed.
 ### :param you: The right operand.
 ### :returns: A tuple of `(wrapped_sum, overflowed)`.
-@ra("S128.add_with_overflow")
+@rv("S128.add_with_overflow")
 routine S128.add_with_overflow(you: S128) -> (S128, Bool)
 
 ### Returns the difference and a flag indicating whether the result overflowed.
 ### :param you: The value to subtract.
 ### :returns: A tuple of `(wrapped_difference, overflowed)`.
-@ra("S128.sub_with_overflow")
+@rv("S128.sub_with_overflow")
 routine S128.sub_with_overflow(you: S128) -> (S128, Bool)
 
 ### Returns the product and a flag indicating whether the result overflowed.
 ### :param you: The right operand.
 ### :returns: A tuple of `(wrapped_product, overflowed)`.
-@ra("S128.mul_with_overflow")
+@rv("S128.mul_with_overflow")
 routine S128.mul_with_overflow(you: S128) -> (S128, Bool)
 
 ### Returns `me + you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
-@ra("S128.add")
+@rv("S128.add")
 routine S128.add(you: S128) -> S128
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
-@ra("S128.sub")
+@rv("S128.sub")
 routine S128.sub(you: S128) -> S128
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
-@ra("S128.mul")
+@rv("S128.mul")
 routine S128.mul(you: S128) -> S128
 
 ### Returns `me // you` (euclidean division), throwing on errors.
@@ -61,21 +61,21 @@ routine S128.mul(you: S128) -> S128
 ### :throws: {IntegerOverflowError} if `me == S128_MIN` and `you == -1`.
 ### `|x|` as a U128 magnitude. `S128_MIN` maps to exactly 2¹²⁷ (the wrapping
 ### negate reinterpreted as unsigned), so there is no overflow.
-@ra("s128_abs_u128")
+@rv("s128_abs_u128")
 routine s128_abs_u128(x: S128) -> U128
 
 ### Euclidean floor division of `me` by `you`.
 ### :param you: The divisor.
 ### :returns: The euclidean quotient (rounds toward negative infinity).
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.floordiv")
+@rv("S128.floordiv")
 routine S128.floordiv(you: S128) -> S128
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.mod")
+@rv("S128.mod")
 routine S128.mod(you: S128) -> S128
 
 ### (quotient, remainder) of euclidean `me // you` and `me % you` from ONE Knuth-D pass. `floordiv!`
@@ -84,105 +84,105 @@ routine S128.mod(you: S128) -> S128
 ### :param you: The divisor.
 ### :returns: The euclidean tuple `(me // you, me % you)`.
 ### :throws: {DivisionByZeroError} if `you == 0`; {IntegerOverflowError} if `me == S128_MIN` and `you == -1`.
-@ra("S128.divmod")
+@rv("S128.divmod")
 routine S128.divmod(you: S128) -> (S128, S128)
 
 ### Returns `-me` (arithmetic negation), with wrapping behavior on `S128_MIN`.
 ### :returns: The negated value. `-S128_MIN` wraps to `S128_MIN`.
-@ra("S128.neg")
+@rv("S128.neg")
 routine S128.neg() -> S128
 
 ### Returns `-me` in two's complement, wrapping `S128_MIN` to itself.
 ### :returns: The wrapped negation.
-@ra("S128.neg_wrap")
+@rv("S128.neg_wrap")
 routine S128.neg_wrap() -> S128
 
 ### Returns `(-me, overflowed)`. Overflow occurs only for `S128_MIN`.
 ### :returns: A tuple of `(wrapped negation, overflow flag)`.
-@ra("S128.neg_with_overflow")
+@rv("S128.neg_with_overflow")
 routine S128.neg_with_overflow() -> (S128, Bool)
 
 ### Returns `-me`, clamped to `S128_MAX` when `me == S128_MIN`.
 ### :returns: The saturating negation.
-@ra("S128.neg_clamp")
+@rv("S128.neg_clamp")
 routine S128.neg_clamp() -> S128
 
 ### Returns |me| in two's complement, wrapping `|S128_MIN|` back to `S128_MIN`.
 ### :returns: The wrapped absolute value.
-@ra("S128.abs_wrap")
+@rv("S128.abs_wrap")
 routine S128.abs_wrap() -> S128
 
 ### Returns `(|me|, overflowed)`. Overflow occurs only for `S128_MIN`.
 ### :returns: A tuple of `(wrapped absolute value, overflow flag)`.
-@ra("S128.abs_with_overflow")
+@rv("S128.abs_with_overflow")
 routine S128.abs_with_overflow() -> (S128, Bool)
 
 ### Returns |me|, clamped to `S128_MAX` when `me == S128_MIN`.
 ### :returns: The saturating absolute value.
-@ra("S128.abs_clamp")
+@rv("S128.abs_clamp")
 routine S128.abs_clamp() -> S128
 
 ### Returns |me| as an unsigned value; `|S128_MIN|` is represented exactly.
 ### :returns: The absolute value as `U128`.
-@ra("S128.unsigned_abs")
+@rv("S128.unsigned_abs")
 routine S128.unsigned_abs() -> U128
 
 ### Returns euclidean `me // you`, wrapping the `S128_MIN // -1` overflow to `S128_MIN`.
 ### :param you: The divisor.
 ### :returns: The wrapped euclidean quotient.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.floordiv_wrap")
+@rv("S128.floordiv_wrap")
 routine S128.floordiv_wrap(you: S128) -> S128
 
 ### Returns `(euclidean quotient, overflowed)`; overflow only for `S128_MIN // -1`.
 ### :param you: The divisor.
 ### :returns: A tuple of `(quotient, overflow flag)`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.floordiv_with_overflow")
+@rv("S128.floordiv_with_overflow")
 routine S128.floordiv_with_overflow(you: S128) -> (S128, Bool)
 
 ### Returns euclidean `me % you`, wrapping the `S128_MIN % -1` overflow to `0`.
 ### :param you: The divisor.
 ### :returns: The wrapped euclidean remainder.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.mod_wrap")
+@rv("S128.mod_wrap")
 routine S128.mod_wrap(you: S128) -> S128
 
 ### Returns `(euclidean remainder, overflowed)`; overflow only for `S128_MIN % -1`.
 ### :param you: The divisor.
 ### :returns: A tuple of `(remainder, overflow flag)`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("S128.mod_with_overflow")
+@rv("S128.mod_with_overflow")
 routine S128.mod_with_overflow(you: S128) -> (S128, Bool)
 
 ### Returns `(me + you)` with wrapping arithmetic (mod 2¹²⁸, signed).
 ### :param you: The right operand.
 ### :returns: The sum, wrapping on overflow.
-@ra("S128.add_wrap")
+@rv("S128.add_wrap")
 routine S128.add_wrap(you: S128) -> S128
 
 ### Returns `(me - you)` with wrapping arithmetic (mod 2¹²⁸, signed).
 ### :param you: The value to subtract.
 ### :returns: The difference, wrapping on underflow.
-@ra("S128.sub_wrap")
+@rv("S128.sub_wrap")
 routine S128.sub_wrap(you: S128) -> S128
 
 ### Returns `(me * you)` with wrapping arithmetic (mod 2¹²⁸, signed).
 ### :param you: The right operand.
 ### :returns: The product, wrapping on overflow.
-@ra("S128.mul_wrap")
+@rv("S128.mul_wrap")
 routine S128.mul_wrap(you: S128) -> S128
 
 ### Returns `me + you`, clamped to `S128_MAX` or `S128_MIN` on overflow.
 ### :param you: The right operand.
 ### :returns: The sum, or `S128_MAX` / `S128_MIN` if it would overflow.
-@ra("S128.add_clamp")
+@rv("S128.add_clamp")
 routine S128.add_clamp(you: S128) -> S128
 
 ### Returns `me - you`, clamped to `S128_MAX` or `S128_MIN` on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference, or `S128_MAX` / `S128_MIN` if it would overflow.
-@ra("S128.sub_clamp")
+@rv("S128.sub_clamp")
 routine S128.sub_clamp(you: S128) -> S128
 
 ### Returns `me * you`, clamped to `S128_MAX` or `S128_MIN` on overflow.
@@ -190,7 +190,7 @@ routine S128.sub_clamp(you: S128) -> S128
 ### The clamp direction (MAX vs MIN) is determined by whether the operands have the same sign.
 ### :param you: The right operand.
 ### :returns: The product, or `S128_MAX` / `S128_MIN` if it would overflow.
-@ra("S128.mul_clamp")
+@rv("S128.mul_clamp")
 routine S128.mul_clamp(you: S128) -> S128
 
 ### Returns `me + you + carry` as `(wrapped_sum, overflowed)`.
@@ -201,7 +201,7 @@ routine S128.mul_clamp(you: S128) -> S128
 ### :param you: The right operand.
 ### :param carry: The incoming carry bit from the lower word.
 ### :returns: A tuple of `(wrapped sum, signed-overflow flag)`.
-@ra("S128.carrying_add")
+@rv("S128.carrying_add")
 routine S128.carrying_add(you: S128, carry: Bool) -> (S128, Bool)
 
 ### Returns `me - you - borrow` as `(wrapped_difference, overflowed)`.
@@ -210,14 +210,14 @@ routine S128.carrying_add(you: S128, carry: Bool) -> (S128, Bool)
 ### :param you: The value to subtract.
 ### :param borrow: The incoming borrow bit from the lower word.
 ### :returns: A tuple of `(wrapped difference, signed-overflow flag)`.
-@ra("S128.borrowing_sub")
+@rv("S128.borrowing_sub")
 routine S128.borrowing_sub(you: S128, borrow: Bool) -> (S128, Bool)
 
 ### Returns `me ** exp` and a flag indicating whether the result overflowed.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
-@ra("S128.pow_with_overflow")
+@rv("S128.pow_with_overflow")
 routine S128.pow_with_overflow(exp: S128) -> (S128, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
@@ -225,288 +225,288 @@ routine S128.pow_with_overflow(exp: S128) -> (S128, Bool)
 ### :returns: The result of raising `me` to the power `exp`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
 ### :throws: {NumericDomainError} if `exp < 0`.
-@ra("S128.pow")
+@rv("S128.pow")
 routine S128.pow(exp: S128) -> S128
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 2¹²⁸ (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
-@ra("S128.pow_wrap")
+@rv("S128.pow_wrap")
 routine S128.pow_wrap(exp: S128) -> S128
 
 ### Returns `me ** exp`, clamped to `S128_MAX` or `S128_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `S128_MAX` / `S128_MIN` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
-@ra("S128.pow_clamp")
+@rv("S128.pow_clamp")
 routine S128.pow_clamp(exp: S128) -> S128
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me & you`.
-@ra("S128.bitand")
+@rv("S128.bitand")
 routine S128.bitand(you: S128) -> S128
 
 ### Returns the bitwise OR of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me | you`.
-@ra("S128.bitor")
+@rv("S128.bitor")
 routine S128.bitor(you: S128) -> S128
 
 ### Returns the bitwise XOR of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me ^ you`.
-@ra("S128.bitxor")
+@rv("S128.bitxor")
 routine S128.bitxor(you: S128) -> S128
 
 ### Returns the bitwise complement of this value.
 ### :returns: `~me` — each bit flipped.
-@ra("S128.bitnot")
+@rv("S128.bitnot")
 routine S128.bitnot() -> S128
 
 ### Returns `true` when both values are equal.
 ### :param you: The value to compare against.
 ### :returns: `true` if `me == you`; `false` otherwise.
-@ra("S128.eq")
+@rv("S128.eq")
 routine S128.eq(you: S128) -> Bool
 
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@ra("S128.compare")
+@rv("S128.compare")
 routine S128.compare(you: S128) -> ComparisonSign
 
 ### Returns the absolute value of this integer.
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S128_MIN` (its magnitude is not representable in S128).
-@ra("S128.abs")
+@rv("S128.abs")
 routine S128.abs() -> S128
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `me` if `me <= you`; otherwise `you`.
-@ra("S128.min")
+@rv("S128.min")
 routine S128.min(you: S128) -> S128
 
 ### Returns the larger of this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `me` if `me >= you`; otherwise `you`.
-@ra("S128.max")
+@rv("S128.max")
 routine S128.max(you: S128) -> S128
 
 ### Returns this value clamped to the range `min_val..=max_val`.
 ### :param min_val: The lower bound (inclusive).
 ### :param max_val: The upper bound (inclusive).
 ### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
-@ra("S128.clamp")
+@rv("S128.clamp")
 routine S128.clamp(min_val: S128, max_val: S128) -> S128
 
 ### Returns the integer square root ⌊√me⌋. Throws for a negative `me`.
 ### :returns: The floor of the square root of `me`.
 ### :throws: {NumericDomainError} if `me < 0`.
-@ra("S128.isqrt")
+@rv("S128.isqrt")
 routine S128.isqrt() -> S128
 
 ### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
 ### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
-@ra("S128.sqrtrem")
+@rv("S128.sqrtrem")
 routine S128.sqrtrem() -> (S128, S128)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
-@ra("S128.ilog")
+@rv("S128.ilog")
 routine S128.ilog(base: S128) -> S128
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
 ### :returns: The non-negative distance between `me` and `you`.
-@ra("S128.abs_diff")
+@rv("S128.abs_diff")
 routine S128.abs_diff(you: S128) -> U128
 
 ### Returns this value with its bits reversed (bit 127 ↔ bit 0, etc.).
 ### :returns: The bit-reversed `S128`.
-@ra("S128.reverse_bits")
+@rv("S128.reverse_bits")
 routine S128.reverse_bits() -> S128
 
 ### Returns this value with its 16 bytes swapped (for endianness conversion).
 ### :returns: An `S128` with its bytes in reverse order.
-@ra("S128.swap_bytes")
+@rv("S128.swap_bytes")
 routine S128.swap_bytes() -> S128
 
 ### Returns the raw byte representation of this value in little-endian order.
-@ra("S128.to_bytes_le")
+@rv("S128.to_bytes_le")
 routine S128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw byte representation of this value in big-endian order.
-@ra("S128.to_bytes_be")
+@rv("S128.to_bytes_be")
 routine S128.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds an `S128` from its little-endian raw byte representation.
 ### :param bytes: The raw bytes, least significant first.
 ### :returns: The S128 value stored in `bytes`.
-@ra("S128.from_bytes_le")
+@rv("S128.from_bytes_le")
 common routine S128.from_bytes_le(bytes: Items[Byte, 16]) -> S128
 
 ### Builds an `S128` from its big-endian raw byte representation.
 ### :param bytes: The raw bytes, most significant first.
 ### :returns: The S128 value stored in `bytes`.
-@ra("S128.from_bytes_be")
+@rv("S128.from_bytes_be")
 common routine S128.from_bytes_be(bytes: Items[Byte, 16]) -> S128
 
 ### Returns `true` if this value is greater than zero.
 ### :returns: `true` if `me > 0`.
-@ra("S128.is_positive")
+@rv("S128.is_positive")
 routine S128.is_positive() -> Bool
 
 ### Returns `true` if this value is less than zero.
 ### :returns: `true` if `me < 0`.
-@ra("S128.is_negative")
+@rv("S128.is_negative")
 routine S128.is_negative() -> Bool
 
 ### Returns `true` if this value is zero.
 ### :returns: `true` if `me == 0`.
-@ra("S128.is_zero")
+@rv("S128.is_zero")
 routine S128.is_zero() -> Bool
 
 ### Returns `true` if this value is divisible by 2.
 ### :returns: `true` if the least-significant bit is 0.
-@ra("S128.is_even")
+@rv("S128.is_even")
 routine S128.is_even() -> Bool
 
 ### Returns `true` if this value is not divisible by 2.
 ### :returns: `true` if the least-significant bit is 1.
-@ra("S128.is_odd")
+@rv("S128.is_odd")
 routine S128.is_odd() -> Bool
 
 ### Returns `true` if this value is an exact power of two.
 ### Negative values always return `false`.
-@ra("S128.is_power_of_two")
+@rv("S128.is_power_of_two")
 routine S128.is_power_of_two() -> Bool
 
 ### Returns the human-readable text of this value.
 ### :returns: The value rendered as `Text`.
-@ra("S128.represent")
+@rv("S128.represent")
 routine S128.represent() -> Text
 
 ### Returns a type-tagged debug rendering of this value.
 ### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
-@ra("S128.diagnose")
+@rv("S128.diagnose")
 routine S128.diagnose() -> Text
 
 ### Returns a SipHash-2-4 keyed hash of this 128-bit value.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("S128.hash")
+@rv("S128.hash")
 routine S128.hash(k0: U64, k1: U64) -> U64
 
 ### Sign-extends an `S8` to `S128` (always succeeds).
 ### :returns: An `S128` with the same signed value as this value.
-@ra("S8.to")
+@rv("S8.to")
 routine S8.to[S128]() -> S128
 
 ### Sign-extends an `S16` to `S128` (always succeeds).
 ### :returns: An `S128` with the same signed value as this value.
-@ra("S16.to")
+@rv("S16.to")
 routine S16.to[S128]() -> S128
 
 ### Sign-extends an `S32` to `S128` (always succeeds).
 ### :returns: An `S128` with the same signed value as this value.
-@ra("S32.to")
+@rv("S32.to")
 routine S32.to[S128]() -> S128
 
 ### Sign-extends an `S64` to `S128` (always succeeds).
 ### :returns: An `S128` with the same signed value as this value.
-@ra("S64.to")
+@rv("S64.to")
 routine S64.to[S128]() -> S128
 
 ### Identity conversion — returns this value unchanged.
 ### :returns: this value unchanged.
-@ra("S128.to")
+@rv("S128.to")
 routine S128.to[S128]() -> S128
 
 ### Zero-extends a `U8` to `S128` (always succeeds — positive values fit).
 ### :returns: An `S128` equal in value to this value.
-@ra("U8.to")
+@rv("U8.to")
 routine U8.to[S128]() -> S128
 
 ### Zero-extends a `U16` to `S128` (always succeeds — positive values fit).
 ### :returns: An `S128` equal in value to this value.
-@ra("U16.to")
+@rv("U16.to")
 routine U16.to[S128]() -> S128
 
 ### Zero-extends a `U32` to `S128` (always succeeds — positive values fit).
 ### :returns: An `S128` equal in value to this value.
-@ra("U32.to")
+@rv("U32.to")
 routine U32.to[S128]() -> S128
 
 ### Zero-extends a `U64` to `S128` (always succeeds — positive values fit).
 ### :returns: An `S128` equal in value to this value.
-@ra("U64.to")
+@rv("U64.to")
 routine U64.to[S128]() -> S128
 
 ### Reinterprets a `U128` as `S128` using two's complement, throwing if the value exceeds S128_MAX.
 ### :returns: The same bit pattern interpreted as `S128`.
 ### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
-@ra("U128.to")
+@rv("U128.to")
 routine U128.to[S128]() -> S128
 
 ### Converts an `S256` to `S128`, throwing if outside the S128 range.
 ### :returns: The lower 128 bits reinterpreted as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is outside the S128 range.
-@ra("S256.to")
+@rv("S256.to")
 routine S256.to[S128]() -> S128
 
 ### Converts a `U256` to `S128`, throwing if the value exceeds S128_MAX.
 ### :returns: The lower 128 bits reinterpreted as an `S128`.
 ### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
-@ra("U256.to")
+@rv("U256.to")
 routine U256.to[S128]() -> S128
 
 ### Converts an `B16` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN or infinite.
-@ra("B16.to")
+@rv("B16.to")
 routine B16.to[S128]() -> S128
 
 ### Converts an `B32` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
-@ra("B32.to")
+@rv("B32.to")
 routine B32.to[S128]() -> S128
 
 ### Converts an `B64` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
-@ra("B64.to")
+@rv("B64.to")
 routine B64.to[S128]() -> S128
 
 ### Converts an `B128` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if out of range; {NumericDomainError} if NaN.
-@ra("B128.to")
+@rv("B128.to")
 routine B128.to[S128]() -> S128
 
 ### Converts a `D32` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if the integer part overflows S128.
-@ra("D32.to")
+@rv("D32.to")
 routine D32.to[S128]() -> S128
 
 ### Converts a `D64` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if the integer part overflows S128.
-@ra("D64.to")
+@rv("D64.to")
 routine D64.to[S128]() -> S128
 
 ### Parses a decimal string into an `S128`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S128` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S128`.
-@ra("Text.to")
+@rv("Text.to")
 routine Text.to[S128]() -> S128

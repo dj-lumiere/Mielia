@@ -58,8 +58,8 @@ routine List[T](count: Int, fill_value: T) -> List[T]
     return List[T](items: Places[T](count: count, fill: fill_value), count: count.to[U64]())
 
 ### Returns a Revare list of copies of the elements, for a Revare library routine that takes one.
-routine List[T].to[RA::System.List[T]]() -> RA::System.List[T]
-    var result = RA::System.List[T](capacity: me.count)
+routine List[T].to[RV::System.List[T]]() -> RV::System.List[T]
+    var result = RV::System.List[T](capacity: me.count)
     for element in me
         result.add_last(value: element)
     return result
@@ -71,7 +71,7 @@ routine List[T].to[RA::System.List[T]]() -> RA::System.List[T]
 common routine List[T].from_serial(value: SerialValue) -> List[T]
     var result = List[T]()
     when value
-        is RA::System.List[SerialValue] as items =>
+        is RV::System.List[SerialValue] as items =>
             for item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
@@ -353,7 +353,7 @@ routine List[T].duplicate() -> List[T]
 ### Returns the list as a `SerialValue.List` of its serialized elements.
 @override
 routine List[T].serialize() -> SerialValue
-    var result = RA::System.List[SerialValue]()
+    var result = RV::System.List[SerialValue]()
     for element in me
         result.add_last(value: element.serialize())
     return SerialValue(result.duplicate())

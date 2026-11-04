@@ -1,10 +1,10 @@
 module Subprocess
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### The outcome of running an external command.
-@ra("ProcessResult")
+@rv("ProcessResult")
 record ProcessResult
     ### The child's exit code. Meaningful when `signal` is absent. (S64 holds POSIX 0–255 and the full
     ### Windows DWORD, including crash codes, without loss.)
@@ -19,21 +19,21 @@ record ProcessResult
 
 ### Whether the command finished cleanly: exited normally (no signal) with exit code 0.
 ### :returns: true if not signalled and `exit_code == 0`.
-@ra("ProcessResult.succeeded")
+@rv("ProcessResult.succeeded")
 routine ProcessResult.succeeded() -> Bool
 
 ### Maps the runtime's term-signal convention (0 = not signalled) to an `Optional`: absent when 0,
 ### otherwise the signal number. `try`-recovering it yields the `S32?` that ProcessResult carries.
 ### :param raw: The raw signal number from the runtime.
 ### :returns: The signal number.
-@ra("term_signal_value")
+@rv("term_signal_value")
 routine term_signal_value(raw: S32) -> S32
 
 ### Assembles a `ProcessResult` from the just-run child's exit code plus the runtime's captured-stream
 ### and signal accessors. Guarded by both `run_process` forms.
 ### :param code: The child's exit code, as returned by the native run.
 ### :returns: The assembled `ProcessResult`.
-@ra("proc_result_of")
+@rv("proc_result_of")
 routine proc_result_of(code: S64) -> ProcessResult
 
 ### Runs `command` through the platform shell (`/bin/sh -c` on POSIX, `cmd /c` on Windows), capturing
@@ -43,5 +43,5 @@ routine proc_result_of(code: S64) -> ProcessResult
 ### thread.
 ### :param command: The command line to run.
 ### :returns: A `ProcessResult` with exit code, optional signal, and captured streams.
-@ra("run_process")
+@rv("run_process")
 routine run_process(command: Text) -> ProcessResult

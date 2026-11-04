@@ -33,7 +33,7 @@ The second axis is **machine visibility**. Mielia hides the machine. Numbers are
 memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Work](args)`
 whose work the runtime schedules, and shared entities are locked for you. A Mielia program has no
 machine-level code at all: no `danger` blocks, no `dangerous` routines, no foreign `C::` routines. C is reached
-through a `.rr` module the program imports (section 18).
+through a `.rvr` module the program imports (section 18).
 
 ## 2. The rules most likely to break your assumptions
 
@@ -925,7 +925,7 @@ logic limit** is fatal and cannot be caught.
   is the same wall: Mielia has no "stack" in its vocabulary, frames are memory, and running out of it is
   reported as out of memory.
 - A segmentation fault cannot happen in Mielia code. If one appears, it is a builder or runtime bug, or it
-  comes from a `.rr` module the program imports, not a language failure mode.
+  comes from a `.rvr` module the program imports, not a language failure mode.
 - Fatal messages describe what the program did, never the machine.
 
 **Exit status.** Every crash (an unrecovered `throw`, a checked-arithmetic failure, out of memory)
@@ -1450,10 +1450,10 @@ A Mielia program never handles memory directly and never calls C directly. `dang
 `dangerous` routines (MI-S800) and foreign `C::` / `LLVM::` routines (MI-S810) are build errors in a program's
 `.mie` files. The words `danger` and `dangerous` stay reserved.
 
-To use a C library, write a small `.rr` module that declares and wraps it, and import that module:
+To use a C library, write a small `.rvr` module that declares and wraps it, and import that module:
 
 ```revare
-# cmath.rr
+# cmath.rvr
 routine C::labs(n: S64) -> S64
 
 routine absolute(n: S64) -> S64
@@ -1469,7 +1469,7 @@ routine start()
     return
 ```
 
-The `.rr` module is checked by Revare's rules (section 23), and inside it `danger`, `dangerous` and `C::`
+The `.rvr` module is checked by Revare's rules (section 23), and inside it `danger`, `dangerous` and `C::`
 are available. Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait)
 `@blocking` there: called from a job's work it runs on one of the runtime's I/O threads while the job parks.
 
@@ -1650,7 +1650,7 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 
 Format: `error[MI-S###]: file:line:col: message`, then the source line with a caret. Families: `MI-G###`
 grammar, `MI-S###` semantic, `MI-W###` warning (warnings print as `warning[MI-W###]`). The prefix follows
-the file the diagnostic points into (an error inside an imported `.rr` module is spelled `RA-` with the same
+the file the diagnostic points into (an error inside an imported `.rvr` module is spelled `RV-` with the same
 number). At most 20 are shown per batch.
 
 | Code          | Usual cause                                         | Fix                                               |
@@ -1716,27 +1716,27 @@ manager (explicit `steal` hand-overs, deterministic teardown at scope exit), and
 (fixed-width numbers by default, OS threads, build-time reflection). Mielia reaches an entity through any
 number of names and hides the machine. The two share the grammar and the standard library, which is written in Revare.
 
-A Mielia program may import Revare (`.rr`) modules; a Revare program may not import Mielia files.
+A Mielia program may import Revare (`.rvr`) modules; a Revare program may not import Mielia files.
 
 - **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Optional` and `Range` are the same
   types in both languages.
-- **An entity of an imported `.rr` module is held like a Mielia entity.** In Mielia code it is a shared
+- **An entity of an imported `.rvr` module is held like a Mielia entity.** In Mielia code it is a shared
   handle: a second name (`var d = c`) or a member variable reaches the same entity, a Mielia routine takes
-  it as a parameter or gives it back (`routine bump_twice(c: Counter)`), a `.rr` routine's entity result
-  (`new_counter(start: 5)`) is received by name, and it is released when nothing holds it. The `.rr`
+  it as a parameter or gives it back (`routine bump_twice(c: Counter)`), a `.rvr` routine's entity result
+  (`new_counter(start: 5)`) is received by name, and it is released when nothing holds it. The `.rvr`
   routines' own bodies keep Revare's rules.
-- **A Revare library entity (`RA::List`) keeps one original.** It may not cross a Mielia routine
+- **A Revare library entity (`RV::List`) keeps one original.** It may not cross a Mielia routine
   signature by value (MI-S439), and keeping it under a second name is MI-S413.
-- `RA::Name` and `MI::Name` name a type in a specific language when both have one with that name.
-- **Collections do not cross as-is.** Mielia's `List` is not Revare's (`RA::List`, counted with `U64`).
+- `RV::Name` and `MI::Name` name a type in a specific language when both have one with that name.
+- **Collections do not cross as-is.** Mielia's `List` is not Revare's (`RV::List`, counted with `U64`).
   Convert at the boundary: `rf_list.to[List]()` makes a Mielia list from a Revare one, and
-  `xs.to[RA::List]()` makes a Revare list from a Mielia one.
+  `xs.to[RV::List]()` makes a Revare list from a Mielia one.
 
 ## 24. Status (do not generate as if shipped)
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Int`/`Decimal` defaults, the error model, Work
-concurrency, the iterate-and-mutate checks, C through imported `.rr` modules, and `ObjectHacker`'s
+concurrency, the iterate-and-mutate checks, C through imported `.rvr` modules, and `ObjectHacker`'s
 `Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations, `when_changed`, `implant` and `watch`. The `StdlibMi` fixtures run in CI with their expected output.
 
 Not built yet:

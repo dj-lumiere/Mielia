@@ -166,7 +166,7 @@ internal sealed class EntityLoweringPass
         }
     }
 
-    /// <summary>Whether <paramref name="file"/> is a `.rr` module of the program (not the standard library's).</summary>
+    /// <summary>Whether <paramref name="file"/> is a `.rvr` module of the program (not the standard library's).</summary>
     private bool IsRevareModuleFile(string? file)
     {
         return file != null && Builder.Frontends.Languages.HasSourceExtension(fileName: file) &&
@@ -201,7 +201,7 @@ internal sealed class EntityLoweringPass
             r = r with { Body = UsingLoweringPass.LowerBody(body: r.Body, registry: _registry) };
         }
 
-        // A routine of a `.rr` module the program imports is Revare code: an entity it makes has one original and
+        // A routine of a `.rvr` module the program imports is Revare code: an entity it makes has one original and
         // is handed back as it is (a `List` its `squares` returns), so nothing in it becomes a shared handle.
         if (IsRevareModuleFile(file: r.Location.FileName))
         {
@@ -772,7 +772,7 @@ internal sealed class EntityLoweringPass
         // An entity taken out of a tuple a call gave (`var (tx, rx) = make_channel[S64](capacity: 8)` reads
         // `_ld_tmp.item1`) is moved into a handle here: the routine that made the tuple built it bare, and every
         // slot of the program that names it (a parameter `rx: Receiver[S64]`) holds a handle.
-        // The library's own Mielia code names the Revare types it keeps (`RA::System.Transmitter[T]`), so it
+        // The library's own Mielia code names the Revare types it keeps (`RV::System.Transmitter[T]`), so it
         // keeps them bare.
         if (!_inLibraryRoutine &&
             lowered is MemberExpression { Object.ResolvedType: TupleTypeSymbol, ResolvedType: EntityTypeSymbol element } &&
@@ -803,7 +803,7 @@ internal sealed class EntityLoweringPass
         // REASSIGNMENT has a separate pre-existing codegen crash (baseline AVs with or without the
         // former RoamBump), so the share placement for that path is deferred until that bug is fixed.
         // The former RcRetainLoweringPass.RoamBump auto-share for field targets is removed (it was the
-        // builder hand-simulating the refcount; RA now spells the co-owner explicitly `x.share()`).
+        // builder hand-simulating the refcount; RV now spells the co-owner explicitly `x.share()`).
         if (assign.Target is IdentifierExpression)
         {
             v = MaybeRoamCopy(expr: v);
@@ -818,7 +818,7 @@ internal sealed class EntityLoweringPass
     // BinaryExpression{Assign} (NOT an AssignmentStatement — the parser only emits BinaryExpression
     // for `=`). MI implicit share: a borrowed Roamed RHS bound into a persistent slot (local var OR a
     // Roamed entity FIELD) must retain so the slot owns its own count. The former RcRetainLoweringPass
-    // .RoamBump only fired for RA BARE-entity field writes (its `IsRoamedEntityField` requires the
+    // .RoamBump only fired for RV BARE-entity field writes (its `IsRoamedEntityField` requires the
     // object to be a bare EntityTypeSymbol) — it NEVER fired for MI's `roamed_obj.field = x` (object is
     // Roamed), so MI field reassignment had NO retain-new: the field aliased the RHS handle without a
     // count → double-free at teardown. Inserting the share HERE (the MI lowering, the home of implicit
@@ -1304,7 +1304,7 @@ internal sealed class EntityLoweringPass
 
     // Receiver projection: a Roamed handle flowing as the RECEIVER into a BARE-`me` memberRoutine
     // must be projected through `.raw_inner()` to the real entity pointer. Stdlib entities
-    // (analyzed in RA mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
+    // (analyzed in RV mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
     // (MeType is NOT Roamed), so passing the RoamManager handle makes the callee read the
     // controller as the entity and crash. USER MI entity memberRoutines have MeType=Roamed and
     // correctly take the handle; memberRoutines declared on Roamed/RoamManager itself
@@ -1359,7 +1359,7 @@ internal sealed class EntityLoweringPass
                                returned is not (EntityTypeSymbol or GenericParameterTypeSymbol) &&
                                RoamedInnerEntity(t: returned) == null;
         if (call.ResolvedType is EntityTypeSymbol callEntity && !returnsNoEntity &&
-            (IsMieliaRealmEntity(entity: callEntity) || !IsRaRealmRef(callee: call.Callee, routine: call.ResolvedRoutine)) &&
+            (IsMieliaRealmEntity(entity: callEntity) || !IsRvRealmRef(callee: call.Callee, routine: call.ResolvedRoutine)) &&
             !IsRevareEntity(entity: callEntity))
         {
             return WrapInRoam(inner: lowered, entity: callEntity);
@@ -1372,10 +1372,10 @@ internal sealed class EntityLoweringPass
         // (under-roamed → later destroyed as a controller → AccessViolation). The no-arg form
         // `Box()` is typed bare (handled above); this catches the arg-carrying form. Gated on
         // `create` (returns bare) so an ordinary routine returning a `Roamed[E]` value is NOT
-        // re-wrapped, and on the MI realm (an RA entity stays bare).
+        // re-wrapped, and on the MI realm (an RV entity stays bare).
         if (lowered.ResolvedRoutine is { IsCreator: true } &&
             RoamedInnerEntity(t: call.ResolvedType) is { } createEntity &&
-            !IsRaRealmRef(callee: call.Callee))
+            !IsRvRealmRef(callee: call.Callee))
         {
             lowered.ResolvedType = createEntity;
             return WrapInRoam(inner: lowered, entity: createEntity);
@@ -1445,7 +1445,7 @@ internal sealed class EntityLoweringPass
             ? gmce with { Object = gObject, Arguments = gArgs }
             : gmce;
         if (gmce.ResolvedType is EntityTypeSymbol gEntity &&
-            (IsMieliaRealmEntity(entity: gEntity) || !IsRaRealmRef(callee: gmce.Object)) &&
+            (IsMieliaRealmEntity(entity: gEntity) || !IsRvRealmRef(callee: gmce.Object)) &&
             !IsRevareEntity(entity: gEntity) && !AsksForRevareType(typeArguments: gmce.TypeArguments, entity: gEntity))
         {
             return WrapInRoam(inner: loweredG, entity: gEntity);
@@ -1456,7 +1456,7 @@ internal sealed class EntityLoweringPass
         // CallExpression form does (WrapCallResultInRoam).
         if (gmce.ResolvedRoutine is { IsCreator: true } &&
             RoamedInnerEntity(t: gmce.ResolvedType) is { } createEntity &&
-            !IsRaRealmRef(callee: gmce.Object))
+            !IsRvRealmRef(callee: gmce.Object))
         {
             loweredG.ResolvedType = createEntity;
             return WrapInRoam(inner: loweredG, entity: createEntity);
@@ -1745,14 +1745,14 @@ internal sealed class EntityLoweringPass
     }
 
     // Wrap a bare-entity-valued expression in `<expr>.roam()`, retyped to Roamed[E].
-    // An `RA::`-qualified construction/call deliberately opts OUT of the Mielia entity->Roamed
+    // An `RV::`-qualified construction/call deliberately opts OUT of the Mielia entity->Roamed
     // lowering: the realm tag reaches the bare Revare realm, so its bare-entity result must NOT be
-    // `.roam()`-wrapped. This is what lets an MI wrapper entity hold a bare `RA::System.List` inside
-    // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RA"`
+    // `.roam()`-wrapped. This is what lets an MI wrapper entity hold a bare `RV::System.List` inside
+    // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RV"`
     // gate on the type-annotation side; the realm survives on the construction callee's identifier
-    // (Parser.Expressions parses `RA::System.List` into `IdentifierExpression { Realm = "RA" }`).
-    // A Revare library entity (`RA::System.List`) keeps its single original in Mielia code, however it was
-    // reached: by an `RA::` name or as what a routine hands back. An entity of a `.rr` module the program imports is
+    // (Parser.Expressions parses `RV::System.List` into `IdentifierExpression { Realm = "RV" }`).
+    // A Revare library entity (`RV::System.List`) keeps its single original in Mielia code, however it was
+    // reached: by an `RV::` name or as what a routine hands back. An entity of a `.rvr` module the program imports is
     // held in Mielia code like a Mielia entity, by a shared handle.
     private bool IsRevareEntity(EntityTypeSymbol entity)
     {
@@ -1779,7 +1779,7 @@ internal sealed class EntityLoweringPass
         return ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Realm != TypeModel.Realms.Shared;
     }
 
-    // A call that names the Revare type it makes (`xs.to[RA::List]()`) hands back that world's value, which keeps
+    // A call that names the Revare type it makes (`xs.to[RV::List]()`) hands back that world's value, which keeps
     // its single holder: wrapping it would hand a handle to code that expects the entity itself.
     private static bool AsksForRevareType(List<TypeExpression> typeArguments, EntityTypeSymbol entity)
     {
@@ -1789,17 +1789,17 @@ internal sealed class EntityLoweringPass
             (t.Name == bareName || t.Name.EndsWith(value: "." + bareName, comparisonType: StringComparison.Ordinal)));
     }
 
-    private static bool IsRaRealmRef(Expression callee, RoutineInfo? routine = null)
+    private static bool IsRvRealmRef(Expression callee, RoutineInfo? routine = null)
     {
         return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared } ||
-               // A common routine called on a type written `RA::Name` hands back that world's value. Called on the
+               // A common routine called on a type written `RV::Name` hands back that world's value. Called on the
                // type as Mielia names it (`Random.from_entropy()`), it hands back a value Mielia holds by handle.
                callee is MemberExpression
                {
                    Object: IdentifierExpression { Realm: TypeModel.Realms.Shared } or
                    TypeExpression { Realm: TypeModel.Realms.Shared }
                } ||
-               // A routine called on a Revare entity held as such (`RA::System.List`) hands back that
+               // A routine called on a Revare entity held as such (`RV::System.List`) hands back that
                // world's value too.
                routine is not { Kind: RoutineKind.CommonRoutine } && callee is MemberExpression
                {

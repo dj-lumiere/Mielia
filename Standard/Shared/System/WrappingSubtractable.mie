@@ -1,12 +1,12 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for modulo-width subtraction.
 ### `WrappingSubtractable` is for bounded types whose subtraction result wraps
 ### through the type's bit width instead of trapping or clamping.
-@ra("WrappingSubtractable")
+@rv("WrappingSubtractable")
 protocol WrappingSubtractable
     ### Returns the wrapping difference between this value and `you`.
     ### Underflow and overflow are reduced to the conforming type's fixed width.

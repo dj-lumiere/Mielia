@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### The protocol for values that can produce an independent duplicate of themselves via `duplicate`.
@@ -10,7 +10,7 @@ module System
 ### does NOT hold: an aggregate `entity` (List/Dict) is `Copyable` (heap deep-clone) but NOT `Assignable`
 ### (single-owner, cannot be shallow-shared — moved via `steal`, never implicitly bound). `duplicate` is
 ### inserted wherever an independent duplicate is required (e.g. building a value into a collection).
-@ra("Copyable")
+@rv("Copyable")
 protocol Copyable
 needs Copyable everywhere
     ### Returns an independent duplicate of this value (a deep copy for an aggregate; the refcount-share

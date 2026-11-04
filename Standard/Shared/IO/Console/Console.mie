@@ -1,16 +1,16 @@
 module IO/Console
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### stdin as a {Source}. Consume forward with `pull`; an empty result signals EOF.
-@ra("ConsoleIn")
+@rv("ConsoleIn")
 record ConsoleIn
 obeys Source
     nothing
 
 ### stdout or stderr as a {Sink}, discriminated by `fd` (1 = stdout, 2 = stderr).
-@ra("ConsoleOut")
+@rv("ConsoleOut")
 record ConsoleOut
 obeys Sink
     nothing
@@ -19,38 +19,38 @@ obeys Sink
 ### `end` is appended after `value`.
 ### :param value: The text to write.
 ### :param end: The trailing text to append.
-@ra("show")
+@rv("show")
 routine show(value: Text, end: Text = "\n")
 
 ### Writes raw bytes to standard output.
 ### `end` is appended after `value`.
 ### :param value: The bytes to write.
 ### :param end: The trailing text to append.
-@ra("show")
+@rv("show")
 routine show(value: Bytes, end: Text = "\n")
 
 ### Writes a single value to standard output using its representable form.
 ### :param value: The value to render and write.
 ### :param end: The trailing text to append.
-@ra("show")
+@rv("show")
 routine show[T](value: T, end: Text = "\n")
 
 ### Writes text to standard error.
 ### :param value: The text to write.
 ### :param end: The trailing text to append.
-@ra("alert")
+@rv("alert")
 routine alert(value: Text, end: Text = "\n")
 
 ### Writes raw bytes to standard error.
 ### :param value: The bytes to write.
 ### :param end: The trailing text to append.
-@ra("alert")
+@rv("alert")
 routine alert(value: Bytes, end: Text = "\n")
 
 ### Writes a single value to standard error using its diagnostic form.
 ### :param value: The value to render and write.
 ### :param end: The trailing text to append.
-@ra("alert")
+@rv("alert")
 routine alert[T](value: T, end: Text = "\n")
 
 ### Reads one line of text from standard input.
@@ -58,7 +58,7 @@ routine alert[T](value: T, end: Text = "\n")
 ### end that ended the word is not read as a blank line of its own.
 ### :returns: The resulting `Text` value.
 ### :throws: {EndOfInputError} when the input has ended.
-@ra("ask_line")
+@rv("ask_line")
 routine ask_line() -> Text
 
 ### Reads one line of standard input as a `T`: `var n: Int = ask()` (the type the value goes to), or
@@ -68,58 +68,58 @@ routine ask_line() -> Text
 ### :returns: The line as a `T`.
 ### :throws: {InvalidValueError} or what else `to[T]()` throws when the line isn't a `T`, {EndOfInputError} when the
 ### input has ended.
-@ra("ask")
+@rv("ask")
 routine ask[T]() -> T
 
 ### Reads one whitespace-delimited word from standard input.
 ### :returns: The resulting `Text` value.
 ### :throws: {EndOfInputError} when the input has ended before another word.
-@ra("ask_word")
+@rv("ask_word")
 routine ask_word() -> Text
 
 ### Reads all remaining text from standard input.
 ### :returns: The resulting `Text` value.
-@ra("ask_all")
+@rv("ask_all")
 routine ask_all() -> Text
 
 ### Reads all remaining standard input as raw bytes.
 ### :returns: The resulting `Bytes` value.
-@ra("ask_raw")
+@rv("ask_raw")
 routine ask_raw() -> Bytes
 
 ### Reads up to `count` bytes from standard input.
 ### :param count: The maximum number of bytes to read.
 ### :returns: The resulting `Bytes` value.
-@ra("ask_bytes")
+@rv("ask_bytes")
 routine ask_bytes(count: U64) -> Bytes
 
 ### The standard-input source.
 ### :returns: A {ConsoleIn} over stdin.
-@ra("stdin")
+@rv("stdin")
 routine stdin() -> ConsoleIn
 
 ### The standard-output sink.
 ### :returns: A {ConsoleOut} over stdout.
-@ra("stdout")
+@rv("stdout")
 routine stdout() -> ConsoleOut
 
 ### The standard-error sink.
 ### :returns: A {ConsoleOut} over stderr.
-@ra("stderr")
+@rv("stderr")
 routine stderr() -> ConsoleOut
 
 ### Pulls up to `max` bytes from standard input; an empty `Bytes` signals EOF.
 ### :param max: The maximum byte count to pull.
 ### :returns: The bytes pulled, or empty at EOF.
-@ra("ConsoleIn.pull")
+@rv("ConsoleIn.pull")
 routine ConsoleIn.pull(max: U64) -> Bytes
 
 ### Pushes `data` to the underlying standard stream, returning the number of bytes accepted.
 ### :param data: The bytes to push.
 ### :returns: The number of bytes accepted (always `data.count()`).
-@ra("ConsoleOut.push")
+@rv("ConsoleOut.push")
 routine ConsoleOut.push(data: Bytes) -> U64
 
 ### Flushes the standard stream. No-op — the runtime flushes stdout/stderr for you.
-@ra("ConsoleOut.flush")
+@rv("ConsoleOut.flush")
 routine ConsoleOut.flush()

@@ -239,7 +239,7 @@ routine SortedList[T].eq(you: SortedList[T]) -> Bool
 ### :returns: The `SerialValue.List` of each element's serialized form.
 @override
 routine SortedList[T].serialize() -> SerialValue
-    var result = RA::System.List[SerialValue]()
+    var result = RV::System.List[SerialValue]()
     for value in me
         result.add_last(value: value.serialize())
     return SerialValue(result.duplicate())
@@ -251,7 +251,7 @@ routine SortedList[T].serialize() -> SerialValue
 common routine SortedList[T].from_serial(value: SerialValue) -> SortedList[T]
     var result = SortedList[T]()
     when value
-        is RA::System.List[SerialValue] as items =>
+        is RV::System.List[SerialValue] as items =>
             for item in items
                 result.add(value: serial_decode[T](value: item))
         else =>

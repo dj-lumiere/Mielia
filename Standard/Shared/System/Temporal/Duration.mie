@@ -1,13 +1,13 @@
 module System/Temporal
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents a span of time with nanosecond precision.
 ### `Duration` is the standard temporal offset type used for time arithmetic, scheduling, and rate control.
 ### Internally it stores whole seconds plus a normalized sub-second nanosecond component.
 ### :see: {Moment}, {LocalMoment}
-@ra("Duration")
+@rv("Duration")
 record Duration
 obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, ScalarFloorDivisible
     nothing
@@ -17,179 +17,179 @@ obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, Sc
 ### :param seconds: The whole-second component.
 ### :param nanoseconds: The nanosecond component within the current second.
 ### :returns: The resulting `Duration` value.
-@ra("normalize_duration")
+@rv("normalize_duration")
 routine normalize_duration(seconds: S64, nanoseconds: S64) -> Duration
 
 ### Returns the zero duration.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.zero")
+@rv("Duration.zero")
 common routine Duration.zero() -> Duration
 
 ### Creates a value from nanoseconds.
 ### :param ns: The duration in nanoseconds.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_nanoseconds")
+@rv("Duration.from_nanoseconds")
 common routine Duration.from_nanoseconds(ns: S64) -> Duration
 
 ### Creates a value from microseconds.
 ### :param us: The duration in microseconds.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_microseconds")
+@rv("Duration.from_microseconds")
 common routine Duration.from_microseconds(us: S64) -> Duration
 
 ### Creates a value from milliseconds.
 ### :param ms: The duration in milliseconds.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_milliseconds")
+@rv("Duration.from_milliseconds")
 common routine Duration.from_milliseconds(ms: S64) -> Duration
 
 ### Creates a value from seconds.
 ### :param s: The duration in seconds.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_seconds")
+@rv("Duration.from_seconds")
 common routine Duration.from_seconds(s: S64) -> Duration
 
 ### Creates a value from minutes.
 ### :param m: The duration in minutes.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_minutes")
+@rv("Duration.from_minutes")
 common routine Duration.from_minutes(m: S64) -> Duration
 
 ### Creates a value from hours.
 ### :param h: The duration in hours.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_hours")
+@rv("Duration.from_hours")
 common routine Duration.from_hours(h: S64) -> Duration
 
 ### Creates a value from days.
 ### :param d: The duration in days.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_days")
+@rv("Duration.from_days")
 common routine Duration.from_days(d: S64) -> Duration
 
 ### Creates a value from weeks.
 ### :param w: The duration in weeks.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.from_weeks")
+@rv("Duration.from_weeks")
 common routine Duration.from_weeks(w: S64) -> Duration
 
 ### Returns the total duration in nanoseconds.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_nanoseconds")
+@rv("Duration.total_nanoseconds")
 routine Duration.total_nanoseconds() -> S64
 
 ### Returns the total duration in microseconds.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_microseconds")
+@rv("Duration.total_microseconds")
 routine Duration.total_microseconds() -> S64
 
 ### Returns the total duration in milliseconds.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_milliseconds")
+@rv("Duration.total_milliseconds")
 routine Duration.total_milliseconds() -> S64
 
 ### Returns the total duration in seconds.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_seconds")
+@rv("Duration.total_seconds")
 routine Duration.total_seconds() -> S64
 
 ### Returns the total duration in minutes.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_minutes")
+@rv("Duration.total_minutes")
 routine Duration.total_minutes() -> S64
 
 ### Returns the total duration in hours.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_hours")
+@rv("Duration.total_hours")
 routine Duration.total_hours() -> S64
 
 ### Returns the total duration in days.
 ### :returns: The resulting `S64` value.
-@ra("Duration.total_days")
+@rv("Duration.total_days")
 routine Duration.total_days() -> S64
 
 ### Returns the days component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_days")
+@rv("Duration.get_days")
 routine Duration.get_days() -> S64
 
 ### Returns the hours component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_hours")
+@rv("Duration.get_hours")
 routine Duration.get_hours() -> S64
 
 ### Returns the minutes component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_minutes")
+@rv("Duration.get_minutes")
 routine Duration.get_minutes() -> S64
 
 ### Returns the seconds component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_seconds")
+@rv("Duration.get_seconds")
 routine Duration.get_seconds() -> S64
 
 ### Returns the milliseconds component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_milliseconds")
+@rv("Duration.get_milliseconds")
 routine Duration.get_milliseconds() -> S64
 
 ### Returns the microseconds component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_microseconds")
+@rv("Duration.get_microseconds")
 routine Duration.get_microseconds() -> S64
 
 ### Returns the nanoseconds component.
 ### :returns: The resulting `S64` value.
-@ra("Duration.get_nanoseconds")
+@rv("Duration.get_nanoseconds")
 routine Duration.get_nanoseconds() -> S64
 
 ### Returns the nanosecond remainder within the current second.
 ### :returns: The resulting `U32` value.
-@ra("Duration.subsec_nanoseconds")
+@rv("Duration.subsec_nanoseconds")
 routine Duration.subsec_nanoseconds() -> U32
 
 ### Returns true if this value is zero.
 ### :returns: The resulting `Bool` value.
-@ra("Duration.is_zero")
+@rv("Duration.is_zero")
 routine Duration.is_zero() -> Bool
 
 ### Returns true if this value is negative.
 ### :returns: The resulting `Bool` value.
-@ra("Duration.is_negative")
+@rv("Duration.is_negative")
 routine Duration.is_negative() -> Bool
 
 ### Returns the absolute value.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.int_abs")
+@rv("Duration.int_abs")
 routine Duration.int_abs() -> Duration
 
 ### Returns `me + you`, adding the two durations and normalizing nanoseconds.
 ### :param you: The addend.
 ### :returns: The combined `Duration`.
-@ra("Duration.add")
+@rv("Duration.add")
 routine Duration.add(you: Duration) -> Duration
 
 ### Returns `me - you`, subtracting `you` from this duration and normalizing.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `Duration`.
-@ra("Duration.sub")
+@rv("Duration.sub")
 routine Duration.sub(you: Duration) -> Duration
 
 ### Returns the negated value.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.neg")
+@rv("Duration.neg")
 routine Duration.neg() -> Duration
 
 ### Returns this value scaled by `factor`.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.scale")
+@rv("Duration.scale")
 routine Duration.scale(factor: S64) -> Duration
 
 ### Returns the product of this value and the other value.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.mul")
+@rv("Duration.mul")
 routine Duration.mul(factor: S64) -> Duration
 
 ### Returns how many times `you` fits into this duration. Like integer `//`, the remainder this leaves is
@@ -197,53 +197,53 @@ routine Duration.mul(factor: S64) -> Duration
 ### :param you: The divisor duration.
 ### :returns: The integer quotient as `S64`.
 ### :throws: {DivisionByZeroError} when `you` is zero.
-@ra("Duration.floordiv")
+@rv("Duration.floordiv")
 routine Duration.floordiv(you: Duration) -> S64
 
 ### Returns what is left after `me // you`. Like integer `%`, it is never negative.
 ### :param you: The divisor duration.
 ### :returns: The remaining `Duration`.
 ### :throws: {DivisionByZeroError} when `you` is zero.
-@ra("Duration.mod")
+@rv("Duration.mod")
 routine Duration.mod(you: Duration) -> Duration
 
 ### Returns this duration divided by `divisor`.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.div_by")
+@rv("Duration.div_by")
 routine Duration.div_by(divisor: S64) -> Duration
 
 ### Returns the quotient of this value and the other value.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
-@ra("Duration.floordiv")
+@rv("Duration.floordiv")
 routine Duration.floordiv(divisor: S64) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `Bool` value.
-@ra("Duration.eq")
+@rv("Duration.eq")
 routine Duration.eq(you: Duration) -> Bool
 
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@ra("Duration.compare")
+@rv("Duration.compare")
 routine Duration.compare(you: Duration) -> ComparisonSign
 
 ### Returns the textual representation of this value.
 ### :returns: The resulting `Text` value.
-@ra("Duration.represent")
+@rv("Duration.represent")
 routine Duration.represent() -> Text
 
 ### Returns the textual representation of this value.
 ### :returns: The resulting `Text` value.
-@ra("Duration.diagnose")
+@rv("Duration.diagnose")
 routine Duration.diagnose() -> Text
 
 ### Returns a SipHash-2-4 keyed hash of this duration.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("Duration.hash")
+@rv("Duration.hash")
 routine Duration.hash(k0: U64, k1: U64) -> U64

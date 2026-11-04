@@ -32,7 +32,7 @@ public sealed class MieliaRules : LanguageRules
     public override string ToolName => "mielia";
     public override string Version => RevareRules.VersionOf(assembly: typeof(MieliaRules).Assembly);
     public override string FileExtension => Builder.Frontends.SourceExtensions.Mielia;
-    public override string? PreviousFileExtension => Builder.Frontends.SourceExtensions.PreviousMielia;
+    public override IReadOnlyList<string> PreviousFileExtensions => Builder.Frontends.SourceExtensions.PreviousMielia;
     public override string ShortName => "MI";
     public override bool HasOwnStandardLibrary => true;
 

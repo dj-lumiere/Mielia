@@ -1,12 +1,12 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the `Range` record.
 ### `Range[T]` describes a lazily iterated arithmetic progression between two bounds.
 ### :typeparam T: The type argument bound to `T`.
-@ra("Range")
+@rv("Range")
 record Range[T]
 relates RangeEmitter[T] as Emitter
 obeys Emittable[T], Container
@@ -27,7 +27,7 @@ needs T obeys Comparable, Addable, Subtractable
 ### Represents the `RangeEmitter` entity.
 ### `RangeEmitter[T]` holds the mutable iteration state for a `Range[T]`.
 ### :typeparam T: The type argument bound to `T`.
-@ra("RangeEmitter")
+@rv("RangeEmitter")
 entity RangeEmitter[T]
 obeys Emitter[T]
 needs RecordType T
@@ -55,7 +55,7 @@ needs T obeys Comparable, Addable, Subtractable
 ### :param start: The inclusive starting position.
 ### :param end: The terminating bound.
 ### :returns: The resulting `Range[T]` value.
-@ra("Range")
+@rv("Range")
 routine Range[T](start: T, end: T) -> Range[T]
 
 ### Creates a range from `start` to `end` using a step of `1`.
@@ -63,29 +63,29 @@ routine Range[T](start: T, end: T) -> Range[T]
 ### :param end: The terminating bound.
 ### :param inclusive: `true` to include `end`; `false` to stop before it.
 ### :returns: The resulting `Range[T]` value.
-@ra("Range")
+@rv("Range")
 routine Range[T](start: T, end: T, inclusive: Bool) -> Range[T]
 
 ### Returns true if this range counts up: it was not written with a negative step.
 ### :returns: The resulting `Bool` value.
-@ra("Range.is_ascending")
+@rv("Range.is_ascending")
 routine Range[T].is_ascending() -> Bool
 
 ### The distance between successive values: the step's magnitude.
 ### :returns: The resulting `T` value.
-@ra("Range.stride")
+@rv("Range.stride")
 routine Range[T].stride() -> T
 
 ### Returns the step component.
 ### This is the increment used for each successive value.
 ### :returns: The resulting `T` value.
-@ra("Range.get_step")
+@rv("Range.get_step")
 routine Range[T].get_step() -> T
 
 ### Returns true if iterating this range yields nothing: counting up, the start is past the end (`2 to 1`),
 ### counting down, the start is before it (`1 to 2 by -1`), and an exclusive range whose start is its end.
 ### :returns: The resulting `Bool` value.
-@ra("Range.is_empty")
+@rv("Range.is_empty")
 routine Range[T].is_empty() -> Bool
 
 ### Returns true if iterating the range would yield `value`: `0 to 10 have 10` is true,
@@ -93,44 +93,44 @@ routine Range[T].is_empty() -> Bool
 ### Works for ranges that count down too (`10 to 0 by -2 have 4` is true).
 ### :param value: The value to test.
 ### :returns: `true` if `value` is within the bounds and on a step from `start`.
-@ra("Range.has")
+@rv("Range.has")
 routine Range[T].has(value: T) -> Bool
 needs T obeys FloorDivisible
 
 ### Returns whether `value` is not in this value: the opposite of `has`.
 ### :param value: The value to look for.
 ### :returns: `true` when `value` is absent.
-@ra("Range.has")
+@rv("Range.has")
 routine Range[T].lacks(value: T) -> Bool
 needs T obeys FloorDivisible
 
 ### Crashes when the step is zero: it never moves, so the range would never reach its end.
 ### :throws: {RangeStepZeroError} when `step` is zero.
-@ra("Range.require_nonzero_step")
+@rv("Range.require_nonzero_step")
 routine Range[T].require_nonzero_step()
 
 ### Returns the range as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`. A step of 1 is left out, and a
 ### range that counts down shows its step with a minus sign.
 ### :returns: The resulting `Text` value.
-@ra("Range.represent")
+@rv("Range.represent")
 routine Range[T].represent() -> Text
 
 ### Returns the range's diagnostic text: its type around the written form, as `Range[Int](0 til 10 by 2)`.
 ### :returns: The resulting `Text` value.
-@ra("Range.diagnose")
+@rv("Range.diagnose")
 routine Range[T].diagnose() -> Text
 
 ### Creates an emitter for this value.
 ### The emitter starts at `me.start` and moves by the step's magnitude in the step's direction. A step of zero
 ### crashes here.
 ### :returns: The resulting `RangeEmitter[T]` value.
-@ra("Range.emitter")
+@rv("Range.emitter")
 routine Range[T].emitter() -> RangeEmitter[T]
 
 ### Returns the step's size for walking the range: its magnitude, after crashing when it is zero. A `for` over a
 ### range written with `by` asks for it once, before the first round.
 ### :returns: The resulting `T` value.
-@ra("Range.walk_stride")
+@rv("Range.walk_stride")
 routine Range[T].walk_stride() -> T
 
 ### Returns whether a walk that has reached `value` takes another step: whether one more step of `stride` from
@@ -138,7 +138,7 @@ routine Range[T].walk_stride() -> T
 ### :param value: The value the walk has reached.
 ### :param stride: The step's size, from `walk_stride()`.
 ### :returns: `true` when another step fits.
-@ra("Range.continues_after")
+@rv("Range.continues_after")
 routine Range[T].continues_after(value: T, stride: T) -> Bool
 
 ### Returns the value one step of `stride` after `value`, in the range's direction. Call it only after
@@ -146,12 +146,12 @@ routine Range[T].continues_after(value: T, stride: T) -> Bool
 ### :param value: The value the walk has reached.
 ### :param stride: The step's size, from `walk_stride()`.
 ### :returns: The next value.
-@ra("Range.next_after")
+@rv("Range.next_after")
 routine Range[T].next_after(value: T, stride: T) -> T
 
 ### Returns the next value from this emitter.
 ### Each successful call yields the current value and advances by `step`.
 ### :returns: The resulting `T` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
-@ra("RangeEmitter.emit")
+@rv("RangeEmitter.emit")
 routine RangeEmitter[T].emit() -> T

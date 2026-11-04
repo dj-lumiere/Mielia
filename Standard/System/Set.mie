@@ -303,7 +303,7 @@ routine Set[T].eq(you: Set[T]) -> Bool
 ### Serializes this collection to a `SerialValue.List`, serializing each element.
 @override
 routine Set[T].serialize() -> SerialValue
-    var result = RA::System.List[SerialValue]()
+    var result = RV::System.List[SerialValue]()
     for val in me
         result.add_last(value: val.serialize())
     return SerialValue(result.duplicate())
@@ -315,7 +315,7 @@ routine Set[T].serialize() -> SerialValue
 common routine Set[T].from_serial(value: SerialValue) -> Set[T]
     var result = Set[T]()
     when value
-        is RA::System.List[SerialValue] as items =>
+        is RV::System.List[SerialValue] as items =>
             for item in items
                 result.add(value: serial_decode[T](value: item))
         else =>

@@ -1,6 +1,6 @@
 module System/Numerics
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A 128-bit unsigned integer in the range 0 to
@@ -8,7 +8,7 @@ module System/Numerics
 ###
 ### `U128` is used for cryptographic keys, UUIDs, very large counters, and
 ### other data that requires more than 64 bits.
-@ra("U128")
+@rv("U128")
 record U128
 obeys UnsignedIntegral, Comparable, Copyable
     nothing
@@ -16,40 +16,40 @@ obeys UnsignedIntegral, Comparable, Copyable
 ### Returns the sum and a flag indicating whether the result wrapped around.
 ### :param you: The right operand.
 ### :returns: A tuple of `(wrapped_sum, overflowed)`.
-@ra("U128.add_with_overflow")
+@rv("U128.add_with_overflow")
 routine U128.add_with_overflow(you: U128) -> (U128, Bool)
 
 ### Returns the difference and a flag indicating whether the result wrapped around.
 ### :param you: The value to subtract.
 ### :returns: A tuple of `(wrapped_difference, overflowed)`.
-@ra("U128.sub_with_overflow")
+@rv("U128.sub_with_overflow")
 routine U128.sub_with_overflow(you: U128) -> (U128, Bool)
 
 ### Returns the product and a flag indicating whether the result wrapped around.
 ### :param you: The right operand.
 ### :returns: A tuple of `(wrapped_product, overflowed)`.
-@ra("U128.mul_with_overflow")
+@rv("U128.mul_with_overflow")
 routine U128.mul_with_overflow(you: U128) -> (U128, Bool)
 
 ### Returns `me + you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
-@ra("U128.add")
+@rv("U128.add")
 routine U128.add(you: U128) -> U128
 
 ### Returns `me - you`, throwing on underflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is less than `U128_MIN` (0).
-@ra("U128.sub")
+@rv("U128.sub")
 routine U128.sub(you: U128) -> U128
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
-@ra("U128.mul")
+@rv("U128.mul")
 routine U128.mul(you: U128) -> U128
 
 ### Unsigned 128/128 floor division via the generic base-2⁶⁴ Knuth-D kernel
@@ -60,14 +60,14 @@ routine U128.mul(you: U128) -> U128
 ### :param a: The dividend.
 ### :param b: The divisor.
 ### :returns: The quotient `a // b`.
-@ra("u128_floordiv")
+@rv("u128_floordiv")
 routine u128_floordiv(a: U128, b: U128) -> U128
 
 ### Returns `me // you` (integer division), throwing if `you` is zero.
 ### :param you: The divisor.
 ### :returns: The quotient `me // you`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("U128.floordiv")
+@rv("U128.floordiv")
 routine U128.floordiv(you: U128) -> U128
 
 ### Returns `me % you` (integer remainder).
@@ -75,21 +75,21 @@ routine U128.floordiv(you: U128) -> U128
 ### :param b: The divisor.
 ### :returns: The remainder `me % you`. Behavior is undefined if `you == 0`.
 ### Unsigned 128-bit remainder via the Knuth-D kernel. PRECONDITION: `b != 0`.
-@ra("u128_mod")
+@rv("u128_mod")
 routine u128_mod(a: U128, b: U128) -> U128
 
 ### Remainder of `me` divided by `you`.
 ### :param you: The divisor.
 ### :returns: The remainder.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("U128.mod")
+@rv("U128.mod")
 routine U128.mod(you: U128) -> U128
 
 ### (quotient, remainder) of `a // b` and `a % b` from ONE `knuth_divide[2]` pass. PRECONDITION: `b != 0`.
 ### :param a: The dividend.
 ### :param b: The divisor.
 ### :returns: The quotient and the remainder, in that order.
-@ra("u128_divmod")
+@rv("u128_divmod")
 routine u128_divmod(a: U128, b: U128) -> (U128, U128)
 
 ### (quotient, remainder) of `me // you` and `me % you` from ONE Knuth-D pass — half the work of
@@ -97,53 +97,53 @@ routine u128_divmod(a: U128, b: U128) -> (U128, U128)
 ### :param you: The divisor.
 ### :returns: The tuple `(me // you, me % you)`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("U128.divmod")
+@rv("U128.divmod")
 routine U128.divmod(you: U128) -> (U128, U128)
 
 ### Returns the two's-complement negation `(2¹²⁸ - me) mod 2¹²⁸`.
 ### :returns: The wrapped negation.
-@ra("U128.neg_wrap")
+@rv("U128.neg_wrap")
 routine U128.neg_wrap() -> U128
 
 ### Returns `(wrapping negation, overflowed)`. Overflow occurs for any non-zero value.
 ### :returns: A tuple of `(wrapped negation, overflow flag)`.
-@ra("U128.neg_with_overflow")
+@rv("U128.neg_with_overflow")
 routine U128.neg_with_overflow() -> (U128, Bool)
 
 ### Returns `(me + you) mod 2¹²⁸` without overflow check.
 ### :param you: The right operand.
 ### :returns: The sum modulo 2¹²⁸.
-@ra("U128.add_wrap")
+@rv("U128.add_wrap")
 routine U128.add_wrap(you: U128) -> U128
 
 ### Returns `(me - you) mod 2¹²⁸` without underflow check.
 ### :param you: The value to subtract.
 ### :returns: The difference modulo 2¹²⁸.
-@ra("U128.sub_wrap")
+@rv("U128.sub_wrap")
 routine U128.sub_wrap(you: U128) -> U128
 
 ### Returns `(me * you) mod 2¹²⁸` without overflow check.
 ### :param you: The right operand.
 ### :returns: The product modulo 2¹²⁸.
-@ra("U128.mul_wrap")
+@rv("U128.mul_wrap")
 routine U128.mul_wrap(you: U128) -> U128
 
 ### Returns `me + you`, clamped to `U128_MAX` on overflow.
 ### :param you: The right operand.
 ### :returns: The sum, or `U128_MAX` if it would overflow.
-@ra("U128.add_clamp")
+@rv("U128.add_clamp")
 routine U128.add_clamp(you: U128) -> U128
 
 ### Returns `me - you`, clamped to `U128_MIN` on underflow.
 ### :param you: The value to subtract.
 ### :returns: The difference, or `0` if it would go below `U128_MIN`.
-@ra("U128.sub_clamp")
+@rv("U128.sub_clamp")
 routine U128.sub_clamp(you: U128) -> U128
 
 ### Returns `me * you`, clamped to `U128_MAX` on overflow.
 ### :param you: The right operand.
 ### :returns: The product, or `U128_MAX` if it would overflow.
-@ra("U128.mul_clamp")
+@rv("U128.mul_clamp")
 routine U128.mul_clamp(you: U128) -> U128
 
 ### Returns `me + you + carry` as `(wrapped_sum, carry_out)`.
@@ -152,7 +152,7 @@ routine U128.mul_clamp(you: U128) -> U128
 ### :param you: The right operand.
 ### :param carry: The incoming carry bit from the lower word.
 ### :returns: A tuple of `(wrapped sum, outgoing carry)`.
-@ra("U128.carrying_add")
+@rv("U128.carrying_add")
 routine U128.carrying_add(you: U128, carry: Bool) -> (U128, Bool)
 
 ### Returns `me - you - borrow` as `(wrapped_difference, borrow_out)`.
@@ -160,7 +160,7 @@ routine U128.carrying_add(you: U128, carry: Bool) -> (U128, Bool)
 ### :param you: The value to subtract.
 ### :param borrow: The incoming borrow bit from the lower word.
 ### :returns: A tuple of `(wrapped difference, outgoing borrow)`.
-@ra("U128.borrowing_sub")
+@rv("U128.borrowing_sub")
 routine U128.borrowing_sub(you: U128, borrow: Bool) -> (U128, Bool)
 
 ### Returns the full `me * you` product as `(low, high)` halves.
@@ -168,7 +168,7 @@ routine U128.borrowing_sub(you: U128, borrow: Bool) -> (U128, Bool)
 ### low and high `U128` words without loss.
 ### :param you: The right operand.
 ### :returns: A tuple of `(low 128 bits, high 128 bits)`.
-@ra("U128.widening_mul")
+@rv("U128.widening_mul")
 routine U128.widening_mul(you: U128) -> (U128, U128)
 
 ### Returns `me * you + carry` as `(low, high)` halves.
@@ -178,123 +178,123 @@ routine U128.widening_mul(you: U128) -> (U128, U128)
 ### :param you: The right operand.
 ### :param carry: The value to add to the product.
 ### :returns: A tuple of `(low 128 bits, high 128 bits)`.
-@ra("U128.carrying_mul")
+@rv("U128.carrying_mul")
 routine U128.carrying_mul(you: U128, carry: U128) -> (U128, U128)
 
 ### Returns `me ** exp` and a flag indicating whether the result wrapped around.
 ### :param exp: The exponent.
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
-@ra("U128.pow_with_overflow")
+@rv("U128.pow_with_overflow")
 routine U128.pow_with_overflow(exp: U128) -> (U128, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent.
 ### :returns: The result of raising `me` to the power `exp`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
-@ra("U128.pow")
+@rv("U128.pow")
 routine U128.pow(exp: U128) -> U128
 
 ### Returns `me ** exp` with wrapping arithmetic (mod 2¹²⁸).
 ### :param exp: The exponent.
 ### :returns: The result modulo 2¹²⁸.
-@ra("U128.pow_wrap")
+@rv("U128.pow_wrap")
 routine U128.pow_wrap(exp: U128) -> U128
 
 ### Returns `me ** exp`, clamped to `U128_MAX` on overflow.
 ### :param exp: The exponent.
 ### :returns: The result, or `U128_MAX` if it would overflow.
-@ra("U128.pow_clamp")
+@rv("U128.pow_clamp")
 routine U128.pow_clamp(exp: U128) -> U128
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me & you`.
-@ra("U128.bitand")
+@rv("U128.bitand")
 routine U128.bitand(you: U128) -> U128
 
 ### Returns the bitwise OR of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me | you`.
-@ra("U128.bitor")
+@rv("U128.bitor")
 routine U128.bitor(you: U128) -> U128
 
 ### Returns the bitwise XOR of this value and `you`.
 ### :param you: The right operand.
 ### :returns: `me ^ you`.
-@ra("U128.bitxor")
+@rv("U128.bitxor")
 routine U128.bitxor(you: U128) -> U128
 
 ### Returns the bitwise complement of this value.
 ### :returns: `~me` — each bit flipped.
-@ra("U128.bitnot")
+@rv("U128.bitnot")
 routine U128.bitnot() -> U128
 
 ### Returns `true` when both values are equal.
 ### :param you: The value to compare against.
 ### :returns: `true` if `me == you`; `false` otherwise.
-@ra("U128.eq")
+@rv("U128.eq")
 routine U128.eq(you: U128) -> Bool
 
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@ra("U128.compare")
+@rv("U128.compare")
 routine U128.compare(you: U128) -> ComparisonSign
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `me` if `me <= you`; otherwise `you`.
-@ra("U128.min")
+@rv("U128.min")
 routine U128.min(you: U128) -> U128
 
 ### Returns the larger of this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `me` if `me >= you`; otherwise `you`.
-@ra("U128.max")
+@rv("U128.max")
 routine U128.max(you: U128) -> U128
 
 ### Returns this value clamped to the range `min_val..=max_val`.
 ### :param min_val: The lower bound (inclusive).
 ### :param max_val: The upper bound (inclusive).
 ### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
-@ra("U128.clamp")
+@rv("U128.clamp")
 routine U128.clamp(min_val: U128, max_val: U128) -> U128
 
 ### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
 ### :returns: The floor of the square root of `me`.
-@ra("U128.isqrt")
+@rv("U128.isqrt")
 routine U128.isqrt() -> U128
 
 ### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
 ### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
 ### :returns: The tuple `(root, remainder)`.
-@ra("U128.sqrtrem")
+@rv("U128.sqrtrem")
 routine U128.sqrtrem() -> (U128, U128)
 
 ### Returns ⌊log_base me⌋. Throws if `me` is zero or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
-@ra("U128.ilog")
+@rv("U128.ilog")
 routine U128.ilog(base: U128) -> U128
 
 ### Returns the absolute difference |me - you| without overflow.
 ### :param you: The other value.
 ### :returns: The non-negative distance between `me` and `you`.
-@ra("U128.abs_diff")
+@rv("U128.abs_diff")
 routine U128.abs_diff(you: U128) -> U128
 
 ### Returns ⌈me / you⌉ (division rounding toward positive infinity).
 ### :param you: The divisor.
 ### :returns: The ceiling of `me / you`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
-@ra("U128.div_ceil")
+@rv("U128.div_ceil")
 routine U128.div_ceil(you: U128) -> U128
 
 ### Returns the smallest power of two that is ≥ me. Both `0` and `1` map to `1`.
 ### :returns: The next power of two at or above `me`.
 ### :throws: {IntegerOverflowError} if the next power of two exceeds `U128_MAX`.
-@ra("U128.next_power_of_two")
+@rv("U128.next_power_of_two")
 routine U128.next_power_of_two() -> U128
 
 ### Returns the smallest multiple of `you` that is ≥ me.
@@ -302,198 +302,198 @@ routine U128.next_power_of_two() -> U128
 ### :returns: The next multiple of `you` at or above `me`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
-@ra("U128.next_multiple_of")
+@rv("U128.next_multiple_of")
 routine U128.next_multiple_of(you: U128) -> U128
 
 ### Returns ⌊(me + you) / 2⌋ computed without overflow.
 ### :param you: The other value.
 ### :returns: The midpoint of `me` and `you`, rounding toward negative infinity.
-@ra("U128.midpoint")
+@rv("U128.midpoint")
 routine U128.midpoint(you: U128) -> U128
 
 ### Returns this value with its bits reversed (bit 127 ↔ bit 0, etc.).
 ### :returns: The bit-reversed `U128`.
-@ra("U128.reverse_bits")
+@rv("U128.reverse_bits")
 routine U128.reverse_bits() -> U128
 
 ### Returns this value with its 16 bytes swapped (for endianness conversion).
 ### :returns: A `U128` with its bytes in reverse order.
-@ra("U128.swap_bytes")
+@rv("U128.swap_bytes")
 routine U128.swap_bytes() -> U128
 
 ### Returns `true` if this value is an exact power of two.
 ### :returns: `true` if `me` is 1, 2, 4, ..., 2¹²⁷; `false` otherwise (including zero).
-@ra("U128.is_power_of_two")
+@rv("U128.is_power_of_two")
 routine U128.is_power_of_two() -> Bool
 
 ### Returns the raw byte representation of this value in little-endian order.
-@ra("U128.to_bytes_le")
+@rv("U128.to_bytes_le")
 routine U128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw byte representation of this value in big-endian order.
-@ra("U128.to_bytes_be")
+@rv("U128.to_bytes_be")
 routine U128.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds a `U128` from its little-endian raw byte representation.
 ### :param bytes: The raw bytes, least significant first.
 ### :returns: The U128 value stored in `bytes`.
-@ra("U128.from_bytes_le")
+@rv("U128.from_bytes_le")
 common routine U128.from_bytes_le(bytes: Items[Byte, 16]) -> U128
 
 ### Builds a `U128` from its big-endian raw byte representation.
 ### :param bytes: The raw bytes, most significant first.
 ### :returns: The U128 value stored in `bytes`.
-@ra("U128.from_bytes_be")
+@rv("U128.from_bytes_be")
 common routine U128.from_bytes_be(bytes: Items[Byte, 16]) -> U128
 
 ### Returns `true` if this value is zero.
 ### :returns: `true` if `me == 0`.
-@ra("U128.is_zero")
+@rv("U128.is_zero")
 routine U128.is_zero() -> Bool
 
 ### Returns `true` if this value is divisible by 2.
 ### :returns: `true` if the least-significant bit is 0.
-@ra("U128.is_even")
+@rv("U128.is_even")
 routine U128.is_even() -> Bool
 
 ### Returns `true` if this value is not divisible by 2.
 ### :returns: `true` if the least-significant bit is 1.
-@ra("U128.is_odd")
+@rv("U128.is_odd")
 routine U128.is_odd() -> Bool
 
 ### Returns the upper 64 bits of this 128-bit value.
 ### :returns: Bits 127..64 as a `U64`.
-@ra("U128.high64")
+@rv("U128.high64")
 routine U128.high64() -> U64
 
 ### Returns the lower 64 bits of this 128-bit value.
 ### :returns: Bits 63..0 as a `U64`.
-@ra("U128.low64")
+@rv("U128.low64")
 routine U128.low64() -> U64
 
 ### Returns the human-readable text of this value.
 ### :returns: The value rendered as `Text`.
-@ra("U128.represent")
+@rv("U128.represent")
 routine U128.represent() -> Text
 
 ### Returns a type-tagged debug rendering of this value.
 ### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
-@ra("U128.diagnose")
+@rv("U128.diagnose")
 routine U128.diagnose() -> Text
 
 ### Returns a SipHash-2-4 keyed hash of this 128-bit value.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("U128.hash")
+@rv("U128.hash")
 routine U128.hash(k0: U64, k1: U64) -> U64
 
 ### Converts an `S8` to `U128`, throwing if the value is negative.
 ### :returns: A `U128` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
-@ra("S8.to")
+@rv("S8.to")
 routine S8.to[U128]() -> U128
 
 ### Converts an `S16` to `U128`, throwing if the value is negative.
 ### :returns: A `U128` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
-@ra("S16.to")
+@rv("S16.to")
 routine S16.to[U128]() -> U128
 
 ### Converts an `S32` to `U128`, throwing if the value is negative.
 ### :returns: A `U128` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
-@ra("S32.to")
+@rv("S32.to")
 routine S32.to[U128]() -> U128
 
 ### Converts an `S64` to `U128`, throwing if the value is negative.
 ### :returns: A `U128` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
-@ra("S64.to")
+@rv("S64.to")
 routine S64.to[U128]() -> U128
 
 ### Converts an `S128` to `U128`, throwing if the value is negative.
 ### :returns: The same bit pattern reinterpreted as an unsigned value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
-@ra("S128.to")
+@rv("S128.to")
 routine S128.to[U128]() -> U128
 
 ### Zero-extends a `U8` to `U128`.
 ### :returns: A `U128` equal in value to this value.
-@ra("U8.to")
+@rv("U8.to")
 routine U8.to[U128]() -> U128
 
 ### Zero-extends a `U16` to `U128`.
 ### :returns: A `U128` equal in value to this value.
-@ra("U16.to")
+@rv("U16.to")
 routine U16.to[U128]() -> U128
 
 ### Zero-extends a `U32` to `U128`.
 ### :returns: A `U128` equal in value to this value.
-@ra("U32.to")
+@rv("U32.to")
 routine U32.to[U128]() -> U128
 
 ### Zero-extends a `U64` to `U128`.
 ### :returns: A `U128` equal in value to this value.
-@ra("U64.to")
+@rv("U64.to")
 routine U64.to[U128]() -> U128
 
 ### Identity conversion — returns this value unchanged.
 ### :returns: this value unchanged.
-@ra("U128.to")
+@rv("U128.to")
 routine U128.to[U128]() -> U128
 
 ### Converts an `S256` to `U128`, throwing if the value is negative or exceeds U128_MAX.
 ### :returns: The lower 128 bits of this value.
 ### :throws: {IntegerOverflowError} if this value is outside 0..340282366920938463463374607431768211455.
-@ra("S256.to")
+@rv("S256.to")
 routine S256.to[U128]() -> U128
 
 ### Converts a `U256` to `U128`, throwing if the value exceeds U128_MAX.
 ### :returns: The lower 128 bits of this value.
 ### :throws: {IntegerOverflowError} if `me > 340282366920938463463374607431768211455`.
-@ra("U256.to")
+@rv("U256.to")
 routine U256.to[U128]() -> U128
 
 ### Converts an `B16` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
-@ra("B16.to")
+@rv("B16.to")
 routine B16.to[U128]() -> U128
 
 ### Converts an `B32` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
-@ra("B32.to")
+@rv("B32.to")
 routine B32.to[U128]() -> U128
 
 ### Converts an `B64` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, negative, or >= 2^128.
-@ra("B64.to")
+@rv("B64.to")
 routine B64.to[U128]() -> U128
 
 ### Converts an `B128` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {NumericOverflowError} if negative or >= 2^128; {NumericDomainError} if NaN.
-@ra("B128.to")
+@rv("B128.to")
 routine B128.to[U128]() -> U128
 
 ### Converts a `D32` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {NumericOverflowError} if the integer part overflows U128.
-@ra("D32.to")
+@rv("D32.to")
 routine D32.to[U128]() -> U128
 
 ### Converts a `D64` to `U128`, truncating toward zero.
 ### :returns: The integer part of this value as a `U128`.
 ### :throws: {NumericOverflowError} if the integer part overflows U128.
-@ra("D64.to")
+@rv("D64.to")
 routine D64.to[U128]() -> U128
 
 ### Parses a decimal string into a `U128`.
 ### :returns: The parsed `U128` value.
 ### :throws: {InvalidValueError} if this value is empty or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `U128`.
-@ra("Text.to")
+@rv("Text.to")
 routine Text.to[U128]() -> U128

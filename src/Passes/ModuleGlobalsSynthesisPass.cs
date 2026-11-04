@@ -25,7 +25,7 @@ internal static class ModuleGlobalsSynthesisPass
     /// <see cref="ModuleGlobalsEntityName"/>, stored behind a single <c>Roamed</c> singleton
     /// <see cref="ModuleGlobalsSingletonName"/> (constructed + promoted at the top of <c>start()</c>).
     /// Field initializers run in dependency order (a global's init may read another global; a cycle —
-    /// including self-reference, including through a free-routine call — is RA-S436). Initializers that
+    /// including self-reference, including through a free-routine call — is RV-S436). Initializers that
     /// touch no other global are folded straight into the singleton constructor; a dependent initializer
     /// runs as an ordered field assignment AFTER construction so its read sees the already-initialized
     /// field. The original <c>global</c> declarations are kept (init stripped) ONLY so semantic analysis
@@ -33,7 +33,7 @@ internal static class ModuleGlobalsSynthesisPass
     /// GlobalEntityRewritePass then deletes them and rewrites each stamped reference to
     /// <c>__globals__.field</c>.
     /// Returns false after reporting through <paramref name="report"/> when the globals cannot be
-    /// synthesized (RA-S436 / RA-S437 / RA-S438).
+    /// synthesized (RV-S436 / RV-S437 / RV-S438).
     /// </summary>
     internal static bool Run(List<(SyntaxTree.Program Program, string FilePath)> orderedFiles,
         Action<SemanticDiagnosticCode, string, SourceLocation> report)
@@ -72,7 +72,7 @@ internal static class ModuleGlobalsSynthesisPass
         }
 
         // Append (NOT prepend) the synthesized declarations: imports must stay at the top of the
-        // file (RA-S114). Declaration order does not matter for type collection.
+        // file (RV-S114). Declaration order does not matter for type collection.
         startProgram.Declarations.Add(item: entityDecl);
         startProgram.Declarations.Add(item: singletonDecl);
         startBlock.Statements.InsertRange(index: 0, collection: initStmts);
@@ -80,7 +80,7 @@ internal static class ModuleGlobalsSynthesisPass
     }
 
     /// <summary>Builds the synthesized entity declaration, singleton declaration, and the init-statement
-    /// list that gets prepended to <c>start()</c>. Returns false (after reporting RA-S437) if a dependent
+    /// list that gets prepended to <c>start()</c>. Returns false (after reporting RV-S437) if a dependent
     /// field has a type with no synthesizable default.</summary>
     private static bool TryBuildModuleGlobalsSynthesis(
         List<ModuleGlobal> globals,
@@ -186,7 +186,7 @@ internal static class ModuleGlobalsSynthesisPass
 
     /// <summary>A build-time default value for a <c>global</c> whose initializer depends on another
     /// global (so its real value is assigned after the singleton is constructed). A bare integer literal
-    /// <c>0</c> conforms to any numeric type (int/float/decimal) via RA-S767; Text and Bool have their
+    /// <c>0</c> conforms to any numeric type (int/float/decimal) via RV-S767; Text and Bool have their
     /// own empty/false defaults. Returns null for a type with no synthesizable default.</summary>
     private static LiteralExpression? DefaultInitializerFor(TypeExpression type,
         SourceLocation loc)

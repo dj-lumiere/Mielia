@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for value equality.
@@ -9,7 +9,7 @@ module System
 ### Every record and entity whose member variables all have `==` obeys `Equatable` without writing
 ### `obeys` (`needs Equatable everywhere`), and the builder writes its `eq` comparing them in order.
 ### A hand-written `eq` takes its place.
-@ra("Equatable")
+@rv("Equatable")
 protocol Equatable
 needs Equatable everywhere
     ### Returns whether both values are equal.

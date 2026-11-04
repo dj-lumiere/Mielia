@@ -13,12 +13,12 @@ module System/Concurrency
 ### :typeparam T: The values the mailbox carries.
 @self_locking
 entity Mailbox[T]
-relates RA::System.ChannelDrain[T] as Emitter
+relates RV::System.ChannelDrain[T] as Emitter
 obeys Emittable[T]
     ### The transmitting side, kept open until `close()`.
-    secret transmitter: RA::System.Transmitter[T]
+    secret transmitter: RV::System.Transmitter[T]
     ### The taking side, shared by every reader.
-    secret receiver: RA::System.SharedReceiver[T]
+    secret receiver: RV::System.SharedReceiver[T]
 
 ### Makes an empty mailbox that holds up to `capacity` values before `add_last` waits (0: each `add_last` waits for
 ### a taker).
@@ -71,5 +71,5 @@ routine Mailbox[T].count() -> Int
 
 ### Takes values in order (`for x in m`), waiting while the mailbox is empty, until it is closed and empty.
 ### :returns: The walk over the mailbox.
-routine Mailbox[T].emitter() -> RA::System.ChannelDrain[T]
+routine Mailbox[T].emitter() -> RV::System.ChannelDrain[T]
     return me.receiver.emitter()

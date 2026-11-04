@@ -1,12 +1,12 @@
 import Tally
 
-# A Counter from the `.rr` module is a parameter like a Mielia entity: the routine works on the same Counter.
+# A Counter from the `.rvr` module is a parameter like a Mielia entity: the routine works on the same Counter.
 routine touch(c: Counter)
     c.bump(name: "x")
 
 routine start()
     var xs = List[Text]()
-    var c = Counter(n: 0, names: xs.to[RA::List]())
+    var c = Counter(n: 0, names: xs.to[RV::List]())
     touch(c: c)
     touch(c: c)
     show(c.total())

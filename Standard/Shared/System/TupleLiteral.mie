@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Marker for types constructible from a **tuple literal** `(a, b, …)` of exactly `ARITY` components. Unlike
@@ -9,6 +9,6 @@ module System
 ### to the type's `ARITY`-argument constructor (arity mismatch is a build error). `Vector3D`, for example,
 ### `obeys TupleLiteral[3]`, so `(x, y, z)` constructs it. The built-in `Tuple` is handled natively; this
 ### marker is the opt-in for OTHER fixed-shape types.
-@ra("TupleLiteral")
+@rv("TupleLiteral")
 protocol TupleLiteral[ARITY]
 needs U64 ARITY

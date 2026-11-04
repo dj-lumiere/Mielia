@@ -1,6 +1,6 @@
 module EmitterTools
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents a lazy flat-map adapter that applies a transform to each source element and
@@ -10,7 +10,7 @@ module EmitterTools
 ### :typeparam TInner: The CONCRETE inner-emittable type the transform returns (the transform's
 ###   return type).
 ### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
-@ra("SelectChainedEmittable")
+@rv("SelectChainedEmittable")
 entity SelectChainedEmittable[T, TResult, TInner, TSource]
 relates SelectChainedEmitter[T, TResult, TInner, TSource/Emitter] as Emitter
 obeys Emittable[TResult]
@@ -24,7 +24,7 @@ needs TInner obeys Emittable[TResult]
 ### :typeparam TResult: The element type yielded by each inner emittable.
 ### :typeparam TInner: The concrete inner-emittable type returned by the transform.
 ### :typeparam TSourceEmitter: The concrete source emitter type (owned).
-@ra("SelectChainedEmitter")
+@rv("SelectChainedEmitter")
 entity SelectChainedEmitter[T, TResult, TInner, TSourceEmitter]
 obeys Emitter[TResult]
 needs TSourceEmitter obeys Emitter[T]
@@ -33,13 +33,13 @@ needs TInner obeys Emittable[TResult]
 
 ### Returns the stateful emitter that drives the flat-map expansion.
 ### :returns: The resulting `SelectChainedEmitter[T, TResult, TInner, TSource/Emitter]` value.
-@ra("SelectChainedEmittable.emitter")
+@rv("SelectChainedEmittable.emitter")
 routine SelectChainedEmittable[T, TResult, TInner, TSource].emitter() -> SelectChainedEmitter[T, TResult, TInner, TSource/Emitter]
 
 ### Returns the next value from the current inner buffer, refilling it as needed.
 ### The emitter calls `emit!` on the outer source whenever the buffer is exhausted.
 ### :returns: The resulting `TResult` value.
-@ra("SelectChainedEmitter.emit")
+@rv("SelectChainedEmitter.emit")
 routine SelectChainedEmitter[T, TResult, TInner, TSourceEmitter].emit() -> TResult
 
 ### Returns a lazy adapter that applies `transform` to each element and yields values from all
@@ -48,6 +48,6 @@ routine SelectChainedEmitter[T, TResult, TInner, TSourceEmitter].emit() -> TResu
 ### at build time.
 ### :param transform: The routine that maps each source element to an inner emittable.
 ### :returns: The resulting `SelectChainedEmittable[T, TResult, TInner, Me]` value.
-@ra("Emittable.select_chained")
+@rv("Emittable.select_chained")
 routine Emittable[T].select_chained[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectChainedEmittable[T, TResult, TInner, Me]
 needs TInner obeys Emittable[TResult]

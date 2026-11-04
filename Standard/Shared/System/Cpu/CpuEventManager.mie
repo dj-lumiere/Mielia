@@ -1,12 +1,12 @@
 module System/Cpu
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### The process's events from the operating system: one handler per kind, held until its event comes. Its routines
 ### are called on the type.
 ### :see: {CpuEventManager.when_terminated}, {CpuEventManager.when_interrupted}
-@ra("CpuEventManager")
+@rv("CpuEventManager")
 entity CpuEventManager
     nothing
 
@@ -15,7 +15,7 @@ entity CpuEventManager
 ### with the status {set_exit_code} stored last. A second request while it runs ends the process at once.
 ### :param handler: The handler, or `none` to let the system end the process.
 ### :returns: The handler before, `none` for none: pass it back to put it back.
-@ra("CpuEventManager.when_terminated")
+@rv("CpuEventManager.when_terminated")
 @discardable
 common routine CpuEventManager.when_terminated(handler: Callable[(), None]?) -> Callable[(), None]?
 
@@ -24,6 +24,6 @@ common routine CpuEventManager.when_terminated(handler: Callable[(), None]?) -> 
 ### ends the process, as it would without a handler.
 ### :param handler: The handler, or `none` to let the system end the process.
 ### :returns: The handler before, `none` for none: pass it back to put it back.
-@ra("CpuEventManager.when_interrupted")
+@rv("CpuEventManager.when_interrupted")
 @discardable
 common routine CpuEventManager.when_interrupted(handler: Callable[(), None]?) -> Callable[(), None]?

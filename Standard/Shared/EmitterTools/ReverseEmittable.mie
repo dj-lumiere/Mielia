@@ -1,13 +1,13 @@
 module EmitterTools
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents a lazy adapter that yields source elements in reverse order.
 ### The source is fully materialized when iteration begins.
 ### :typeparam T: The element type of the source sequence.
 ### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
-@ra("ReverseEmittable")
+@rv("ReverseEmittable")
 entity ReverseEmittable[T, TSource]
 relates ReverseEmitter[T] as Emitter
 obeys Emittable[T]
@@ -19,24 +19,24 @@ needs TSource obeys Emittable[T]
 ### that makes it, so the source outlives it, and a source cannot change while it is iterated. The buffer frees
 ### its storage and leaves the values to the source.
 ### :typeparam T: The element type of the reversed sequence.
-@ra("ReverseEmitter")
+@rv("ReverseEmitter")
 entity ReverseEmitter[T]
 obeys Emitter[T]
     nothing
 
 ### Materializes the source into a buffer and returns an emitter that walks it backwards.
 ### :returns: The resulting `ReverseEmitter[T]` value.
-@ra("ReverseEmittable.emitter")
+@rv("ReverseEmittable.emitter")
 routine ReverseEmittable[T, TSource].emitter() -> ReverseEmitter[T]
 
 ### Returns the next element counting backward through the buffer.
 ### Signals absence once all elements have been yielded.
 ### :returns: The resulting `T` value.
-@ra("ReverseEmitter.emit")
+@rv("ReverseEmitter.emit")
 routine ReverseEmitter[T].emit() -> T
 
 ### Returns a lazy adapter that yields this emittable's elements in reverse order.
 ### The source is fully consumed when the returned adapter is first iterated.
 ### :returns: The resulting `ReverseEmittable[T, Me]` value.
-@ra("Emittable.reverse")
+@rv("Emittable.reverse")
 routine Emittable[T].reverse() -> ReverseEmittable[T, Me]

@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the protocol for total or partial value ordering.
@@ -8,7 +8,7 @@ module System
 ### consistent with equality and can drive the relational operator family.
 ### `needs Comparable everywhere` auto-confers Comparable on any member-bearing type all of whose
 ### members are themselves Comparable — the structural gate that drives the auto-derived `compare`.
-@ra("Comparable")
+@rv("Comparable")
 protocol Comparable
 obeys Equatable
 needs Comparable everywhere

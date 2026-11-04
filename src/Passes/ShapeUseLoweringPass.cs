@@ -24,7 +24,7 @@ namespace Mielia.Passes;
 /// through a handle to a <c>@reshaping</c> routine (one that can add, remove or move elements) is preceded by
 /// <c>handle.require_shape_free()</c>, which crashes with ReshapingWhileInUseError while a use is open. A
 /// Mielia entity is reached only through handles, so this catches the change even when it is hidden behind
-/// other calls, where the build-time checks (RA-S625, RA-S639) cannot see it. Uses are counted, so nested
+/// other calls, where the build-time checks (RV-S625, RV-S639) cannot see it. Uses are counted, so nested
 /// loops and element calls on one entity stack. A failure inside an open use ends the program, so that use
 /// never needs closing.
 /// <para>Runs on user programs after OperatorLoweringPass. The begin/end calls are spliced into the

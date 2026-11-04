@@ -19,7 +19,7 @@ routine run_program(
     working_directory: Directory = Directory(at: ""),
     env: Dict[Text, Text] = {:},
 ) -> ProcessResult
-    var shared_args = args.to[RA::List]()
+    var shared_args = args.to[RV::List]()
     return run_program(
         file: file,
         args: shared_args,
@@ -30,8 +30,8 @@ routine run_program(
 ### The environment additions as the shared library's dictionary.
 ### :param env: The additions.
 ### :returns: The same names and values.
-secret routine shared_env(env: Dict[Text, Text]) -> RA::System.Dict[Text, Text]
-    var result = RA::System.Dict[Text, Text]()
+secret routine shared_env(env: Dict[Text, Text]) -> RV::System.Dict[Text, Text]
+    var result = RV::System.Dict[Text, Text]()
     for name in env.keys()
         result[name] = env[name]
     return result

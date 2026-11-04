@@ -192,46 +192,46 @@ public sealed class ExitCodeTests
         }
     }
 
-    /// <summary>An entity from an imported `.rr` module works as a local and as a member variable of a Mielia entity:
+    /// <summary>An entity from an imported `.rvr` module works as a local and as a member variable of a Mielia entity:
     /// its routines are built as Revare code and it is released once.</summary>
     [Fact]
     public void RevareEntity_UsedFromMielia_RunsAndIsReleasedOnce()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.mie", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.mie", folder: "RvInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "2\n12\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A List a `.rr` routine makes and returns stays that module's list: the routine's body is Revare
+    /// <summary>A List a `.rvr` routine makes and returns stays that module's list: the routine's body is Revare
     /// code, so its construction is not made a shared handle, and the Mielia side reads and converts the list.</summary>
     [Fact]
     public void RevareRoutine_ReturnsList_ReadsInMielia()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.mie", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.mie", folder: "RvInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "[1, 4, 9, 16]\n130\n14", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A `.rr` entity is a parameter like a Mielia entity: the routine works on the same object.</summary>
+    /// <summary>A `.rvr` entity is a parameter like a Mielia entity: the routine works on the same object.</summary>
     [Fact]
     public void RevareEntity_Parameter_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.mie", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.mie", folder: "RvInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A second name for a `.rr` entity reaches the same object, as for a Mielia entity.</summary>
+    /// <summary>A second name for a `.rvr` entity reaches the same object, as for a Mielia entity.</summary>
     [Fact]
     public void RevareEntity_SecondName_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.mie", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.mie", folder: "RvInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");

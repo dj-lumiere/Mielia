@@ -1,13 +1,13 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the call-trace payload captured for runtime failures.
 ### `RoutineTrace` is a compact inline record used by diagnostics and crash
 ### reporting to preserve the most recent routine frames without heap
 ### allocation during failure handling.
-@ra("RoutineTrace")
+@rv("RoutineTrace")
 record RoutineTrace
     ### Stores the recorded routine frames in caller-to-callee order.
     ### Only the prefix indicated by `depth` is considered valid.
@@ -22,5 +22,5 @@ record RoutineTrace
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("RoutineTrace.hash")
+@rv("RoutineTrace.hash")
 routine RoutineTrace.hash(k0: U64, k1: U64) -> U64

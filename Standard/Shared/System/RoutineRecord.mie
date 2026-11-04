@@ -1,12 +1,12 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents one frame in a captured runtime routine trace.
 ### The stored ids point into builder-generated lookup tables used for stack reporting.
 ### This record is intentionally compact because traces are kept inline in runtime error state.
-@ra("RoutineRecord")
+@rv("RoutineRecord")
 record RoutineRecord
     ### Stores the source file identifier.
     file_id: U32
@@ -25,5 +25,5 @@ record RoutineRecord
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("RoutineRecord.hash")
+@rv("RoutineRecord.hash")
 routine RoutineRecord.hash(k0: U64, k1: U64) -> U64

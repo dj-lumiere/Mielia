@@ -1,6 +1,6 @@
 module Random
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### A seedable pseudo-random number generator built on xoshiro256**.
@@ -14,10 +14,10 @@ module Random
 ### the same sequence. This is a statistical generator for simulations, games,
 ### sampling, and shuffling — it is NOT cryptographically secure.
 ###
-### The generator's arithmetic is Lapila's `Xoshiro256` (Standard/Random.li), called
+### The generator's arithmetic is Lapila's `Xoshiro256` (Standard/Random.lpa), called
 ### through Ingrid (`C::ingrid_xoshiro256ss_*`): this entity keeps the four state words, and
 ### a seed gives the same stream on every platform.
-@ra("Random")
+@rv("Random")
 entity Random
     nothing
 
@@ -25,7 +25,7 @@ entity Random
 ### four xoshiro256** state words.
 ### :param x: The running splitmix64 accumulator.
 ### :returns: The next well-mixed `U64` output.
-@ra("splitmix64_next")
+@rv("splitmix64_next")
 routine splitmix64_next(x: U64) -> U64
 
 ### Creates a generator seeded from a single `U64` value.
@@ -33,83 +33,83 @@ routine splitmix64_next(x: U64) -> U64
 ### well-distributed regardless of how small or patterned the seed is.
 ### :param seed: The seed value; equal seeds replay equal streams.
 ### :returns: A fresh `Random` generator.
-@ra("make_random")
+@rv("make_random")
 routine make_random(seed: U64) -> Random
 
 ### Creates a generator seeded with 256 random bits from the operating system's random source ({Entropy}), so every
 ### run gets a stream of its own.
 ### :returns: A fresh `Random` generator.
-@ra("Random.from_entropy")
+@rv("Random.from_entropy")
 common routine Random.from_entropy() -> Random
 
 ### Advances the generator and returns the next 64 random bits: `rng.next[U64]()`.
 ### This is the core draw, and every other one is built from it.
 ### :returns: The next uniformly distributed `U64` in the full 64-bit range.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[U64]() -> U64
 
 ### Advances the generator and returns the next `U8` over its full range: the high 8 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `U8`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[U8]() -> U8
 
 ### Advances the generator and returns the next `U16` over its full range: the high 16 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `U16`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[U16]() -> U16
 
 ### Advances the generator and returns the next `U32` over its full range: the high 32 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `U32`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[U32]() -> U32
 
 ### Advances the generator and returns the next `S8` over its full range: the high 8 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `S8`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[S8]() -> S8
 
 ### Advances the generator and returns the next `S16` over its full range: the high 16 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `S16`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[S16]() -> S16
 
 ### Advances the generator and returns the next `S32` over its full range: the high 32 bits of one 64-bit draw,
 ### which carry the strongest statistical quality in xoshiro256**.
 ### :returns: The next uniformly distributed `S32`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[S32]() -> S32
 
 ### Advances the generator and returns the next `S64` over its full range: the 64 bits of one draw.
 ### :returns: The next uniformly distributed `S64`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[S64]() -> S64
 
 ### Advances the generator twice and returns the next `U128` over its full range: the first draw is the high 64
 ### bits, the second the low 64 bits.
 ### :returns: The next uniformly distributed `U128`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[U128]() -> U128
 
 ### Advances the generator twice and returns the next `S128` over its full range: the bits of `next[U128]()`.
 ### :returns: The next uniformly distributed `S128`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[S128]() -> S128
 
 ### Advances the generator and returns the next `B64` in the half-open unit interval `[0.0, 1.0)`: the top 53 bits of
 ### a draw (the width of a `B64` mantissa) times 2^-53, so every multiple of 2^-53 below 1 is equally likely.
 ### :returns: A uniformly distributed `B64` in `[0.0, 1.0)`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[B64]() -> B64
 
 ### Advances the generator and returns the next `B32` in the half-open unit interval `[0.0, 1.0)`: the top 24 bits of
 ### a draw (the width of a `B32` mantissa) times 2^-24, so every multiple of 2^-24 below 1 is equally likely.
 ### :returns: A uniformly distributed `B32` in `[0.0, 1.0)`.
-@ra("Random.next")
+@rv("Random.next")
 routine Random.next[B32]() -> B32
 
 ### Returns whether a Bernoulli trial with the given success probability
@@ -118,7 +118,7 @@ routine Random.next[B32]() -> B32
 ###   handled by clamping behaviour (`<= 0.0` never succeeds, `>= 1.0` always
 ###   succeeds).
 ### :returns: `true` with the given probability, otherwise `false`.
-@ra("Random.chance")
+@rv("Random.chance")
 routine Random.chance(probability: B64) -> Bool
 
 ### Returns a uniformly distributed value in the half-open range
@@ -127,5 +127,5 @@ routine Random.chance(probability: B64) -> Bool
 ### :param high: The exclusive upper bound.
 ### :returns: A `U64` in `[low, high)`.
 ### :throws: if `high <= low` (empty range) — the modulo has no valid width.
-@ra("Random.range")
+@rv("Random.range")
 routine Random.range(low: U64, high: U64) -> U64

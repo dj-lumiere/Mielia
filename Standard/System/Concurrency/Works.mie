@@ -10,7 +10,7 @@ module System/Concurrency
 ### :typeparam T: The value the routine returns.
 entity Work[T]
     ### The work: where it runs, its fiber or thread, and its result.
-    secret state: RA::System.WorkState[T]
+    secret state: RV::System.WorkState[T]
     ### The wait deadline of the next `retrieve`; only meaningful when `has_deadline` is true.
     secret deadline: Duration
     ### Whether `waitfor` gave the next `retrieve` a deadline.

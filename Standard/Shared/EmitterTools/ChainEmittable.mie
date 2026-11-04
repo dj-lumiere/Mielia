@@ -1,6 +1,6 @@
 module EmitterTools
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents a lazy adapter that yields one emittable after another.
@@ -8,7 +8,7 @@ module EmitterTools
 ### :typeparam T: The element type produced by both source sequences.
 ### :typeparam TFirstSource: The concrete first source emittable type (borrowed).
 ### :typeparam TSecondSource: The concrete second source emittable type (borrowed).
-@ra("ChainEmittable")
+@rv("ChainEmittable")
 entity ChainEmittable[T, TFirstSource, TSecondSource]
 relates ChainEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter] as Emitter
 obeys Emittable[T]
@@ -20,7 +20,7 @@ needs TSecondSource obeys Emittable[T]
 ### :typeparam T: The element type produced by the concatenated sequence.
 ### :typeparam TFirstEmitter: The concrete first source emitter type (owned).
 ### :typeparam TSecondEmitter: The concrete second source emitter type (owned).
-@ra("ChainEmitter")
+@rv("ChainEmitter")
 entity ChainEmitter[T, TFirstEmitter, TSecondEmitter]
 obeys Emitter[T]
 needs TFirstEmitter obeys Emitter[T]
@@ -30,11 +30,11 @@ needs TSecondEmitter obeys Emitter[T]
 ### Returns the stateful emitter that concatenates the two source sequences.
 ### The returned emitter walks `first` to completion before switching to `second`.
 ### :returns: The resulting `ChainEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter]` value.
-@ra("ChainEmittable.emitter")
+@rv("ChainEmittable.emitter")
 routine ChainEmittable[T, TFirstSource, TSecondSource].emitter() -> ChainEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter]
 
 ### Returns the next value from the concatenated sequence.
 ### Once the first emitter is exhausted, all remaining values come from the second emitter.
 ### :returns: The resulting `T` value.
-@ra("ChainEmitter.emit")
+@rv("ChainEmitter.emit")
 routine ChainEmitter[T, TFirstEmitter, TSecondEmitter].emit() -> T

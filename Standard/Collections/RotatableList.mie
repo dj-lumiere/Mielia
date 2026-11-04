@@ -69,7 +69,7 @@ routine RotatableList[T](count: Int, fill_value: T) -> RotatableList[T]
 common routine RotatableList[T].from_serial(value: SerialValue) -> RotatableList[T]
     var result = RotatableList[T]()
     when value
-        is RA::System.List[SerialValue] as items =>
+        is RV::System.List[SerialValue] as items =>
             for item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
@@ -388,7 +388,7 @@ routine RotatableList[T].duplicate() -> RotatableList[T]
 ### Returns the list as a `SerialValue.List` of its serialized elements.
 @override
 routine RotatableList[T].serialize() -> SerialValue
-    var result = RA::System.List[SerialValue]()
+    var result = RV::System.List[SerialValue]()
     for element in me
         result.add_last(value: element.serialize())
     return SerialValue(result.duplicate())

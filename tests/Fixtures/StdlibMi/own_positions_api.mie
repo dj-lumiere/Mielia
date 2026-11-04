@@ -15,7 +15,7 @@ routine start()
     var xs = ["a", "b", "c"]
     show(f"find={find(items: xs, name: "c")} last={xs[^1]} second_last={xs[^2]} tail={xs[1 til ^0].count()}")
     show(f"text_last={"hello"[^1]} text_find={"hello".find(other: "l")}")
-    var rf = xs.to[RA::List]()
+    var rf = xs.to[RV::List]()
     var back = rf.to[List]()
     var unique = xs.to[Set]().to[List]()
     show(f"rf={rf.count()} back={back.count() + 1} unique={unique.count()}")

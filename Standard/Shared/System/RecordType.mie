@@ -1,6 +1,6 @@
 module System
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents the aggregate protocol for plain value records.
@@ -9,5 +9,5 @@ module System
 ### every member variable has `==` (or the record writes its own `eq`), and `Hashable`/`Comparable` only
 ### when the record declares `obeys` for them. Conferring them here would promise an `eq` even for a
 ### record whose member variable has none.
-@ra("RecordType")
+@rv("RecordType")
 protocol RecordType

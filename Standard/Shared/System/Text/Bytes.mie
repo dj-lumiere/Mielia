@@ -1,6 +1,6 @@
 module System/Text
 
-# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
 ### Represents an immutable byte sequence with value semantics.
@@ -14,14 +14,14 @@ module System/Text
 ### `Bytes` shares the list (its `Guarded` owner counts one more holder) and copies the `data`/`count` cache, so a
 ### read never goes through the owner. The last copy to go ends the list. An empty sequence and a bytes literal have
 ### no owner: nothing is counted or freed.
-@ra("Bytes")
+@rv("Bytes")
 record Bytes
 relates BytesEmitter as Emitter
 obeys Copyable, Addable, Emittable[Byte], Comparable, Hashable
     nothing
 
 ### Represents the emitter used to traverse a `Bytes` value.
-@ra("BytesEmitter")
+@rv("BytesEmitter")
 entity BytesEmitter
 obeys Emitter[Byte]
     ### Stores the source byte sequence.
@@ -31,61 +31,61 @@ obeys Emitter[Byte]
 
 ### Represents a strict lazy UTF-8 view over a borrowed `Bytes` value.
 ### Iteration throws {MalformedUtf8Error} on the first ill-formed subsequence.
-@ra("BytesUtf8View")
+@rv("BytesUtf8View")
 record BytesUtf8View
 relates BytesUtf8Emitter as Emitter
 obeys Emittable[Char]
     nothing
 
 ### Represents the emitter backing {BytesUtf8View}.
-@ra("BytesUtf8Emitter")
+@rv("BytesUtf8Emitter")
 entity BytesUtf8Emitter
     ### Stores the index.
     index: U64
 
 ### Represents a lossy lazy UTF-8 view over a borrowed `Bytes` value.
 ### Iteration substitutes U+FFFD for any ill-formed subsequence and never fails.
-@ra("BytesUtf8LossyView")
+@rv("BytesUtf8LossyView")
 record BytesUtf8LossyView
 relates BytesUtf8LossyEmitter as Emitter
 obeys Emittable[Char]
     nothing
 
 ### Represents the emitter backing {BytesUtf8LossyView}.
-@ra("BytesUtf8LossyEmitter")
+@rv("BytesUtf8LossyEmitter")
 entity BytesUtf8LossyEmitter
     ### Stores the index.
     index: U64
 
 ### Copy (Copyable): a `Bytes` is immutable, so a copy shares the same bytes.
-@ra("Bytes.duplicate")
+@rv("Bytes.duplicate")
 routine Bytes.duplicate() -> Bytes
 
 ### Returns `true` when this byte sequence has no stored bytes.
 ### This is equivalent to checking whether `count()` is `0`.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.is_empty")
+@rv("Bytes.is_empty")
 routine Bytes.is_empty() -> Bool
 
 ### Returns a new value with `other` appended.
 ### Both input byte sequences remain unchanged.
 ### :param other: The byte sequence to append.
 ### :returns: The resulting `Bytes` value.
-@ra("Bytes.concat")
+@rv("Bytes.concat")
 routine Bytes.concat(other: Bytes) -> Bytes
 
 ### Returns the sum of this value and the other value.
 ### This is the operator form of `concat`.
 ### :param other: The byte sequence to append.
 ### :returns: The resulting `Bytes` value.
-@ra("Bytes.add")
+@rv("Bytes.add")
 routine Bytes.add(other: Bytes) -> Bytes
 
 ### Returns whether both values are equal.
 ### Equality requires the same length and the same byte at each position.
 ### :param you: The other byte sequence to compare against.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.eq")
+@rv("Bytes.eq")
 routine Bytes.eq(you: Bytes) -> Bool
 
 ### Compares this value with the other value.
@@ -93,7 +93,7 @@ routine Bytes.eq(you: Bytes) -> Bool
 ### prefix of a longer one sorts first. Lets `Bytes` be sorted and used as a map key.
 ### :param you: The other byte sequence to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@ra("Bytes.compare")
+@rv("Bytes.compare")
 routine Bytes.compare(you: Bytes) -> ComparisonSign
 
 ### Returns a SipHash-2-4 keyed hash of this value.
@@ -102,63 +102,63 @@ routine Bytes.compare(you: Bytes) -> ComparisonSign
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: The resulting `U64` keyed hash.
-@ra("Bytes.hash")
+@rv("Bytes.hash")
 routine Bytes.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `true` when this byte sequence contains `byte`.
 ### :param byte: The byte to search for.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.has")
+@rv("Bytes.has")
 routine Bytes.has(byte: Byte) -> Bool
 
 ### Returns whether `byte` is not in this value: the opposite of `has`.
 ### :param byte: The value to look for.
 ### :returns: `true` when `byte` is absent.
-@ra("Bytes.lacks")
+@rv("Bytes.lacks")
 routine Bytes.lacks(byte: Byte) -> Bool
 
 ### Returns `true` when this byte sequence contains `other` as a contiguous sub-sequence.
 ### An empty `other` is always considered contained.
 ### :param other: The sub-sequence to search for.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.has")
+@rv("Bytes.has")
 routine Bytes.has(other: Bytes) -> Bool
 
 ### Returns whether `other` is not in this value: the opposite of `has`.
 ### :param other: The value to look for.
 ### :returns: `true` when `other` is absent.
-@ra("Bytes.lacks")
+@rv("Bytes.lacks")
 routine Bytes.lacks(other: Bytes) -> Bool
 
 ### Returns `true` when this byte sequence begins with `prefix`.
 ### :param prefix: The prefix to test.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.starts_with")
+@rv("Bytes.starts_with")
 routine Bytes.starts_with(prefix: Bytes) -> Bool
 
 ### Returns `true` when this byte sequence ends with `suffix`.
 ### :param suffix: The suffix to test.
 ### :returns: The resulting `Bool` value.
-@ra("Bytes.ends_with")
+@rv("Bytes.ends_with")
 routine Bytes.ends_with(suffix: Bytes) -> Bool
 
 ### Returns a copy with the value order reversed.
 ### Bytes are reversed by position with no interpretation as text.
 ### :returns: The resulting `Bytes` value.
-@ra("Bytes.reverse")
+@rv("Bytes.reverse")
 routine Bytes.reverse() -> Bytes
 
 ### Returns this byte as exactly two lowercase hexadecimal digits, high nibble first (`0x0F` is `0f`), the
 ### per-byte form of `Bytes.to_hex`.
 ### :returns: The two-digit hexadecimal `Text`.
-@ra("Byte.to_hex")
+@rv("Byte.to_hex")
 routine Byte.to_hex() -> Text
 
 ### Returns the lowercase hexadecimal encoding of this sequence.
 ### Each byte becomes exactly two hex digits (high nibble first), so the result is
 ### always `2 * count()` characters. The inverse is `Bytes.from_hex!`.
 ### :returns: The resulting `Text` value.
-@ra("Bytes.to_hex")
+@rv("Bytes.to_hex")
 routine Bytes.to_hex() -> Text
 
 ### Decodes a hexadecimal string into bytes.
@@ -166,50 +166,50 @@ routine Bytes.to_hex() -> Text
 ### :param hex: The hex string to decode; its length must be even.
 ### :returns: The resulting `Bytes` value.
 ### :throws: {InvalidValueError} on an odd length or a non-hex character.
-@ra("Bytes.from_hex")
+@rv("Bytes.from_hex")
 routine Bytes.from_hex(hex: Text) -> Bytes
 
 ### Returns an emitter over this byte sequence.
 ### The emitter starts at byte index `0`.
 ### :returns: The resulting `BytesEmitter` value.
-@ra("Bytes.emitter")
+@rv("Bytes.emitter")
 routine Bytes.emitter() -> BytesEmitter
 
 ### Returns the next byte from this emitter.
 ### Each successful call yields one byte and advances the internal index.
 ### :returns: The resulting `Byte` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
-@ra("BytesEmitter.emit")
+@rv("BytesEmitter.emit")
 routine BytesEmitter.emit() -> Byte
 
 ### Returns the display form of this byte sequence.
 ### Each byte is rendered as `\xHH` with two uppercase hex digits.
 ### :returns: The resulting `Text` value.
-@ra("Bytes.represent")
+@rv("Bytes.represent")
 routine Bytes.represent() -> Text
 
 ### Returns the diagnostic form of this byte sequence.
 ### The diagnostic form includes both the byte count and the escaped payload.
 ### :returns: The resulting `Text` value.
-@ra("Bytes.diagnose")
+@rv("Bytes.diagnose")
 routine Bytes.diagnose() -> Text
 
 ### Encodes this text value as UTF-8 bytes.
 ### :returns: The resulting `Bytes` value.
-@ra("Text.encode_as_utf8")
+@rv("Text.encode_as_utf8")
 routine Text.encode_as_utf8() -> Bytes
 
 ### Decodes this byte sequence as UTF-8, replacing malformed subsequences with
 ### the Unicode replacement character.
 ### :returns: The resulting `Text` value.
-@ra("Bytes.decode_as_utf8_lossy")
+@rv("Bytes.decode_as_utf8_lossy")
 routine Bytes.decode_as_utf8_lossy() -> Text
 
 ### Decodes this byte sequence as UTF-8.
 ### Malformed input causes a `MalformedUtf8Error` instead of lossy replacement.
 ### :returns: The resulting `Text` value.
 ### :throws: May throw {MalformedUtf8Error}.
-@ra("Bytes.decode_as_utf8")
+@rv("Bytes.decode_as_utf8")
 routine Bytes.decode_as_utf8() -> Text
 
 ### Returns a strict lazy UTF-8 view over this byte sequence.
@@ -218,50 +218,50 @@ routine Bytes.decode_as_utf8() -> Text
 ### are mutated after construction.
 ### :returns: The resulting `BytesUtf8View` value.
 ### :throws: {MalformedUtf8Error} if these bytes are not well-formed UTF-8.
-@ra("Bytes.interpret_as_utf8")
+@rv("Bytes.interpret_as_utf8")
 routine Bytes.interpret_as_utf8() -> BytesUtf8View
 
 ### Returns a lossy lazy UTF-8 view over this byte sequence.
 ### Malformed subsequences are surfaced as the Unicode replacement character
 ### (U+FFFD) during iteration.
 ### :returns: The resulting `BytesUtf8LossyView` value.
-@ra("Bytes.interpret_as_utf8_lossy")
+@rv("Bytes.interpret_as_utf8_lossy")
 routine Bytes.interpret_as_utf8_lossy() -> BytesUtf8LossyView
 
 ### Returns an emitter over this strict UTF-8 view.
 ### :returns: The resulting `BytesUtf8Emitter` value.
-@ra("BytesUtf8View.emitter")
+@rv("BytesUtf8View.emitter")
 routine BytesUtf8View.emitter() -> BytesUtf8Emitter
 
 ### Returns an emitter over this lossy UTF-8 view.
 ### :returns: The resulting `BytesUtf8LossyEmitter` value.
-@ra("BytesUtf8LossyView.emitter")
+@rv("BytesUtf8LossyView.emitter")
 routine BytesUtf8LossyView.emitter() -> BytesUtf8LossyEmitter
 
 ### Returns the next decoded character from this strict UTF-8 emitter.
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 ### :throws: {MalformedUtf8Error} on the first ill-formed subsequence.
-@ra("BytesUtf8Emitter.emit")
+@rv("BytesUtf8Emitter.emit")
 routine BytesUtf8Emitter.emit() -> Char
 
 ### Returns the next decoded character from this lossy UTF-8 emitter.
 ### Malformed subsequences are surfaced as the replacement character (U+FFFD).
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when iteration is exhausted.
-@ra("BytesUtf8LossyEmitter.emit")
+@rv("BytesUtf8LossyEmitter.emit")
 routine BytesUtf8LossyEmitter.emit() -> Char
 
 ### Returns a SipHash-2-4 keyed hash of the underlying byte buffer's address.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("BytesUtf8View.hash")
+@rv("BytesUtf8View.hash")
 routine BytesUtf8View.hash(k0: U64, k1: U64) -> U64
 
 ### Returns a SipHash-2-4 keyed hash of this emitter.
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
-@ra("BytesUtf8Emitter.hash")
+@rv("BytesUtf8Emitter.hash")
 routine BytesUtf8Emitter.hash(k0: U64, k1: U64) -> U64
