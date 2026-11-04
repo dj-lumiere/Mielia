@@ -38,7 +38,7 @@ obeys Emittable[T], Container
 ### collection reaches its places through its own handle and the one block handle. The standard library's
 ### collections use it, and a program uses `Memory[T]` instead: copies of a `Places[T]` do not share one row.
 ### :typeparam T: The element type stored in the places.
-record Places[T]
+secret record Places[T]
     ### The places, a handle shared with every span and walk of this row.
     secret block: MemoryBlock[T]
 

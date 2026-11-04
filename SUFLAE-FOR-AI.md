@@ -182,7 +182,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   bit set → **`flags`**; sum type → **`variant`**; error type → **`crashable`**; interface/trait →
   **`protocol`**, adopted with **`obeys`**.
 - field → **member variable**, a bare `name: Type` line in the type body (no `var`). Visibility is written
-  only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private: seen in its module and the modules under it).
+  only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private: seen in its module and the modules under it). In the standard library a secret name is seen by the whole library and by no program.
   Giving a `secret` or `posted` member variable a value in `T(field: value, ...)` is allowed only inside the
   type's module (SF-S403 / SF-S404): outside, build it with a routine the module opens (`HttpResult.ok(body: b)`).
 - Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
