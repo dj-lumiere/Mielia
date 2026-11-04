@@ -1,0 +1,40 @@
+module Tests/StdlibSf/RecordFieldOverwriteApi
+
+import IO/Console
+import ObjectHacker
+
+entity Item
+    id: Int
+
+record Slot
+    item: Item
+    tag: Int
+
+entity Holder
+    slot: Slot
+    pair: (Item, Int)
+    maybe: Slot?
+
+# Writing a new record over a member variable that holds entity handles drops the shares of the old record: the
+# entity behind it is gone once nothing else holds it, and writing a record over itself loses nothing.
+
+routine start()
+    var a = Item(id: 1)
+    var b = Item(id: 3)
+    var c = Item(id: 5)
+    var sa = watch(target: a)
+    var sb = watch(target: b)
+    var sc = watch(target: c)
+    var holder = Holder(slot: Slot(item: a, tag: 1), pair: (b, 1), maybe: Slot(item: c, tag: 1))
+    a = Item(id: 2)
+    b = Item(id: 4)
+    c = Item(id: 6)
+    holder.slot = holder.slot
+    holder.pair = holder.pair
+    holder.maybe = holder.maybe
+    show(f"self: {sa.is_alive()} {sb.is_alive()} {sc.is_alive()} {holder.slot.item.id} {holder.pair.item0.id}")
+    holder.slot = Slot(item: a, tag: 2)
+    holder.pair = (a, 2)
+    holder.maybe = none
+    show(f"overwritten: {sa.is_alive()} {sb.is_alive()} {sc.is_alive()}")
+    return

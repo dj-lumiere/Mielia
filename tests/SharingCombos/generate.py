@@ -20,7 +20,7 @@ SITES = ["start", "routine", "try", "work"]
 DESTS = ["field", "list", "dict", "set", "sorteddict", "sortedset", "sortedlist"]
 VALUES = ["handle", "record", "tuple", "variant", "nested", "chain"]
 ORDERED_ELEMENTS = ["set", "sortedset", "sortedlist"]
-WAITS = ["retrieve_local", "retrieve_list", "gather", "mailbox", "channel"]
+WAITS = ["retrieve_local", "retrieve_list", "retrieve_list_needs", "gather", "mailbox", "channel"]
 
 # What the value kinds declare, and how a value is made and how its Box is reached.
 VALUE_DECLS = {
@@ -194,6 +194,26 @@ routine start()
     var jobs = [touch.to[Work](holder: holder)]
     jobs[0].start_now()
     show(f"got {jobs[0].retrieve()} holder {holder.x}")
+    show("RESULT ok")
+    return
+"""
+    if wait == "retrieve_list_needs":
+        # The Work needs the list it sits in: waiting for jobs[0] must not hold the list.
+        return """import IO/Console
+
+routine peek(jobs: List[Work[Int]]) -> Int
+    waitfor(20ms)
+    return jobs.count()
+
+routine start()
+    var jobs = List[Work[Int]]()
+    jobs.add_last(peek.to[Work](jobs: jobs))
+    jobs.add_last(peek.to[Work](jobs: jobs))
+    jobs[0].start_now()
+    jobs[1].start_now()
+    show(f"nested {jobs[0].retrieve()}")
+    var whole = jobs[1].retrieve()
+    show(f"whole {whole}")
     show("RESULT ok")
     return
 """
