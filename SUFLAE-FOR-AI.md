@@ -1328,6 +1328,14 @@ routine start()
   message names jobs and entities only. All the globals of a program are behind one lock, so statements that use
   globals of several modules never wait on each other, and a statement that uses globals and a shared entity, run by
   two jobs in opposite orders, ends with a `Deadlock error` in every build mode.
+- **Finding a race the program has.** `[debug] sanitize = "thread"` in config.toml builds the program with
+  ThreadSanitizer (Linux and macOS): every memory access of the program and of the runtime is watched, and two
+  accesses from different threads that no lock or atomic orders are reported when they happen, with both places
+  (`WARNING: ThreadSanitizer: data race`). The program runs several times slower, is built by the local build (not the
+  daemon or the JIT), and the exit status is 66 when something was reported. A debug build also checks the sharing of
+  entities: an entity that other jobs can reach must hold only entities they can reach safely, and a build that finds
+  one that does not stops with `Sharing violation error` naming the type that holds it. That is a bug in the builder
+  or a library, not in your program. The release modes carry neither check.
 - There is no thread type in Suflae.
 
 ```suflae
