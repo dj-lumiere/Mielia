@@ -13,17 +13,17 @@ public sealed class ImportOrderTests
     private static readonly Dictionary<string, string> Modules = new()
     {
         [key: "config.toml"] = "[package]\nname = \"imports\"\nversion = \"0.0.1\"\n\n[target]\nexecutable = \"App\"\nmode = \"debug\"\n",
-        [key: "Base.mi"] = "module Base\n\nentity Counter\n    n: S64\n",
+        [key: "Base.mie"] = "module Base\n\nentity Counter\n    n: S64\n",
         // Adds a routine to a type of another module: it is seen where Ext is imported.
-        [key: "Ext.mi"] = "module Ext\n\nimport Base\n\nroutine Counter.plus_two() -> S64\n    return me.n + 2\n",
-        [key: "A.mi"] = "module A\n\nrecord Thing\n    v: S64\n\nroutine twin() -> S64\n    return 1\n\n" +
+        [key: "Ext.mie"] = "module Ext\n\nimport Base\n\nroutine Counter.plus_two() -> S64\n    return me.n + 2\n",
+        [key: "A.mie"] = "module A\n\nrecord Thing\n    v: S64\n\nroutine twin() -> S64\n    return 1\n\n" +
                         "routine describe() -> S64\n    return 10\n\nroutine pick(x: S64) -> S64\n    return x + 100\n",
-        [key: "B.mi"] = "module B\n\nroutine twin() -> S64\n    return 2\n\n" +
+        [key: "B.mie"] = "module B\n\nroutine twin() -> S64\n    return 2\n\n" +
                         "routine describe() -> S64\n    return 20\n\nroutine pick(x: Text) -> S64\n    return 7\n",
-        [key: "C.mi"] = "module C\n\nrecord Gizmo\n    w: S64\n\nroutine gadget() -> S64\n    return 5\n\n" +
+        [key: "C.mie"] = "module C\n\nrecord Gizmo\n    w: S64\n\nroutine gadget() -> S64\n    return 5\n\n" +
                         "routine twin() -> S64\n    return 6\n",
-        [key: "D.mi"] = "module D\n\nroutine describe() -> S64\n    return 30\n\nroutine only_d() -> S64\n    return 4\n",
-        [key: "E.mi"] = "module E\n\nroutine thing() -> S64\n    return 8\n"
+        [key: "D.mie"] = "module D\n\nroutine describe() -> S64\n    return 30\n\nroutine only_d() -> S64\n    return 4\n",
+        [key: "E.mie"] = "module E\n\nroutine thing() -> S64\n    return 8\n"
     };
 
     // Whole-module imports, member imports (one name, several names, with an alias) and a module alias.
@@ -146,7 +146,7 @@ public sealed class ImportOrderTests
                     File.WriteAllText(path: Path.Combine(path1: dir, path2: name), contents: text);
                 }
 
-                File.WriteAllText(path: Path.Combine(path1: dir, path2: "App.mi"), contents: source(arg: order));
+                File.WriteAllText(path: Path.Combine(path1: dir, path2: "App.mie"), contents: source(arg: order));
                 (int exit, string output) = Run(verb: verb, dir: dir);
                 results.Add(item: (string.Join(separator: " | ", value: order), exit, Normalize(text: output, dir: dir)));
             }
@@ -206,7 +206,7 @@ public sealed class ImportOrderTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: dir), verb, Path.Combine(path1: dir, path2: "App.mi") },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: dir), verb, Path.Combine(path1: dir, path2: "App.mie") },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,

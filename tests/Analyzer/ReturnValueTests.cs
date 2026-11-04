@@ -25,7 +25,7 @@ public class ReturnValueTests
                         show(is_big(p: Point(x: 5)))
                         """;
 
-        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "value_without_arrow.mi");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "value_without_arrow.mie");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                          e.Message.Contains(value: "'is_big' gives nothing back") &&
@@ -42,7 +42,7 @@ public class ReturnValueTests
                             return false
                         """;
 
-        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "bare_in_value.mi");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "bare_in_value.mie");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                          e.Message.Contains(value: "'is_big' gives back a 'Bool'"));
@@ -58,7 +58,7 @@ public class ReturnValueTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "mixed_returns.mi");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "mixed_returns.mie");
         Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                             e.Message.Contains(value: "'mixed' gives nothing back"));
@@ -78,7 +78,7 @@ public class ReturnValueTests
                         greet(x: 5)
                         """;
 
-        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "none_without_return.mi");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "none_without_return.mie");
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code is SemanticDiagnosticCode.ReturnTypeMismatch or SemanticDiagnosticCode.MissingReturn);
     }
@@ -94,7 +94,7 @@ public class ReturnValueTests
                         run(f: x => x > 3)
                         """;
 
-        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "lambda_into_none.mi");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "lambda_into_none.mie");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch);
     }

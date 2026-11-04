@@ -4,7 +4,7 @@
     <vendor email="djminstar573@gmail.com">mielia</vendor>
 
     <description><![CDATA[
-        Mielia (<code>.mi</code>) in Rider: syntax highlighting, comment and bracket handling, and the Mielia
+        Mielia (<code>.mie</code>) in Rider: syntax highlighting, comment and bracket handling, and the Mielia
         language server (<code>Mielia lsp</code>) for diagnostics, completion, hover, navigation, rename, inlay hints
         and formatting.
     ]]></description>

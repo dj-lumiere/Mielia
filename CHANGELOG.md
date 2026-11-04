@@ -21,7 +21,7 @@ file only once its other old spellings are gone.
 
 ### Breaking changes
 
-- The language is renamed: Suflae is **Mielia**. Sources end in `.mi` (a `.sf` file given to the builder is a build error that names the new
+- The language is renamed: Suflae is **Mielia**. Sources end in `.mie` (a `.sf` file given to the builder is a build error that names the new
   extension), diagnostic codes start with `MI-` (`MI-S625`), the command is `mielia`, and the manifest key is
   `mielia-version`. `mielia migrate --step extensions <folder>` renames the files, rewrites the manifest's
   `executable` and version key, and old diagnostic codes in comments.

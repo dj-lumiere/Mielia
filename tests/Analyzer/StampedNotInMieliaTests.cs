@@ -14,7 +14,7 @@ public class StampedNotInMieliaTests
     [Fact]
     public void Analyze_MieliaCallsStamp_ReportsS447Only()
     {
-        AnalysisResult result = AnalyzeMielia(fileName: "stamped_not_in_mielia.mi", source: """
+        AnalysisResult result = AnalyzeMielia(fileName: "stamped_not_in_mielia.mie", source: """
                                                       entity Node
                                                           value: S64
 

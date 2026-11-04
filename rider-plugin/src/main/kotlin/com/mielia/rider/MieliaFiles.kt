@@ -11,13 +11,13 @@ import javax.swing.Icon
 
 internal const val PLUGIN_ID = "com.mielia.rider"
 
-private val EXTENSIONS = setOf("mi")
+private val EXTENSIONS = setOf("mie")
 
 internal fun VirtualFile.isMielia(): Boolean = extension?.lowercase() in EXTENSIONS
 
 /**
  * Registers the TextMate bundle shipped next to the plugin's jar: the grammar from Mielia.tmbundle plus the comment
- * and bracket rules of language-configuration.json. `.mi` files open as TextMate files, highlighted by that grammar.
+ * and bracket rules of language-configuration.json. `.mie` files open as TextMate files, highlighted by that grammar.
  */
 class MieliaBundleProvider : TextMateBundleProvider {
     override fun getBundles(): List<TextMateBundleProvider.PluginBundle> {
@@ -26,7 +26,7 @@ class MieliaBundleProvider : TextMateBundleProvider {
     }
 }
 
-/** Gives `.mi` files the Mielia icon in place of the generic TextMate one. */
+/** Gives `.mie` files the Mielia icon in place of the generic TextMate one. */
 class MieliaIconProvider : FileIconProvider {
     override fun getIcon(file: VirtualFile, flags: Int, project: Project?): Icon? =
         if (file.isMielia()) ICON else null

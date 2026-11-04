@@ -6,7 +6,7 @@ namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// A program that uses Work checks every entity access, a program without Work doesn't: the emitted IR of
-/// <c>tests/Fixtures/TaskChecks/no_work.mi</c> has no access lock and no promotion, the IR of <c>with_work.mi</c>
+/// <c>tests/Fixtures/TaskChecks/no_work.mie</c> has no access lock and no promotion, the IR of <c>with_work.mie</c>
 /// (the same program with one Work) has them.
 /// </summary>
 public sealed class TaskCheckTests
@@ -20,7 +20,7 @@ public sealed class TaskCheckTests
     [Fact]
     public void ProgramWithoutWork_HasNoAccessLockAndNoPromotion()
     {
-        string ir = Emit(fixture: "no_work.mi");
+        string ir = Emit(fixture: "no_work.mie");
 
         Assert.DoesNotMatch(expectedRegex: LockUse, actualString: ir);
         Assert.DoesNotMatch(expectedRegex: PromoteUse, actualString: ir);
@@ -29,7 +29,7 @@ public sealed class TaskCheckTests
     [Fact]
     public void ProgramWithWork_KeepsAccessLockAndPromotion()
     {
-        string ir = Emit(fixture: "with_work.mi");
+        string ir = Emit(fixture: "with_work.mie");
 
         Assert.Matches(expectedRegex: LockUse, actualString: ir);
         Assert.Matches(expectedRegex: PromoteUse, actualString: ir);

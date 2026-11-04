@@ -21,7 +21,7 @@ public class NoticeTests
                                                         routine test()
                                                             get_value()
                                                             return
-                                                        """, fileName: "unused_result.mi");
+                                                        """, fileName: "unused_result.mie");
         Assert.Empty(collection: result.Errors);
         Assert.DoesNotContain(collection: result.Warnings,
             filter: w => w.Code == SemanticWarningCode.UnusedRoutineReturnValue);
@@ -49,7 +49,7 @@ public class NoticeTests
                                                                               routine add(a: Int, b: Int) -> Int
                                                                                   return a + b
                                                                               """,
-            fileName: "/virtual/docs/doc_notes.mi").Notices);
+            fileName: "/virtual/docs/doc_notes.mie").Notices);
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment);
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksReturns);
         Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksParam &&
@@ -61,8 +61,8 @@ public class NoticeTests
     [Fact]
     public void DocNotes_RoutineOfAnImportedModule_NeedsADocComment()
     {
-        const string lib = "/virtual/docs/doclib.mi";
-        const string entry = "/virtual/docs/docuse.mi";
+        const string lib = "/virtual/docs/doclib.mie";
+        const string entry = "/virtual/docs/docuse.mie";
         var libProgram = ParseMielia(source: "module DocLib\n\nroutine bare(x: Int) -> Int\n    return x\n", fileName: lib);
         var entryProgram = ParseMielia(source: "import DocLib\n\nroutine start()\n    return\n", fileName: entry);
         var analyzer = new Builder.Verification.SemanticVerifier(language: TypeModel.Enums.Language.Mielia);

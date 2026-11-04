@@ -3,7 +3,7 @@ module ObjectHacker
 import BuilderQuery
 
 # The pieces of the change hooks that work on addresses. The hooks themselves, and the registry that finds an
-# object's hooks, are in Hooks.mi. In a program that imports ObjectHacker the builder writes, around every change of
+# object's hooks, are in Hooks.mie. In a program that imports ObjectHacker the builder writes, around every change of
 # a member variable, `changing_member` before it and `changed_member` after it, both behind `hooks_on()`, so a
 # program with no hooks pays one load and one branch per change.
 

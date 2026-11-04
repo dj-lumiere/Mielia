@@ -23,8 +23,8 @@ public sealed class TargetGateTests
     [Fact]
     public void NonRaFile_NeverGated()
     {
-        // A `.mi` file is Mielia — never subject to conditional compilation, even with a directive.
-        string f = WriteTemp(name: "x.mi", body: "@target(os: \"windows\")\nmodule M\n");
+        // A `.mie` file is Mielia — never subject to conditional compilation, even with a directive.
+        string f = WriteTemp(name: "x.mie", body: "@target(os: \"windows\")\nmodule M\n");
         try
         {
             Assert.True(condition: TargetGate.ShouldCompile(filePath: f,

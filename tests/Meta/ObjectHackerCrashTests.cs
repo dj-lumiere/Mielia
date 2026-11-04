@@ -15,7 +15,7 @@ public sealed class ObjectHackerCrashTests
     [Fact]
     public void UnknownEquality_WithoutEq_CrashesNamingTheType()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "unknown_no_equality.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "unknown_no_equality.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");

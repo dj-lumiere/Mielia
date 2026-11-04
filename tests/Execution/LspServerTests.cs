@@ -99,7 +99,7 @@ public sealed class LspServerTests
     [Fact]
     public void Completion_OffersOnlyMieliaKeywords()
     {
-        const string miUri = "file:///test/Keywords.mi";
+        const string miUri = "file:///test/Keywords.mie";
         const string sf =
             "routine start()\n" +
             "    var total = 1\n" +
@@ -125,7 +125,7 @@ public sealed class LspServerTests
     {
         // A Mielia standard library type is shown with `@ra(...)` between its doc comment and its header.
         string dir = Directory.CreateTempSubdirectory(prefix: "lsp_hover_").FullName;
-        string path = Path.Combine(path1: dir, path2: "main.mi");
+        string path = Path.Combine(path1: dir, path2: "main.mie");
         File.WriteAllText(path: path, contents: source);
         string uri = new System.Uri(uriString: path).AbsoluteUri;
         (int line, int character) = LspTestHarness.PositionOf(text: source, needle: needle);
@@ -154,8 +154,8 @@ public sealed class LspServerTests
             "    return\n";
 
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
-            LspTestHarness.DidOpen(uri: "file:///test/Sample.mi", text: sf, languageId: "mielia"),
-            LspTestHarness.DocRequest(id: 21, method: "textDocument/documentSymbol", uri: "file:///test/Sample.mi"),
+            LspTestHarness.DidOpen(uri: "file:///test/Sample.mie", text: sf, languageId: "mielia"),
+            LspTestHarness.DocRequest(id: 21, method: "textDocument/documentSymbol", uri: "file:///test/Sample.mie"),
             Exit);
 
         Assert.NotNull(@object: LspTestHarness.ReplyWithId(replies: replies, id: 21));

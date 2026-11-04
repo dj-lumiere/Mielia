@@ -10,7 +10,7 @@ the Work already shares, and print the count. The axes:
   wait   none, or a wait that sits in the same statement as an entity access (see WAITS)
 
 usage: generate.py OUTDIR [--site S] [--dest D] [--value V] [--rounds N] [--only substring]
-Every case is a folder OUTDIR/<name>/ with main.mi and config.toml (debug mode, ThreadSanitizer on).
+Every case is a folder OUTDIR/<name>/ with main.mie and config.toml (debug mode, ThreadSanitizer on).
 """
 import argparse
 import os
@@ -306,7 +306,7 @@ def main():
             continue
         folder = os.path.join(a.outdir, name)
         os.makedirs(folder, exist_ok=True)
-        with open(os.path.join(folder, "main.mi"), "w") as f:
+        with open(os.path.join(folder, "main.mie"), "w") as f:
             f.write(text)
         cfg = CONFIG.format(name=name)
         if a.no_sanitize:

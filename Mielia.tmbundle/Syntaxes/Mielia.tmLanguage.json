@@ -1,7 +1,7 @@
 {
   "name": "Mielia",
-  "scopeName": "source.mi",
-  "fileTypes": ["mi", "mielia"],
+  "scopeName": "source.mie",
+  "fileTypes": ["mie", "mielia"],
   "patterns": [
     { "include": "#comments" },
     { "include": "#keywords" },
@@ -15,12 +15,12 @@
       "patterns": [
         {
           "comment": "Documentation comment",
-          "name": "comment.block.documentation.mi",
+          "name": "comment.block.documentation.mie",
           "match": "###.*$"
         },
         {
           "comment": "Line comment",
-          "name": "comment.line.mi",
+          "name": "comment.line.mie",
           "match": "#.*$"
         }
       ]
@@ -29,94 +29,94 @@
       "patterns": [
         {
           "comment": "Annotations (@positional, @inline, @readonly, @writable, @override, @generated, ...)",
-          "name": "storage.modifier.annotation.mi",
+          "name": "storage.modifier.annotation.mie",
           "match": "@\\w+"
         },
         {
           "comment": "Type declarations",
-          "name": "storage.type.mi",
+          "name": "storage.type.mie",
           "match": "\\b(routine|entity|record|variant|choice|protocol|flags|crashable)\\b"
         },
         {
           "comment": "Variable declarations",
-          "name": "keyword.declaration.mi",
+          "name": "keyword.declaration.mie",
           "match": "\\b(var|preset|common|define|lateinit)\\b"
         },
         {
           "comment": "Access and routine modifiers",
-          "name": "keyword.modifier.mi",
+          "name": "keyword.modifier.mie",
           "match": "\\b(secret|posted|global|suspended|failable|dangerous)\\b"
         },
         {
           "comment": "A named jump (break to rows, continue to rows) and a loop named with loop as rows",
           "match": "\\b(break|continue)\\s+(to)\\s+([A-Za-z_][A-Za-z0-9_]*)|\\b(loop)\\s+(as)\\s+([A-Za-z_][A-Za-z0-9_]*)",
           "captures": {
-            "1": { "name": "keyword.control.mi" },
-            "2": { "name": "keyword.control.mi" },
-            "3": { "name": "entity.name.label.mi" },
-            "4": { "name": "keyword.control.mi" },
-            "5": { "name": "keyword.control.mi" },
-            "6": { "name": "entity.name.label.mi" }
+            "1": { "name": "keyword.control.mie" },
+            "2": { "name": "keyword.control.mie" },
+            "3": { "name": "entity.name.label.mie" },
+            "4": { "name": "keyword.control.mie" },
+            "5": { "name": "keyword.control.mie" },
+            "6": { "name": "entity.name.label.mie" }
           }
         },
         {
           "comment": "Control flow",
-          "name": "keyword.control.mi",
+          "name": "keyword.control.mie",
           "match": "\\b(if|elseif|else|then|for|loop|when|break|continue|return|throw|try|check|todo|danger|until|becomes)\\b"
         },
         {
           "comment": "Type and pattern operations",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "\\b(is|isnot|obeys|in|everywhere)\\b"
         },
         {
           "comment": "Module system",
-          "name": "keyword.control.import.mi",
+          "name": "keyword.control.import.mie",
           "match": "\\b(import|module)\\b"
         },
         {
           "comment": "Resource management",
-          "name": "keyword.control.mi",
+          "name": "keyword.control.mie",
           "match": "\\b(using)\\b"
         },
         {
           "comment": "Generic constraints",
-          "name": "keyword.other.mi",
+          "name": "keyword.other.mie",
           "match": "\\b(needs|relates|onlyif)\\b"
         },
         {
           "comment": "Logical operators",
-          "name": "keyword.operator.logical.mi",
+          "name": "keyword.operator.logical.mie",
           "match": "\\b(and|or|not)\\b"
         },
         {
           "comment": "Self reference",
-          "name": "variable.language.mi",
+          "name": "variable.language.mie",
           "match": "\\b(me|Me)\\b"
         },
         {
           "comment": "Range keywords",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "\\b(to|til|by)\\b"
         },
         {
           "comment": "Special keywords",
-          "name": "keyword.other.mi",
+          "name": "keyword.other.mie",
           "match": "\\b(as|nothing|given)\\b"
         },
         {
           "comment": "Boolean literals",
-          "name": "constant.language.boolean.mi",
+          "name": "constant.language.boolean.mie",
           "match": "\\b(true|false)\\b"
         },
         {
           "comment": "None type (absent-arm type for variants and carriers)",
-          "name": "constant.language.null.mi",
+          "name": "constant.language.null.mie",
           "match": "\\b(None)\\b"
         },
         {
           "comment": "none value literal (the empty value of an Optional or a variant with a None case)",
-          "name": "constant.language.null.mi",
+          "name": "constant.language.null.mie",
           "match": "\\b(none)\\b"
         }
       ]
@@ -125,17 +125,17 @@
       "patterns": [
         {
           "comment": "Prefixed text literals (br, rf, b, r, f)",
-          "name": "string.quoted.double.mi",
+          "name": "string.quoted.double.mie",
           "begin": "(br|rf|b|r|f)\"",
           "beginCaptures": {
-            "1": { "name": "storage.modifier.mi" }
+            "1": { "name": "storage.modifier.mie" }
           },
           "end": "\"",
           "patterns": [{ "include": "#escapes" }]
         },
         {
           "comment": "Text literal",
-          "name": "string.quoted.double.mi",
+          "name": "string.quoted.double.mie",
           "begin": "\"",
           "end": "\"",
           "patterns": [{ "include": "#escapes" }]
@@ -146,17 +146,17 @@
       "patterns": [
         {
           "comment": "Unicode escape \\uXXXXXX (6 hex)",
-          "name": "constant.character.escape.mi",
+          "name": "constant.character.escape.mie",
           "match": "\\\\u[0-9a-fA-F]{6}"
         },
         {
           "comment": "Hex byte escape \\xFF (2 hex)",
-          "name": "constant.character.escape.mi",
+          "name": "constant.character.escape.mie",
           "match": "\\\\x[0-9a-fA-F]{2}"
         },
         {
           "comment": "Simple escapes",
-          "name": "constant.character.escape.mi",
+          "name": "constant.character.escape.mie",
           "match": "\\\\[nrt0\\\\\"']"
         }
       ]
@@ -165,23 +165,23 @@
       "patterns": [
         {
           "comment": "Byte literal byte'x'",
-          "name": "string.quoted.single.mi",
+          "name": "string.quoted.single.mie",
           "begin": "byte'",
-          "beginCaptures": { "0": { "name": "storage.modifier.mi" } },
+          "beginCaptures": { "0": { "name": "storage.modifier.mie" } },
           "end": "'",
           "patterns": [{ "include": "#escapes" }]
         },
         {
           "comment": "Letter literal letter'x'",
-          "name": "string.quoted.single.mi",
+          "name": "string.quoted.single.mie",
           "begin": "letter'",
-          "beginCaptures": { "0": { "name": "storage.modifier.mi" } },
+          "beginCaptures": { "0": { "name": "storage.modifier.mie" } },
           "end": "'",
           "patterns": [{ "include": "#escapes" }]
         },
         {
           "comment": "Letter literal 'x'",
-          "name": "string.quoted.single.mi",
+          "name": "string.quoted.single.mie",
           "begin": "'",
           "end": "'",
           "patterns": [{ "include": "#escapes" }]
@@ -192,32 +192,32 @@
       "patterns": [
         {
           "comment": "Hex number",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b0x[0-9a-fA-F_]+([a-z0-9]+)?\\b"
         },
         {
           "comment": "Binary number",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b0b[01_]+([a-z0-9]+)?\\b"
         },
         {
           "comment": "Octal number",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b0o[0-7_]+([a-z0-9]+)?\\b"
         },
         {
           "comment": "Quaternary number",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b0q[0-3_]+([a-z0-9]+)?\\b"
         },
         {
           "comment": "Float with suffix",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b[0-9][0-9_]*\\.[0-9_]+([eE][+-]?[0-9_]+)?([a-z0-9]+)?\\b"
         },
         {
           "comment": "Int with suffix",
-          "name": "constant.numeric.mi",
+          "name": "constant.numeric.mie",
           "match": "\\b[0-9][0-9_]*([a-z]+)?\\b"
         }
       ]
@@ -226,67 +226,67 @@
       "patterns": [
         {
           "comment": "Compound annotation",
-          "name": "storage.modifier.annotation.mi",
+          "name": "storage.modifier.annotation.mie",
           "match": "@\\[[a-zA-Z_][a-zA-Z0-9_, ]*\\]"
         },
         {
           "comment": "Annotation",
-          "name": "storage.modifier.annotation.mi",
+          "name": "storage.modifier.annotation.mie",
           "match": "@[a-zA-Z_][a-zA-Z0-9_]*"
         },
         {
           "comment": "Arrows",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "(->|=>)"
         },
         {
           "comment": "Three-way comparison",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "<=>"
         },
         {
           "comment": "Shift operators",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "(<<<|>>>|<<|>>)"
         },
         {
           "comment": "Comparison",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "(===|!==|==|!=|<=|>=|<|>)"
         },
         {
           "comment": "Power operators",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "(\\*\\*[%^]?=?)"
         },
         {
           "comment": "Integer division",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "//=?"
         },
         {
           "comment": "Overflow arithmetic",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "[+\\-*][%^]=?"
         },
         {
           "comment": "Optional/coalesce operators",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "(\\?\\?=?|\\?\\.?|!!)"
         },
         {
           "comment": "Assignment",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "[+\\-*/%&|^]=|="
         },
         {
           "comment": "Basic operators",
-          "name": "keyword.operator.mi",
+          "name": "keyword.operator.mie",
           "match": "[+\\-*/%&|^~!]"
         },
         {
           "comment": "Colon for type annotations",
-          "name": "punctuation.separator.mi",
+          "name": "punctuation.separator.mie",
           "match": ":"
         }
       ]

@@ -13,7 +13,7 @@ public sealed class ImplantSignatureTests
     [Fact]
     public void Analyze_ImplantOfWrongSignature_NamesRoutineAndBothSignatures()
     {
-        AnalysisResult result = AnalyzeMielia(fileName: "implant_signature.mi", source: """
+        AnalysisResult result = AnalyzeMielia(fileName: "implant_signature.mie", source: """
                                      import IO/Console
                                      import ObjectHacker
 

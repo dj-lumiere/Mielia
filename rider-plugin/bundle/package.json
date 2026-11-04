@@ -6,14 +6,14 @@
       {
         "id": "mielia",
         "aliases": ["Mielia", "mielia"],
-        "extensions": [".mi"],
+        "extensions": [".mie"],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "mielia",
-        "scopeName": "source.mi",
+        "scopeName": "source.mie",
         "path": "./syntaxes/Mielia.tmLanguage.json"
       }
     ]

@@ -6,7 +6,7 @@ namespace Mielia;
 
 /// <summary>
 /// The Mielia Language Server: the shared engine (<c>Builder.Execution.LspServer</c>) run by <c>mielia lsp</c>,
-/// serving <c>.mi</c> files with Mielia's own keywords and names.
+/// serving <c>.mie</c> files with Mielia's own keywords and names.
 /// </summary>
 internal sealed class MieliaLanguageServer : LanguageServerProfile
 {

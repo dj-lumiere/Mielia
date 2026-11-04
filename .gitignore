@@ -41,7 +41,7 @@ tmp/
 
 # Generated test artifacts (in-process compile bundles, harness inputs, coverage output)
 tests/Fixtures/MieliaHarnessInProc/
-tests/Fixtures/MieliaHarness/all_mielia.mi
+tests/Fixtures/MieliaHarness/all_mielia.mie
 tests/Fixtures/MieliaHarness/all_mielia.ingrid.bc
 tests/Fixtures/MieliaHarness/razorforge.toml
 tests/TestResults/

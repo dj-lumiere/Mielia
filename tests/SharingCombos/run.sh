@@ -23,7 +23,7 @@ python3 "$here/generate.py" "$work" "$@" > "$work/cases.txt"
 one_case() {
     name="$1"
     cd "$work/$name" || exit 1
-    if ! dotnet "$dll" build main.mi > build.log 2>&1; then
+    if ! dotnet "$dll" build main.mie > build.log 2>&1; then
         echo "BUILD $name"
         return
     fi

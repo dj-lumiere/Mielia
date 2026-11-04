@@ -23,7 +23,7 @@
           "mielia"
         ],
         "extensions": [
-          ".mi"
+          ".mie"
         ],
         "configuration": "./language-configuration.json",
         "icon": {
@@ -35,7 +35,7 @@
     "grammars": [
       {
         "language": "mielia",
-        "scopeName": "source.mi",
+        "scopeName": "source.mie",
         "path": "./syntaxes/Mielia.tmLanguage.json"
       }
     ],

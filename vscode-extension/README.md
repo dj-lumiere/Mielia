@@ -1,6 +1,6 @@
 # Mielia for VS Code
 
-Mielia (`.mi`) in VS Code: highlighting from `../Mielia.tmbundle`, comment toggling and bracket pairing,
+Mielia (`.mie`) in VS Code: highlighting from `../Mielia.tmbundle`, comment toggling and bracket pairing,
 and the Mielia language server (`Mielia lsp`): errors as you type, semantic colors, hover, completion, go to
 definition, rename, find usages and formatting.
 

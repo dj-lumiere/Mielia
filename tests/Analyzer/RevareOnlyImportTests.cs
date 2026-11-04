@@ -18,7 +18,7 @@ public class RevareOnlyImportTests
         Directory.CreateDirectory(path: dir);
         try
         {
-            string entry = Path.Combine(path1: dir, path2: "main.mi");
+            string entry = Path.Combine(path1: dir, path2: "main.mie");
             File.WriteAllText(path: entry, contents: source);
             var driver = new BuildDriver(projectRoot: dir, stdlibRoot: StdlibLoader.GetDefaultStdlibPath(),
                 language: Language.Mielia);

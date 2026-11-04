@@ -8,8 +8,8 @@ namespace Mielia.Tests.Meta;
 /// shape as in use, and a change hidden behind a call (which Mielia cannot trace at build time, its list
 /// being a shared <c>Roamed</c> handle) crashes with ReshapingWhileInUseError instead of leaving the loop
 /// reading moved memory. Revare rejects the same program at build time (ShapeEffectTests). Builds and
-/// runs <c>tests/Fixtures/ShapeUse/*.mi</c> through <c>buildandrun</c>. The paths that must NOT crash are
-/// covered by the StdlibMi fixture <c>shape_use_sf.mi</c>.
+/// runs <c>tests/Fixtures/ShapeUse/*.mie</c> through <c>buildandrun</c>. The paths that must NOT crash are
+/// covered by the StdlibMi fixture <c>shape_use_sf.mie</c>.
 /// </summary>
 public sealed class ContainerShapeUseTests
 {
@@ -18,7 +18,7 @@ public sealed class ContainerShapeUseTests
     [Fact]
     public void IndirectReshapeDuringFor_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_for.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_for.mie");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -34,7 +34,7 @@ public sealed class ContainerShapeUseTests
     [Fact]
     public void IndirectReshapeDuringForOverAField_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_for.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_for.mie");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -49,10 +49,10 @@ public sealed class ContainerShapeUseTests
     /// run on silently (safety matrix C45, cells sf-shape-lambda, -global, -adapter, -nested).
     /// </summary>
     [Theory]
-    [InlineData("reshape_lambda_capture_for.mi")]
-    [InlineData("reshape_global_for.mi")]
-    [InlineData("reshape_adapter_for.mi")]
-    [InlineData("reshape_element_list_for.mi")]
+    [InlineData("reshape_lambda_capture_for.mie")]
+    [InlineData("reshape_global_for.mie")]
+    [InlineData("reshape_adapter_for.mie")]
+    [InlineData("reshape_element_list_for.mie")]
     public void ReshapeThroughOtherPaths_CrashesWithReshapingWhileInUse(string fixture)
     {
         (int exit, string stdout, string stderr) = RunFixture(fixture: fixture);

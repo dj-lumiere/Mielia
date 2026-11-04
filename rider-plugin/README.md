@@ -1,6 +1,6 @@
 # Mielia for Rider
 
-A Rider plugin for Mielia (`.mi`):
+A Rider plugin for Mielia (`.mie`):
 
 - Syntax highlighting from `../Mielia.tmbundle`, plus `#` comment toggling and bracket pairing (`bundle/`).
 - The Mielia file icon.

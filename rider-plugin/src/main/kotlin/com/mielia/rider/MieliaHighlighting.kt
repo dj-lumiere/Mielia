@@ -26,7 +26,7 @@ object MieliaLanguage : Language("mielia") {
 /** Highlights Mielia code outside a file (a hover's code block) with the same TextMate grammar the editor uses. */
 class MieliaSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
     override fun getSyntaxHighlighter(project: Project?, virtualFile: VirtualFile?): SyntaxHighlighter =
-        TextMateService.getInstance().getLanguageDescriptorByExtension("mi")
+        TextMateService.getInstance().getLanguageDescriptorByExtension("mie")
             ?.let { TextMateHighlighter(TextMateHighlightingLexer(it, LINE_LIMIT)) }
             ?: PlainSyntaxHighlighter()
 

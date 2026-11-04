@@ -28,8 +28,8 @@ public sealed partial class StdlibApiTests
 
     private const string HarnessModule = "StdlibHarness";
 
-    // Mielia (.mi) sibling harness. MI fixtures live under a DISTINCT namespace prefix
-    // (Tests/StdlibMi/*) and their own fixtures dir so the MI bundle's prefix import pulls only `.mi`
+    // Mielia (.mie) sibling harness. MI fixtures live under a DISTINCT namespace prefix
+    // (Tests/StdlibMi/*) and their own fixtures dir so the MI bundle's prefix import pulls only `.mie`
     // files — a shared prefix would drag `.rr` fixtures into the MI project and trip BuildDriver's
     // cross-language import guard. MI reuses the Revare stdlib wholesale (MI's System IS RA's System),
     // so the ONLY difference here is the fixtures dir, entry extension, module name, and library path.
@@ -54,8 +54,8 @@ public sealed partial class StdlibApiTests
     private static partial Regex StderrDiagnosticRe();
 
     /// <summary>
-    /// Mielia (.mi) sibling of the stdlib harness. Bundles every <c>StdlibMi/*.mi</c> fixture into one
-    /// <c>all_mielia.mi</c> (an MI project — entry extension picks the language), compiles + runs it
+    /// Mielia (.mie) sibling of the stdlib harness. Bundles every <c>StdlibMi/*.mie</c> fixture into one
+    /// <c>all_mielia.mie</c> (an MI project — entry extension picks the language), compiles + runs it
     /// ONCE over the shared Revare stdlib, and diffs each fixture's section against its snapshot.
     /// Proves MI programs behave correctly on the borrowed RA System; where a <c>StdlibMi</c> fixture
     /// shares a stem with a <c>Stdlib</c> fixture, the equivalence test below locks their snapshots
@@ -66,28 +66,28 @@ public sealed partial class StdlibApiTests
     {
         if (!Directory.Exists(path: MieliaFixturesDir) || !Directory
                                                           .EnumerateFiles(path: MieliaFixturesDir,
-                                                               searchPattern: "*.mi")
+                                                               searchPattern: "*.mie")
                                                           .Any())
         {
             return; // No MI fixtures authored yet — nothing to assert.
         }
 
         int fixtureCount = RunFixtureBundle(fixturesDir: MieliaFixturesDir,
-            glob: "*.mi",
+            glob: "*.mie",
             harnessDir: MieliaHarnessDir,
             harnessModule: MieliaHarnessModule,
-            bundleFileName: "all_mielia.mi",
+            bundleFileName: "all_mielia.mie",
             packageName: "mielia-harness",
             libraryRel: "../StdlibMi");
-        // The early return above guarantees at least one .mi fixture; confirm the bundle actually ran it.
+        // The early return above guarantees at least one .mie fixture; confirm the bundle actually ran it.
         Assert.True(condition: fixtureCount > 0,
             userMessage: "MI fixtures exist but the harness discovered none to run.");
     }
 
     /// <summary>
     /// Equivalence lock: every fixture stem present in BOTH <c>Stdlib</c> (.rr) and <c>StdlibMi</c>
-    /// (.mi) must have byte-identical (normalized) expected output. This is what makes the MI fixture
-    /// an equivalence test rather than a standalone one — porting a .rr fixture to .mi and keeping the
+    /// (.mie) must have byte-identical (normalized) expected output. This is what makes the MI fixture
+    /// an equivalence test rather than a standalone one — porting a .rr fixture to .mie and keeping the
     /// same snapshot asserts the two frontends produce the SAME observable behavior over the shared
     /// stdlib. If the MI output legitimately differs (e.g. a genuinely MI-only surface), give that
     /// fixture a stem with no .rr counterpart so it is exempt.
@@ -112,7 +112,7 @@ public sealed partial class StdlibApiTests
             }
 
             // Canonicalize the namespace before comparing. MI fixtures live under `Tests/StdlibMi/*`
-            // (their own namespace so the MI bundle's prefix import pulls only `.mi` files), so any
+            // (their own namespace so the MI bundle's prefix import pulls only `.mie` files), so any
             // fixture that prints its own fully-qualified type name (via `diagnose` / `:?`) emits
             // `Tests/StdlibMi/...` where its `.rr` twin emits `Tests/Stdlib/...`. That's a naming
             // artifact of the split, NOT a behavioral difference — fold it out so equivalence tracks
@@ -142,7 +142,7 @@ public sealed partial class StdlibApiTests
     /// <paramref name="glob"/> (importing each by its declared module, calling its <c>start()</c> via the
     /// module leaf), compiles + runs the ONE program, splits combined stdout on the
     /// <c>##### stem #####</c> delimiters, and diffs each section against its <c>.expected.txt</c>. Guarded
-    /// by the Revare (.rr) and Mielia (.mi) harnesses — the language is selected by the entry file's
+    /// by the Revare (.rr) and Mielia (.mie) harnesses — the language is selected by the entry file's
     /// extension, so the only per-language inputs are the fixtures dir, glob, module name, and paths.
     /// Returns the number of fixtures discovered and bundled (0 = nothing ran).
     /// </summary>
@@ -226,13 +226,13 @@ public sealed partial class StdlibApiTests
     public void MieliaHarness_InProcessCompileSucceeds()
     {
         AssertBundleCompilesInProcess(fixturesDir: MieliaFixturesDir,
-            glob: "*.mi",
+            glob: "*.mie",
             harnessDir: Path.Combine(path1: RepoRoot,
                 path2: "tests",
                 path3: "Fixtures",
                 path4: "MieliaHarnessInProc"),
             harnessModule: "MieliaHarnessInProc",
-            bundleFileName: "all_mielia_inproc.mi",
+            bundleFileName: "all_mielia_inproc.mie",
             packageName: "mielia-harness-inproc",
             libraryRel: "../StdlibMi");
     }

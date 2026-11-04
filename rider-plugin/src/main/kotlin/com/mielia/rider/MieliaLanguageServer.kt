@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
 private val LOG = logger<MieliaLanguageServer>()
 
 /**
- * Starts the Mielia language server (`Mielia lsp`) when a `.mi` file opens. Rider asks this provider only about files in
+ * Starts the Mielia language server (`Mielia lsp`) when a `.mie` file opens. Rider asks this provider only about files in
  * project content, which in Rider means files a .csproj includes, so MieliaFileOpenListener starts the server for the rest.
  */
 class MieliaLanguageServer : LspIntegrationProvider {
@@ -62,7 +62,7 @@ class MieliaLanguageServer : LspIntegrationProvider {
 }
 
 /**
- * Starts the server for every `.mi` file that opens, including the ones outside project content (the stdlib,
+ * Starts the server for every `.mie` file that opens, including the ones outside project content (the stdlib,
  * playgrounds and test fixtures, which no .csproj includes). Rider keeps one client per provider and descriptor, so
  * starting it again for each file is free.
  */
@@ -77,7 +77,7 @@ internal class MieliaFileOpenListener(private val project: Project) : FileEditor
 }
 
 /**
- * Starts the server when an editor for a `.mi` file is created. In a remote-development backend the editors a client
+ * Starts the server when an editor for a `.mie` file is created. In a remote-development backend the editors a client
  * opens go through the guest editor manager, which doesn't publish `FileEditorManagerListener.fileOpened` on the backend,
  * so MieliaFileOpenListener alone never sees them. An editor is created on the backend either way.
  */

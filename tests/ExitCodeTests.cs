@@ -6,7 +6,7 @@ namespace Mielia.Tests.Meta;
 /// <summary>
 /// End-to-end check of <c>set_exit_code</c>: a program that returns from <c>start</c> normally ends with the status
 /// it set last, which the builder's <c>main</c> returns after <c>start</c>. Builds and runs
-/// <c>tests/Fixtures/ExitCode/set_exit_code.mi</c> through <c>buildandrun</c>.
+/// <c>tests/Fixtures/ExitCode/set_exit_code.mie</c> through <c>buildandrun</c>.
 /// </summary>
 public sealed class ExitCodeTests
 {
@@ -17,7 +17,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void AlertBytes_WritesTheBytesRaw()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "alert_bytes.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "alert_bytes.mie");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -29,7 +29,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void SetExitCode_LastCallIsTheExitStatus()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "set_exit_code.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "set_exit_code.mie");
 
         Assert.True(condition: exit == 42,
             userMessage: $"expected exit 42, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -42,7 +42,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void ThrowInPlainRoutineUnderTry_CrashesWithItsMessage()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "throw_in_plain_under_try.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "throw_in_plain_under_try.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -59,7 +59,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void BareFailureAfterKeptCheck_CrashesWithItsOwnMessage()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "mold_bare_crash.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "mold_bare_crash.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -74,7 +74,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void LambdaFailureWithoutKeyword_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "lambda_bare_crash.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "lambda_bare_crash.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -91,7 +91,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void FailureInsidePlainHelperUnderTry_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "wall_under_try.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "wall_under_try.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -109,7 +109,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RangeStepZero_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "range_step_zero.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "range_step_zero.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -124,7 +124,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void DeepCalls_CrashLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "deep_calls.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "deep_calls.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -140,7 +140,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void SharedEntityDeadlock_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "shared_entity_deadlock.mi");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "shared_entity_deadlock.mie");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -164,7 +164,7 @@ public sealed class ExitCodeTests
         try
         {
             foreach (string file in Directory.GetFiles(
-                         path: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "GlobalDeadlock"]), searchPattern: "*.mi"))
+                         path: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "GlobalDeadlock"]), searchPattern: "*.mie"))
             {
                 File.Copy(sourceFileName: file, destFileName: Path.Combine(path1: dir, path2: Path.GetFileName(path: file)));
             }
@@ -173,7 +173,7 @@ public sealed class ExitCodeTests
                 contents: "[package]\nname = \"global-deadlock\"\nversion = \"0.0.1\"\nmielia-version = \"0.5.0\"\n\n" +
                           $"[target]\nmode = \"{mode}\"\n");
             // A build and a run take well under a minute: a hang fails in 2 minutes (scaled on CI), not 5.
-            (int exit, string stdout, string stderr) = RunSource(miPath: Path.Combine(path1: dir, path2: "main.mi"),
+            (int exit, string stdout, string stderr) = RunSource(miPath: Path.Combine(path1: dir, path2: "main.mie"),
                 name: $"global deadlock ({mode})", timeoutBaseMs: 120_000);
 
             Assert.True(condition: exit == 82,
@@ -197,7 +197,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RevareEntity_UsedFromMielia_RunsAndIsReleasedOnce()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.mi", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.mie", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -209,7 +209,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RevareRoutine_ReturnsList_ReadsInMielia()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.mi", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.mie", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -220,7 +220,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RevareEntity_Parameter_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.mi", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.mie", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -231,7 +231,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RevareEntity_SecondName_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.mi", folder: "RaInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.mie", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -243,7 +243,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void IntBuiltFromAnInt_IsS646()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.mi", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
         Assert.Contains(expectedSubstring: "MI-S646", actualString: stdout + stderr);
@@ -255,7 +255,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void NumberBuiltFromBits_IsS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.mi", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
         Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
@@ -267,7 +267,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void GenericNumberBuiltFromBits_IsS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.mi", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
         Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
@@ -280,7 +280,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void CharAndBoolBuiltFromBits_AreS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "char_bool_from_bits.mi", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "char_bool_from_bits.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
         Assert.Contains(expectedSubstring: "'Char.from_codepoint(n: n.to[Int]())'", actualString: stdout + stderr);

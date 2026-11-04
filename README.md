@@ -22,10 +22,10 @@
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
-Mielia (`.mi`) is a natively compiled language for building applications without managing memory by
+Mielia (`.mie`) is a natively compiled language for building applications without managing memory by
 hand. It is the sibling of [Revare](https://github.com/dj-lumiere/Revare): the same grammar,
 the same standard library, the same loud failures, and every entity shared for you. A file
-can be just its statements, and running it is one command: `mielia run hello.mi`.
+can be just its statements, and running it is one command: `mielia run hello.mie`.
 
 ```mielia
 import IO/Console
@@ -139,17 +139,17 @@ The short alias `mi` works as well.
 ### 2. Hello, world
 
 ```mielia
-# hello.mi
+# hello.mie
 import IO/Console
 
 show("Hello from Mielia!")
 ```
 
 ```bash
-mielia run hello.mi
+mielia run hello.mie
 ```
 
-`run` builds the file and runs it. `mielia build hello.mi` stops after building
+`run` builds the file and runs it. `mielia build hello.mie` stops after building
 and leaves `hello.exe` next to the source.
 
 ### Using an AI assistant?
@@ -163,7 +163,7 @@ that does not build. Point yours at [`MIELIA-FOR-AI.md`](MIELIA-FOR-AI.md) toget
 ## Command line
 
 ```
-mielia new [folder]                    Start a project (config.toml, main.mi, editor files)
+mielia new [folder]                    Start a project (config.toml, main.mie, editor files)
 mielia migrate [--check] <paths>...    Move sources from the previous release to this one
 mielia check [--json] [entry-file]     Check the program without building it
 mielia build [entry-file]              Build a native executable for this OS (no run)
@@ -179,11 +179,11 @@ mielia help | version
 There are no build flags. A solution is configured in a `config.toml` manifest, the same one
 Revare uses (see the
 [Revare README](https://github.com/dj-lumiere/Revare#command-line)), and the standard library
-is found next to the `mielia` executable, so a `.mi` file anywhere on disk builds.
+is found next to the `mielia` executable, so a `.mie` file anywhere on disk builds.
 
 ## Mixing with Revare
 
-A `.mi` file can `import` a Revare module and use its types and routines directly. An entity
+A `.mie` file can `import` a Revare module and use its types and routines directly. An entity
 that comes from Revare keeps Revare's rules for sharing: you can use it freely as a local or
 a field, and to pass one across a Mielia routine's signature you share it through a `Retained[T]`. This is how a Mielia program reaches lower-level code written in Revare.
 

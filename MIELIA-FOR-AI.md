@@ -1,12 +1,12 @@
 # Mielia — Reference for AI Assistants
 
-You are reading this because Mielia (`.mi`, v0.1, 2026) is **not in your training data**. Do not guess
+You are reading this because Mielia (`.mie`, v0.1, 2026) is **not in your training data**. Do not guess
 syntax from Python, Ruby or Kotlin intuitions; this file lists where those intuitions are wrong. It is a
 complete reference on its own: you do not need any other document to write correct Mielia.
 
 When unsure, consult ground truth in the repo:
 
-- `Mielia/tests/Fixtures/StdlibMi/*.mi` — Mielia programs with their expected output (`.expected.txt`).
+- `Mielia/tests/Fixtures/StdlibMi/*.mie` — Mielia programs with their expected output (`.expected.txt`).
   Start from the closest one.
 - `Revare/Standard/` — the standard library every Mielia build reads (`System`, `Collections`, `IO`,
   `EmitterTools`, …). It is written in Revare, the sibling language, but every public routine
@@ -150,7 +150,7 @@ routine start()
 
 **Modules.** `module <Path>` is optional: without it the module path comes from the file's location
 relative to `config.toml` (each folder and the file name PascalCased, joined with `/`:
-`tools/text utils.mi` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
+`tools/text utils.mie` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
 declare the same `module` are one module and build together. A file there with its own `routine start()` is another
 program and is not built with yours, so a draft that does not build yet can sit next to the program. A file there
 with top-level statements and no `routine start()` is built and is MI-S443, since only the entry file may be a
@@ -1071,7 +1071,7 @@ for (name, age) in ages
   (`seat = "empty"`); the arm's name keeps the entity it matched, and later reads see the new value.
 - `n ** -1` on an `Int` crashes with `NumericDomainError` (no integer result); `try n ** -1` gives `none`.
 - `import Collections.SortedDict` makes the whole module available, as `import Collections` does. A file's `module`
-  line names its module wherever it lives (`geometry/shapes.mi` with `module Geometry/Shapes` is imported as
+  line names its module wherever it lives (`geometry/shapes.mie` with `module Geometry/Shapes` is imported as
   `Geometry/Shapes`).
 - Inside a protocol-constrained routine, the routines of a protocol the constraint's protocol obeys can be called
   (`animal.name()` with `protocol Animal obeys Named`), and an associated type (`T/Item`) stands for the obeying
@@ -1448,7 +1448,7 @@ routine start()
 
 A Mielia program never handles memory directly and never calls C directly. `danger` blocks (MI-S800),
 `dangerous` routines (MI-S800) and foreign `C::` / `LLVM::` routines (MI-S810) are build errors in a program's
-`.mi` files. The words `danger` and `dangerous` stay reserved.
+`.mie` files. The words `danger` and `dangerous` stay reserved.
 
 To use a C library, write a small `.rr` module that declares and wraps it, and import that module:
 
@@ -1461,7 +1461,7 @@ routine absolute(n: S64) -> S64
 ```
 
 ```mielia
-# main.mi
+# main.mie
 import Cmath
 
 routine start()
@@ -1608,18 +1608,18 @@ routine fib(n: Int) -> Int
 ## 20. CLI and `config.toml`
 
 ```
-mielia new [folder]          # start a project: config.toml, main.mi, .gitignore, .vscode/ (keeps existing files)
-mielia run hello.mi          # build and run
-mielia build hello.mi        # build a native executable, don't run it
-mielia check hello.mi        # check the program without building it
-mielia test <dir-or-file>... # build and run each .mi against <name>.expected / .exit / .error / .input
+mielia new [folder]          # start a project: config.toml, main.mie, .gitignore, .vscode/ (keeps existing files)
+mielia run hello.mie          # build and run
+mielia build hello.mie        # build a native executable, don't run it
+mielia check hello.mie        # check the program without building it
+mielia test <dir-or-file>... # build and run each .mie against <name>.expected / .exit / .error / .input
 mielia fmt [--check] <paths> # rewrite sources in the canonical layout
 mielia lint <paths>          # report code that is not in the canonical layout
 mielia lsp                   # language server, for an editor
 mielia help | version
 ```
 
-- A bare file is not a command: `mielia hello.mi` is an error that points to `mielia run hello.mi`.
+- A bare file is not a command: `mielia hello.mie` is an error that points to `mielia run hello.mie`.
 - **There are no build flags.** Configuration lives in `config.toml`; with no entry file, the CLI walks up
   from the current directory to find it.
 
@@ -1633,8 +1633,8 @@ module_paths = ["../shared"]  # folders whose modules join the solution (optiona
 mode = "debug"              # debug | debug-jit | release | release-time | release-space
 ```
 
-- A single script needs no manifest: `mielia run script.mi`. Without a manifest the build mode is `debug`.
-- **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mi`
+- A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
+- **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
   (`--step extensions` does only that, with the `MI-` spelling of diagnostic codes in comments and `mielia-version`
   in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4
   (`migrate --step indent` does only that, text literals keep their lines), renames the 0.1 manifest file to
@@ -1745,6 +1745,6 @@ Not built yet:
 - `ObjectHacker`'s `when_destroyed`; annotations on parameters and member variables;
   hot reload and `morph` come after 0.5.
 
-When generating Mielia: start from the closest `Mielia/tests/Fixtures/StdlibMi/*.mi` program, name every
+When generating Mielia: start from the closest `Mielia/tests/Fixtures/StdlibMi/*.mie` program, name every
 argument, return a value on every path of a routine that has one, use bare `Int`/`Decimal` numbers, and
 prefer `when` over nested conditionals.
