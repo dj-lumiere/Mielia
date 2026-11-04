@@ -284,8 +284,8 @@ file only once its other old spellings are gone.
 - `jobs.start_now()` on a list of Works starts every Work in it and lets them all go together, so none runs before
   the others are ready. `gather` and `race` start the ones not started yet the same way.
 - `RoundingRule` (`HALF_UP`, `HALF_EVEN`, `HALF_AWAY`, `FLOOR`, `CEIL`, `TRUNC`) for the routines that round on
-  purpose: `x.round(places:, rule:)`, `x.fixed(places:, rule:)`, and on `Decimal` `divide(by:, places:, rule:)`,
-  `add`, `subtract` and `multiply` with `places:` and `rule:` (computed exactly, rounded once). Leaving out `rule` gives
+  purpose: `x.round(places:, rule:)`, `x.fixed(places:, rule:)`, and on `Decimal` `add_round`, `sub_round`,
+  `mul_round` and `div_round` with optional `places:` and `rule:` (computed exactly, rounded once). Leaving out `rule` gives
   the type's own rule.
 - `Decimal`, `D32`, `D64` and `D128` are `Hashable`: equal values hash the same whatever their digits.
 - `T(from: SerialValue)` builds a value from serial data (`SerialShapeError`).

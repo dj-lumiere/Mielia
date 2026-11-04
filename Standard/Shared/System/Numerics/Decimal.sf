@@ -90,41 +90,41 @@ routine Decimal.sub(you: Decimal) -> Decimal
 @rf("Decimal.truediv")
 routine Decimal.truediv(you: Decimal) -> Decimal
 
-### Returns `me + you` computed exactly, then rounded once to the nearest value of 34 significant digits by `rule` (half
-### up when left out). Where `+` fails past 34 digits, this rounds.
+### Returns `me + you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `+` fails past 34 digits, this rounds.
 ### :param you: The number added.
 ### :param rule: How the digits past the 34th go.
 ### :returns: The rounded sum.
 ### :throws: {NumericOverflowError} when the rounded sum is past the range of a Decimal.
-@rf("Decimal.add")
-routine Decimal.add(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+@rf("Decimal.add_round")
+routine Decimal.add_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
 
-### Returns `me - you` computed exactly, then rounded once to the nearest value of 34 significant digits by `rule` (half
-### up when left out). Where `-` fails past 34 digits, this rounds.
+### Returns `me - you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `-` fails past 34 digits, this rounds.
 ### :param you: The number taken away.
 ### :param rule: How the digits past the 34th go.
 ### :returns: The rounded difference.
 ### :throws: {NumericOverflowError} when the rounded difference is past the range of a Decimal.
-@rf("Decimal.subtract")
-routine Decimal.subtract(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+@rf("Decimal.sub_round")
+routine Decimal.sub_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
 
-### Returns `me * by` computed exactly, then rounded once to the nearest value of 34 significant digits by `rule` (half
-### up when left out). Where `*` fails past 34 digits, this rounds.
-### :param by: The other factor.
+### Returns `me * you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `*` fails past 34 digits, this rounds.
+### :param you: The other factor.
 ### :param rule: How the digits past the 34th go.
 ### :returns: The rounded product.
 ### :throws: {NumericOverflowError} when the rounded product is past the range of a Decimal.
-@rf("Decimal.multiply")
-routine Decimal.multiply(by: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+@rf("Decimal.mul_round")
+routine Decimal.mul_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
 
-### Returns `me / by` rounded once to the nearest value of 34 significant digits by `rule` (half up when left out).
-### :param by: The divisor.
+### Returns `me / you` rounded once, by `rule` (half up when left out), to the nearest value of 34 significant digits:
+### `1.div_round(3)` is `0.3333333333333333333333333333333333`.
+### :param you: The divisor.
 ### :param rule: How the digits past the 34th go.
-### :returns: The quotient.
-### :throws: {DivisionByZeroError} when `by` is zero; {NumericOverflowError} when the quotient is past the range of a
-###     Decimal.
-@rf("Decimal.divide")
-routine Decimal.divide(by: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+### :returns: The rounded quotient.
+### :throws: {DivisionByZeroError} when `you` is zero; {NumericOverflowError} when the quotient is past the range of a Decimal.
+@rf("Decimal.div_round")
+routine Decimal.div_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
 
 ### The smaller of `me` and `you`. If one operand is NaN, the other one.
 ### :param you: The value to compare with.

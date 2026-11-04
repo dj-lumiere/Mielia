@@ -30,46 +30,46 @@ routine Decimal.fixed(places: Int, rule: RoundingRule = RoundingRule.HALF_UP) ->
 routine Decimal.round(places: Int = 0, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
     return me.round(places: places.to[U64](), rule: rule)
 
-### Returns `me / by` rounded once to `places` digits after the point by `rule`, half up when left out
-### (`1.divide(by: 3, places: 2)` is `0.33`).
-### :param by: The divisor.
-### :param places: The digits after the point kept.
-### :param rule: How the digits past them go.
-### :returns: The quotient.
-### :throws: {DivisionByZeroError} when `by` is zero; {NumericOverflowError} when the quotient at that place needs more
-###     than 34 significant digits.
-routine Decimal.divide(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
-    return me.divide(by: by, places: places.to[U64](), rule: rule)
-
 ### Returns `me + you` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
 ### left out): where the operator fails past 34 digits, this rounds.
-### :param you: The other number.
+### :param you: The number added.
 ### :param places: The digits after the point kept.
 ### :param rule: How the digits past them go.
-### :returns: The rounded result.
+### :returns: The rounded sum.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-routine Decimal.add(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
-    return me.add(you: you, places: places.to[U64](), rule: rule)
+routine Decimal.add_round(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+    return me.add_round(you: you, places: places.to[U64](), rule: rule)
 
 ### Returns `me - you` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
 ### left out): where the operator fails past 34 digits, this rounds.
-### :param you: The other number.
+### :param you: The number taken away.
 ### :param places: The digits after the point kept.
 ### :param rule: How the digits past them go.
-### :returns: The rounded result.
+### :returns: The rounded difference.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-routine Decimal.subtract(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
-    return me.subtract(you: you, places: places.to[U64](), rule: rule)
+routine Decimal.sub_round(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+    return me.sub_round(you: you, places: places.to[U64](), rule: rule)
 
-### Returns `me * by` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
+### Returns `me * you` computed exactly, then rounded once to `places` digits after the point by `rule` (half up when
 ### left out): where the operator fails past 34 digits, this rounds.
-### :param by: The other number.
+### :param you: The other factor.
 ### :param places: The digits after the point kept.
 ### :param rule: How the digits past them go.
-### :returns: The rounded result.
+### :returns: The rounded product.
 ### :throws: {NumericOverflowError} when even the rounded result needs more than 34 significant digits.
-routine Decimal.multiply(by: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
-    return me.multiply(by: by, places: places.to[U64](), rule: rule)
+routine Decimal.mul_round(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+    return me.mul_round(you: you, places: places.to[U64](), rule: rule)
+
+### Returns `me / you` rounded once to `places` digits after the point by `rule`, half up when left out
+### (`1.div_round(3, places: 2)` is `0.33`).
+### :param you: The divisor.
+### :param places: The digits after the point kept.
+### :param rule: How the digits past them go.
+### :returns: The rounded quotient.
+### :throws: {DivisionByZeroError} when `you` is zero; {NumericOverflowError} when the quotient at that place needs more
+###     than 34 significant digits.
+routine Decimal.div_round(you: Decimal, places: Int, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+    return me.div_round(you: you, places: places.to[U64](), rule: rule)
 
 ### me * 10^n (the decimal analog of ldexp).
 routine Decimal.scaleb(n: Int) -> Decimal
