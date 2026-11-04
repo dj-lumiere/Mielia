@@ -95,6 +95,10 @@ through a `.rf` module the program imports (section 18).
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
     `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`), which get none.
+    Doc comment notes: SF-W305 a routine with no `###` doc comment, only for a routine of a module another file
+    imports (not the entry file, a script or the REPL), SF-W306 a parameter with no `:param` line, SF-W307 a `:param`
+    line naming no parameter (these two everywhere). There is no `:returns:` note. Files under a `tests`, `playground`,
+    `scratch` or `generated` folder are exempt.
     Other notes: `until false` gets SF-W304 with the quick fix "Write 'loop'", the body of `until true` gets
     SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `suflae check --json`
