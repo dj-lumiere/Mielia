@@ -39,15 +39,19 @@ routine Bytes.getitem(range: Range[Int]) -> Bytes
 
 ### Returns the position of the first `byte`.
 ### :param byte: The byte to look for.
-### :throws: {AbsentValueError} There is no such byte.
-routine Bytes.find(byte: Byte) -> Int
-    return me.find(byte: byte).to[Int]()
+### :returns: The position, or `none` when there is no such byte.
+routine Bytes.find(byte: Byte) -> Int?
+    when me.find(byte: byte)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the position where the first `other` starts.
 ### :param other: The bytes to look for.
-### :throws: {AbsentValueError} The bytes do not contain `other`.
-routine Bytes.find(other: Bytes) -> Int
-    return me.find(other: other).to[Int]()
+### :returns: The position, or `none` when the bytes do not contain `other`.
+routine Bytes.find(other: Bytes) -> Int?
+    when me.find(other: other)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the parts between the `separator` bytes.
 ### :param separator: The byte between parts.

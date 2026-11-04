@@ -29,10 +29,9 @@ routine BytesPattern.matches(bytes: Bytes) -> Bool
 
 ### The leftmost place the pattern matches in `bytes`.
 ### :param bytes: The bytes.
-### :returns: The match.
-### :throws: {AbsentValueError} The pattern matches nowhere (`try p.find(b)` gives `none`).
+### :returns: The match, or `none` when the pattern matches nowhere.
 @rf("BytesPattern.find")
-routine BytesPattern.find(bytes: Bytes) -> BytesMatch
+routine BytesPattern.find(bytes: Bytes) -> BytesMatch?
 
 ### `bytes` with every match replaced by `with`.
 ### :param bytes: The bytes.

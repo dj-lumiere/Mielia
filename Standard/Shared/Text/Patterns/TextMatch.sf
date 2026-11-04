@@ -17,12 +17,11 @@ routine TextMatch.text() -> Text
 
 ### The text a capture took.
 ### :param name: The capture's name.
-### :returns: The text.
+### :returns: The text, or `none` when the capture took no part in the match (it sits in an `optional` piece that
+###   matched nothing, or in an either's alternative that wasn't taken).
 ### :throws: {CaptureNameError} The pattern has no capture of that name.
-### :throws: {AbsentValueError} The capture took no part in the match (it sits in an `optional` piece that matched
-###   nothing, or in an either's alternative that wasn't taken).
 @rf("TextMatch.group")
-routine TextMatch.group(name: Text) -> Text
+routine TextMatch.group(name: Text) -> Text?
 
 ### The match as its place and what it took: `0 til 10: 2026-10-20`.
 ### :returns: The text.

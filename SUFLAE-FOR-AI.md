@@ -773,7 +773,7 @@ variant Number
 ## 11. Errors and failure
 
 **Failing.** A routine fails with `throw`, and nothing in its declaration says so. A routine with no value to give
-throws `AbsentValueError()`, an ordinary standard error:
+because something went wrong throws `AbsentValueError()`, an ordinary standard error:
 
 ```suflae
 crashable NopeError
@@ -877,7 +877,9 @@ routine start()
   the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
 - `is None` is an arm of `Optional` only (and the success arm of `Check[None]`). A `Check` has no
   absent state: "not found" in a `Check` is `is AbsentValueError`.
-- Users never write `T?`/`Check` as a return type (SF-S806), only a keyword produces one.
+- A routine may return `T?`, and it should only when having nothing is a normal result (a find, a lookup):
+  `routine find_index(items: List[Text], name: Text) -> Int?` says `return none`, and the caller takes it apart with
+  `when`. Something gone wrong is a `throw`. Users never write `Check` as a return type (SF-S806), only `check` makes one.
   `Check` is meant to be taken apart where it is made: they cannot be a parameter type
   (SF-S754), a member variable type (SF-S755), or copied from one variable to another (SF-S758). `Optional` is
   an ordinary optional value and may be stored.
@@ -990,7 +992,7 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
   integers have `hex()`, `bin()`, `oct()`, `to_text(radix:)`; `Decimal` and floats have `fixed(places)`;
   `Text` has `pad_start(width)`, `pad_end(width)`, `center(width)`, `zero_pad(width)`.
 - `Text` counts and positions with `Int`: `count()`, `count_of(...)`, `s[i]`, `find(other:)` /
-  `find_last(other:)` (failable: `try s.find(other: "x")`), `repeat(times:)`, and the widths of
+  `find_last(other:)` (an `Int?`, `none` where nothing is found), `repeat(times:)`, and the widths of
   `pad_start`/`pad_end`/`center`/`zero_pad`. `split(separator:)`, `lines()` and `words()` give a `List[Text]`.
 - `Text` is a value. Useful members: `count()`, `is_empty()`, `starts_with(prefix:)`,
   `ends_with(suffix:)`, `split(...)`, `words()`, `replace(old:, new:)`, `to_uppercase()`,
@@ -1014,10 +1016,10 @@ digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pa
 - Alternatives name their rule, there is no default: `either_longer([...])` (the longest match there),
   `either_shorter([...])` (the shortest), the first written winning a tie.
 - `capture("name", p)`, `ignoring_case(p)`, and `TextPattern.of(pieces: [...], ignore_case: true)`.
-- Searches: `p.matches(text)` (whole text), failable `p.find(text)` (`try p.find(t)` gives `none`), `p.find_all(text)`
+- Searches: `p.matches(text)` (whole text), `p.find(text)` (a `TextMatch?`, `none` where nothing matches), `p.find_all(text)`
   (non-overlapping, `List[TextMatch]`), `p.replace(text: t, with: "#")`, `p.split(text)`. A `TextMatch` has `start()`,
-  `end()` (character positions, `Int`), `text()`, failable `group("name")` (`CaptureNameError` for an unknown name,
-  `AbsentValueError` for a capture that took no part).
+  `end()` (character positions, `Int`), `text()`, `group("name")` (a `Text?`: `none` for a capture that took no part,
+  `CaptureNameError` for an unknown name).
 - `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes(b"PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
   `end_of_bytes`; `BytesMatch.bytes()`. Text and bytes pieces never mix (a type error).
 - Failable `TextPattern.from_regex(text)` / `BytesPattern.from_regex` read the usual regex syntax (unnamed groups
@@ -1089,6 +1091,8 @@ for (name, age) in ages
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
   `SortedDict`, `PriorityQueue`, `BitList`, `Bits`, `RotatableList`. A `List` keeps its elements from the first
   place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
+  Searches return `Int?` (`none` where there is no match): `index_of` on `Items`, and `first_true`, `next_true`,
+  `first_false`, `next_false` on `Bits` and `BitList`.
   `RotatableList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
   and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Items[T, COUNT]` is RazorForge's
   fixed-size record, counted and indexed with `Int` too. RazorForge's `SplitList` / `SplitItems`
@@ -1209,7 +1213,7 @@ routine start()
 - Files are read and written whole or through sessions. There is no mapped storage in Suflae
   (`FileManager.open_storage` is gone): read the bytes with `read_bytes`, or a session in chunks.
 - The environment (`Environment`, always available): `arguments()` (a list, the program's own name left out),
-  `variable(name:)` (`try` gives an `Optional`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
+  `variable(name:)` (a `Text?`, `none` where it is not set), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
   `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
   `Directory` and build paths from it. `Entropy.next[T]()` gives random bits from the operating system,
   `Random.from_entropy()` a generator seeded with them (`make_random(seed:)` one that replays its stream). A draw

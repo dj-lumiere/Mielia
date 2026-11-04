@@ -18,10 +18,9 @@ common routine Environment.arguments() -> List[Text]
 ### The value of the environment variable `name`, asked of the operating system now (on Windows the name's case
 ### doesn't matter).
 ### :param name: The variable's name.
-### :returns: Its value.
-### :throws: {AbsentValueError} when it isn't set (`try Environment.variable(name:)` gives an `Optional`).
+### :returns: Its value, or `none` when it isn't set.
 @rf("Environment.variable")
-common routine Environment.variable(name: Text) -> Text
+common routine Environment.variable(name: Text) -> Text?
 
 ### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
 ### when it changes.

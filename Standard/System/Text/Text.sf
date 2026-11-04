@@ -40,27 +40,35 @@ routine Text.getitem(range: Range[Int]) -> Text
 
 ### Returns the position of the first `letter`.
 ### :param letter: The character to look for.
-### :throws: {AbsentValueError} The text has no such character.
-routine Text.find(letter: Char) -> Int
-    return me.find(letter: letter).to[Int]()
+### :returns: The position, or `none` when the text has no such character.
+routine Text.find(letter: Char) -> Int?
+    when me.find(letter: letter)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the position where the first `other` starts.
 ### :param other: The text to look for.
-### :throws: {AbsentValueError} The text does not contain `other`.
-routine Text.find(other: Text) -> Int
-    return me.find(other: other).to[Int]()
+### :returns: The position, or `none` when the text does not contain `other`.
+routine Text.find(other: Text) -> Int?
+    when me.find(other: other)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the position of the last `letter`.
 ### :param letter: The character to look for.
-### :throws: {AbsentValueError} The text has no such character.
-routine Text.find_last(letter: Char) -> Int
-    return me.find_last(letter: letter).to[Int]()
+### :returns: The position, or `none` when the text has no such character.
+routine Text.find_last(letter: Char) -> Int?
+    when me.find_last(letter: letter)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
 ### :param other: The text to look for.
-### :throws: {AbsentValueError} The text does not contain `other`.
-routine Text.find_last(other: Text) -> Int
-    return me.find_last(other: other).to[Int]()
+### :returns: The position, or `none` when the text does not contain `other`.
+routine Text.find_last(other: Text) -> Int?
+    when me.find_last(other: other)
+        is U64 as at => return at.to[Int]()
+        is None => return none
 
 ### Returns the text written `times` times in a row.
 ### :param times: How many copies.

@@ -44,10 +44,9 @@ routine TextPattern.matches(text: Text) -> Bool
 
 ### The leftmost place the pattern matches in `text`.
 ### :param text: The text.
-### :returns: The match.
-### :throws: {AbsentValueError} The pattern matches nowhere in the text (`try p.find(t)` gives `none`).
+### :returns: The match, or `none` when the pattern matches nowhere in the text.
 @rf("TextPattern.find")
-routine TextPattern.find(text: Text) -> TextMatch
+routine TextPattern.find(text: Text) -> TextMatch?
 
 ### `text` with every match (as `find_all` finds them) replaced by `with`.
 ### :param text: The text.
