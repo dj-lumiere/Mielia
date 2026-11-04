@@ -1,0 +1,40 @@
+module System
+
+# Mielia's derives for its own choices and flags: the cases come in Mielia's own `List`, and the number of
+# cases is an `Int`. A choice or flags declared in Revare keeps Revare's derives.
+
+### Every declared case, in declaration order.
+@overridable
+routine T.all_cases() -> List[Me]
+needs ChoiceType T
+    var result = List[Me]()
+    expand c in caseof(T)
+        result.add_last(value: LLVM::reinterpret_bits[S32, Me]($valueof(c)))
+    return result
+
+### Every declared member, in declaration order.
+@overridable
+routine T.all_cases() -> List[Me]
+needs FlagsType T
+    var result = List[Me]()
+    expand c in caseof(T)
+        result.add_last(value: LLVM::reinterpret_bits[U64, Me]($valueof(c)))
+    return result
+
+### The number of declared cases.
+@overridable
+routine T.count() -> Int
+needs ChoiceType T
+    var n: U64 = 0
+    expand c in caseof(T)
+        n = n +% 1
+    return n.to()
+
+### The number of declared members.
+@overridable
+routine T.count() -> Int
+needs FlagsType T
+    var n: U64 = 0
+    expand c in caseof(T)
+        n = n +% 1
+    return n.to()

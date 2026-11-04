@@ -1,0 +1,32 @@
+module Tests/StdlibMi/MemorySharedApi
+
+import IO/Console
+
+# A Memory is one row of places however many names it has: growing it through one name and writing through another
+# are seen by all of them, also when a routine does the growing.
+
+entity Box
+    n: Int
+
+routine enlarge(row: Memory[Int], capacity: Int)
+    row.grow(capacity: capacity)
+    row[capacity - 1] = 99
+    return
+
+routine start()
+    var a = Memory[Int](count: 3, fill: 1)
+    var b = a
+    a.grow(capacity: 5)
+    show(f"after grow: a={a.capacity()} b={b.capacity()}")
+    a[4] = 40
+    b[0] = 10
+    show(f"after writes: a={a} b={b}")
+    enlarge(row: b, capacity: 8)
+    show(f"after a routine grew it: a={a.capacity()} b={b.capacity()} last={a[7]}")
+    var boxes = Memory[Box](capacity: 2)
+    var other = boxes
+    boxes.grow(capacity: 4)
+    other[3] = Box(n: 7)
+    show(f"box through the other name: {boxes[3].n}")
+    show("DONE")
+    return

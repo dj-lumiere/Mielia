@@ -1,6 +1,6 @@
 using Builder.Targeting;
 
-namespace Suflae.Tests.BuildSystem;
+namespace Mielia.Tests.BuildSystem;
 
 /// <summary>
 /// Tests for <see cref="TargetGate"/> — file-granularity conditional compilation driven by a leading
@@ -21,10 +21,10 @@ public sealed class TargetGateTests
     }
 
     [Fact]
-    public void NonRfFile_NeverGated()
+    public void NonRaFile_NeverGated()
     {
-        // A `.sf` file is Suflae — never subject to conditional compilation, even with a directive.
-        string f = WriteTemp(name: "x.sf", body: "@target(os: \"windows\")\nmodule M\n");
+        // A `.mi` file is Mielia — never subject to conditional compilation, even with a directive.
+        string f = WriteTemp(name: "x.mi", body: "@target(os: \"windows\")\nmodule M\n");
         try
         {
             Assert.True(condition: TargetGate.ShouldCompile(filePath: f,

@@ -1,0 +1,12 @@
+module System
+
+# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the aggregate protocol for entity values.
+### `EntityType` identifies heap-backed or identity-bearing values whose
+### semantics are based on shared instance identity rather than plain structural
+### copying. An entity has `==` like a record does: the builder gives it `Equatable` when every member
+### variable has `==` (its `eq` compares them), while `===` asks whether two names reach the same entity.
+@ra("EntityType")
+protocol EntityType

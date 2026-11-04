@@ -2,11 +2,11 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// A program that uses Work checks every entity access, a program without Work doesn't: the emitted IR of
-/// <c>tests/Fixtures/TaskChecks/no_work.sf</c> has no access lock and no promotion, the IR of <c>with_work.sf</c>
+/// <c>tests/Fixtures/TaskChecks/no_work.mi</c> has no access lock and no promotion, the IR of <c>with_work.mi</c>
 /// (the same program with one Work) has them.
 /// </summary>
 public sealed class TaskCheckTests
@@ -20,7 +20,7 @@ public sealed class TaskCheckTests
     [Fact]
     public void ProgramWithoutWork_HasNoAccessLockAndNoPromotion()
     {
-        string ir = Emit(fixture: "no_work.sf");
+        string ir = Emit(fixture: "no_work.mi");
 
         Assert.DoesNotMatch(expectedRegex: LockUse, actualString: ir);
         Assert.DoesNotMatch(expectedRegex: PromoteUse, actualString: ir);
@@ -29,7 +29,7 @@ public sealed class TaskCheckTests
     [Fact]
     public void ProgramWithWork_KeepsAccessLockAndPromotion()
     {
-        string ir = Emit(fixture: "with_work.sf");
+        string ir = Emit(fixture: "with_work.mi");
 
         Assert.Matches(expectedRegex: LockUse, actualString: ir);
         Assert.Matches(expectedRegex: PromoteUse, actualString: ir);
@@ -81,7 +81,7 @@ public sealed class TaskCheckTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -96,6 +96,6 @@ public sealed class TaskCheckTests
         }
 
         throw new InvalidOperationException(
-            message: "Could not locate Suflae.csproj walking up from test assembly directory.");
+            message: "Could not locate Mielia.csproj walking up from test assembly directory.");
     }
 }

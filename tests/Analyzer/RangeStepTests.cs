@@ -1,14 +1,14 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
 /// The sign of a range's step sets its direction (`10 to 0 by -1` counts down), so only a literal step of zero is a
-/// build error (SF-S516) instead of a loop that never ends. A step held in a variable is checked when the range is
-/// iterated (tests/Fixtures/ExitCode/range_step_zero.rf).
+/// build error (MI-S516) instead of a loop that never ends. A step held in a variable is checked when the range is
+/// iterated (tests/Fixtures/ExitCode/range_step_zero.rr).
 /// </summary>
 public sealed class RangeStepTests
 {
@@ -18,7 +18,7 @@ public sealed class RangeStepTests
     [InlineData("0.0 to 1.0 by -0.0")]
     public void Analyze_LiteralStepZero_ReportsError(string range)
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Walk(range: range));
+        AnalysisResult result = AnalyzeSaMielia(source: Walk(range: range));
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.RangeStepZero);
     }
@@ -30,7 +30,7 @@ public sealed class RangeStepTests
     [InlineData("1.0 to 0.0 by -0.5")]
     public void Analyze_LiteralStepNonZero_NoError(string range)
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Walk(range: range));
+        AnalysisResult result = AnalyzeSaMielia(source: Walk(range: range));
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.RangeStepZero);
     }
@@ -46,7 +46,7 @@ public sealed class RangeStepTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.RangeStepZero);
     }

@@ -1,5 +1,0 @@
-module Ledger
-
-# The globals the jobs in main.sf change.
-
-global balance: Int = 1

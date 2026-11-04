@@ -1,23 +1,23 @@
 using SyntaxTree;
 using Builder.Frontends;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
-/// Auto-forwarding synthesis for the Suflae wrapper standard library.
+/// Auto-forwarding synthesis for the Mielia wrapper standard library.
 ///
-/// A Suflae-realm <c>entity X { secret inner: RF::System.Y[..] }</c> re-surfaces the RazorForge-realm type
+/// A Mielia-realm <c>entity X { secret inner: RA::System.Y[..] }</c> re-surfaces the Revare-realm type
 /// <c>Y</c>: for every PUBLIC member routine <c>Y</c> declares that <c>X</c> does not hand-define, this
 /// synthesizes a transparent forwarder
 /// <code>routine X[..].m(args) -> ret
 ///   return me.inner.m(args)</code>
 /// and APPENDS it to <c>X</c>'s program BEFORE registration, so the ordinary stdlib pipeline (registration
 /// → body analysis → monomorphization → codegen) treats it identically to a hand-written forwarder. This
-/// is what lets an SF wrapper present the COMPLETE inner surface rather than a hand-picked subset — the
+/// is what lets an MI wrapper present the COMPLETE inner surface rather than a hand-picked subset — the
 /// partial-wrapper trap that sank the old overlay.
 ///
 /// v1 scope (deferred bits noted): forwards public, non-lifecycle member routines whose return type is NOT
-/// the inner container type itself (a <c>RF::Y -&gt; SF Y</c> return re-wrap is not built yet, so
+/// the inner container type itself (a <c>RA::Y -&gt; MI Y</c> return re-wrap is not built yet, so
 /// container-returning methods like <c>copy</c>/<c>sorted</c> are skipped for now). Constructors and
 /// <c>destruct</c> are excluded — the wrapper hand-writes its constructor and gets a synthesized field-walk
 /// <c>destruct</c> (called by RoamManager).
@@ -61,20 +61,20 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>The lifecycle access tokens that only appear in builder-internal helper signatures (never an
-    /// approachable SF surface). The read and write tokens <c>Viewing</c>/<c>Modifying</c> are not among them: a
+    /// approachable MI surface). The read and write tokens <c>Viewing</c>/<c>Modifying</c> are not among them: a
     /// call converts a value to them, and the library's internal helpers that take them are secret.</summary>
     private static readonly HashSet<string> InternalBorrowTokens = new(collection:
         ["Receiving", "Watched", "Enterable"],
         comparer: StringComparer.Ordinal);
 
     /// <summary>Whether <paramref name="type"/> is (or is a generic over) an internal borrow token — the
-    /// signal that a method is a builder-internal helper the SF surface must not forward.</summary>
+    /// signal that a method is a builder-internal helper the MI surface must not forward.</summary>
     private static bool TakesInternalBorrowToken(TypeExpression? type)
     {
         return type != null && InternalBorrowTokens.Contains(item: BareTypeName(name: type.Name));
     }
 
-    /// <summary>The fixed-width integer types, which Suflae's own surface replaces with <c>Int</c>.</summary>
+    /// <summary>The fixed-width integer types, which Mielia's own surface replaces with <c>Int</c>.</summary>
     private static readonly HashSet<string> FixedWidthIntegers = new(collection:
         ["U8", "U16", "U32", "U64", "U128", "U256", "S8", "S16", "S32", "S64", "S128", "S256"],
         comparer: StringComparer.Ordinal);
@@ -88,8 +88,8 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>A dedup key for a member routine: its name and parameter names. Types are left out on purpose: a
-    /// wrapper method replaces the inner one called the same way even when its types differ (Suflae's
-    /// <c>getitem(index: Int)</c> replaces RazorForge's <c>getitem(index: U64)</c>).</summary>
+    /// wrapper method replaces the inner one called the same way even when its types differ (Mielia's
+    /// <c>getitem(index: Int)</c> replaces Revare's <c>getitem(index: U64)</c>).</summary>
     private static string ForwarderSignatureKey(RoutineDeclaration r)
     {
         return
@@ -97,7 +97,7 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>
-    /// Appends synthesized inner-forwarders onto every Suflae wrapper entity in the loaded SF stdlib
+    /// Appends synthesized inner-forwarders onto every Mielia wrapper entity in the loaded MI stdlib
     /// <paramref name="programs"/> (program, file path, module). Runs from the standard library loader after
     /// the scan and BEFORE the registration passes so the forwarders register/analyze/monomorphize/codegen as
     /// authored source.
@@ -111,23 +111,23 @@ internal static class WrapperForwarderSynthesis
         // (List/Dict/Set) worked.
         List<(Program Program, string FilePath, string Module)> allProgs = programs.ToList();
 
-        // Index RazorForge-realm member-routine declarations by MODULE-QUALIFIED owner (e.g. "System.List" →
+        // Index Revare-realm member-routine declarations by MODULE-QUALIFIED owner (e.g. "System.List" →
         // List's own methods).
-        Dictionary<string, List<RoutineDeclaration>> rfMembersByOwner =
-            IndexRfMembersByOwner(allProgs: allProgs);
-        if (rfMembersByOwner.Count == 0)
+        Dictionary<string, List<RoutineDeclaration>> raMembersByOwner =
+            IndexRaMembersByOwner(allProgs: allProgs);
+        if (raMembersByOwner.Count == 0)
         {
             return;
         }
 
-        // The set of SF wrapper entity names (every SF-realm `entity X { secret inner: RF::… }`). A forwarded
+        // The set of MI wrapper entity names (every MI-realm `entity X { secret inner: RA::… }`). A forwarded
         // method whose return type names one of these (whether X itself — `copy` — or a SIBLING wrapper —
-        // `Dict.keys() -> List[K]`) returns a bare RF value that must be re-wrapped into the SF wrapper.
-        HashSet<string> sfWrapperNames = CollectSfWrapperNames(allProgs: allProgs);
+        // `Dict.keys() -> List[K]`) returns a bare RA value that must be re-wrapped into the MI wrapper.
+        HashSet<string> miWrapperNames = CollectMiWrapperNames(allProgs: allProgs);
 
         foreach ((Program prog, string filePath, string _) in allProgs)
         {
-            if (Languages.RealmOf(fileName: filePath) != SuflaeRules.Instance.ShortName)
+            if (Languages.RealmOf(fileName: filePath) != MieliaRules.Instance.ShortName)
             {
                 continue;
             }
@@ -138,8 +138,8 @@ internal static class WrapperForwarderSynthesis
                 GenerateForwardersForEntity(prog: prog,
                     entity: entity,
                     filePath: filePath,
-                    rfMembersByOwner: rfMembersByOwner,
-                    sfWrapperNames: sfWrapperNames,
+                    raMembersByOwner: raMembersByOwner,
+                    miWrapperNames: miWrapperNames,
                     generated: generated);
             }
 
@@ -148,18 +148,18 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>
-    /// Indexes RazorForge-realm member-routine declarations by MODULE-QUALIFIED owner (e.g.
+    /// Indexes Revare-realm member-routine declarations by MODULE-QUALIFIED owner (e.g.
     /// "System.List" → List's own methods). Keying by module (not bare owner) is load-bearing: an
-    /// EXTENSION method in another module — `Random.rf`'s `List[T].shuffle()` — has bare owner "List"
-    /// too, but forwarding it onto the SF List produced a `me.inner.shuffle()` body that fails to
-    /// resolve (shuffle is not a System.List member) → RF-S458 in the SF stdlib validation. The wrapper's
-    /// `inner: RF::System.List` names module System, so only System-module List members are forwarded;
+    /// EXTENSION method in another module — `Random.rr`'s `List[T].shuffle()` — has bare owner "List"
+    /// too, but forwarding it onto the MI List produced a `me.inner.shuffle()` body that fails to
+    /// resolve (shuffle is not a System.List member) → RA-S458 in the MI stdlib validation. The wrapper's
+    /// `inner: RA::System.List` names module System, so only System-module List members are forwarded;
     /// `Random.List` is excluded.
     /// </summary>
-    private static Dictionary<string, List<RoutineDeclaration>> IndexRfMembersByOwner(
+    private static Dictionary<string, List<RoutineDeclaration>> IndexRaMembersByOwner(
         List<(Program Program, string FilePath, string Module)> allProgs)
     {
-        var rfMembersByOwner =
+        var raMembersByOwner =
             new Dictionary<string, List<RoutineDeclaration>>(comparer: StringComparer.Ordinal);
         foreach ((Program prog, string filePath, string module) in allProgs)
         {
@@ -176,10 +176,10 @@ internal static class WrapperForwarderSynthesis
                     } r)
                 {
                     string key = $"{module}.{owner}";
-                    if (!rfMembersByOwner.TryGetValue(key: key,
+                    if (!raMembersByOwner.TryGetValue(key: key,
                             value: out List<RoutineDeclaration>? list))
                     {
-                        rfMembersByOwner[key: key] = list = [];
+                        raMembersByOwner[key: key] = list = [];
                     }
 
                     list.Add(item: r);
@@ -187,20 +187,20 @@ internal static class WrapperForwarderSynthesis
             }
         }
 
-        return rfMembersByOwner;
+        return raMembersByOwner;
     }
 
     /// <summary>
-    /// Collects the bare names of every SF wrapper entity (an SF-realm
-    /// <c>entity X { secret inner: RF::… }</c>). A forwarded method returning one of these yields a bare
-    /// RF value that must be re-wrapped into the SF wrapper.
+    /// Collects the bare names of every MI wrapper entity (an MI-realm
+    /// <c>entity X { secret inner: RA::… }</c>). A forwarded method returning one of these yields a bare
+    /// RA value that must be re-wrapped into the MI wrapper.
     /// </summary>
-    private static HashSet<string> CollectSfWrapperNames(
+    private static HashSet<string> CollectMiWrapperNames(
         List<(Program Program, string FilePath, string Module)> allProgs)
     {
-        var sfWrapperNames = new HashSet<string>(comparer: StringComparer.Ordinal);
+        var miWrapperNames = new HashSet<string>(comparer: StringComparer.Ordinal);
         foreach ((Program prog, _, _) in allProgs.Where(predicate: p =>
-                     Languages.RealmOf(fileName: p.FilePath) == SuflaeRules.Instance.ShortName))
+                     Languages.RealmOf(fileName: p.FilePath) == MieliaRules.Instance.ShortName))
         {
             foreach (EntityDeclaration e in prog.Declarations
                                                 .OfType<EntityDeclaration>()
@@ -210,23 +210,23 @@ internal static class WrapperForwarderSynthesis
                                                          v.Name == "inner" && v.Type is
                                                              { Realm: TypeModel.Realms.Shared })))
             {
-                sfWrapperNames.Add(item: BareTypeName(name: e.Name));
+                miWrapperNames.Add(item: BareTypeName(name: e.Name));
             }
         }
 
-        return sfWrapperNames;
+        return miWrapperNames;
     }
 
     /// <summary>
-    /// Generates the inner-forwarders for one SF wrapper entity, appending them to
-    /// <paramref name="generated"/>. No-op for an entity that is not a `secret inner: RF::…` wrapper or
-    /// whose inner owner has no indexed RF members.
+    /// Generates the inner-forwarders for one MI wrapper entity, appending them to
+    /// <paramref name="generated"/>. No-op for an entity that is not a `secret inner: RA::…` wrapper or
+    /// whose inner owner has no indexed RA members.
     /// </summary>
     private static void GenerateForwardersForEntity(Program prog, EntityDeclaration entity,
-        string filePath, Dictionary<string, List<RoutineDeclaration>> rfMembersByOwner,
-        HashSet<string> sfWrapperNames, List<RoutineDeclaration> generated)
+        string filePath, Dictionary<string, List<RoutineDeclaration>> raMembersByOwner,
+        HashSet<string> miWrapperNames, List<RoutineDeclaration> generated)
     {
-        // The wrapper's backing field: `secret inner: RF::System.Y[..]`.
+        // The wrapper's backing field: `secret inner: RA::System.Y[..]`.
         VariableDeclaration? innerField = entity.Members
                                                 .OfType<VariableDeclaration>()
                                                 .FirstOrDefault(predicate: v =>
@@ -241,7 +241,7 @@ internal static class WrapperForwarderSynthesis
         // TypeExpression keeps its args in GenericArguments, so Name has no `[..]` to strip. This is
         // the exact key of the member index, so only that module's own members are forwarded.
         string innerModuleOwner = innerType.Name;
-        if (!rfMembersByOwner.TryGetValue(key: innerModuleOwner,
+        if (!raMembersByOwner.TryGetValue(key: innerModuleOwner,
                 value: out List<RoutineDeclaration>? innerMembers))
         {
             return;
@@ -265,11 +265,11 @@ internal static class WrapperForwarderSynthesis
             }
 
             // A method whose return type IS the inner container type (`copy`/`sorted` → the same
-            // container; a value type's `trim`/`add` → itself) returns a bare `RF::System.Y` that must
-            // be RE-WRAPPED into the SF `X` before it re-surfaces — else the SF caller would receive
-            // a raw RF value. `reWrap` drives the forwarder to build `return X[..](inner: <call>)`.
+            // container; a value type's `trim`/`add` → itself) returns a bare `RA::System.Y` that must
+            // be RE-WRAPPED into the MI `X` before it re-surfaces — else the MI caller would receive
+            // a raw RA value. `reWrap` drives the forwarder to build `return X[..](inner: <call>)`.
             bool reWrap = inner.ReturnType is { } rt &&
-                          sfWrapperNames.Contains(item: BareTypeName(name: rt.Name));
+                          miWrapperNames.Contains(item: BareTypeName(name: rt.Name));
             if (!defined.Add(item: ForwarderSignatureKey(r: inner)))
             {
                 continue;
@@ -284,7 +284,7 @@ internal static class WrapperForwarderSynthesis
     }
 
     /// <summary>
-    /// Whether an inner RF member routine should be forwarded onto the SF wrapper: excludes lifecycle
+    /// Whether an inner RA member routine should be forwarded onto the MI wrapper: excludes lifecycle
     /// (destroy), @dangerous and secret surface, builder-internal borrow-token helpers, and
     /// specialized-receiver methods (only the PLAIN generic form <c>X[T,..].m</c> forwards cleanly).
     /// </summary>
@@ -300,10 +300,10 @@ internal static class WrapperForwarderSynthesis
         }
 
         // A forwarder is a plain routine, so it cannot carry a @dangerous member: unsafe code reaches the
-        // inner value through RF surface (`danger` + Hijacked), not the wrapper. (`iter`/`access`/`control` are
+        // inner value through RA surface (`danger` + Hijacked), not the wrapper. (`iter`/`access`/`control` are
         // builder-internal — direct calls are banned so an iterator/borrow can't outlive its
         // source — but STDLIB bodies may chain them, and a forwarder carrying its wrapper file's
-        // path IS stdlib, so `iter` forwards fine and the SF list stays `for`-iterable.)
+        // path IS stdlib, so `iter` forwards fine and the MI list stays `for`-iterable.)
         if (inner.IsDangerous)
         {
             return false;
@@ -314,7 +314,7 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
-        // Suflae counts and indexes with `Int`, so a wrapper never shows a fixed-width integer: a method
+        // Mielia counts and indexes with `Int`, so a wrapper never shows a fixed-width integer: a method
         // taking or returning one is either written again by hand with `Int` (`count`, `getitem`) or left
         // out (the raw and sorting helpers).
         if (inner.Parameters.Any(predicate: p => p.Name != "me" && MentionsFixedWidthInteger(type: p.Type)) ||
@@ -324,14 +324,14 @@ internal static class WrapperForwarderSynthesis
         }
 
         // Internal borrow-token surface: a method taking a lifecycle access token
-        // (`Receiving`/`Watched`/`Enterable`) is an implementation helper, never an approachable SF
+        // (`Receiving`/`Watched`/`Enterable`) is an implementation helper, never an approachable MI
         // surface method, and forwarding it over-prunes at codegen.
         if (inner.Parameters.Any(predicate: p => TakesInternalBorrowToken(type: p.Type)))
         {
             return false;
         }
 
-        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RF::System.Y[T,..]`).
+        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RA::System.Y[T,..]`).
         // A SPECIALIZED-receiver method (`List[Work[V]].gather`, `List[U16]…`) targets a different
         // instantiation than the wrapper's inner field — skip (its `me.inner` would mistype).
         if (!IsPlainGenericReceiver(receiver: inner.ReceiverType, ownerParams: ownerParams))
@@ -360,13 +360,13 @@ internal static class WrapperForwarderSynthesis
     /// <summary>Builds one <c>routine X[..].m(args) -> ret: return me.inner.m(args)</c> forwarder.
     /// <paramref name="filePath"/> is the wrapper's stdlib source path — used as the forwarder's source
     /// location so builder-internal chains (e.g. <c>me.inner.iter()</c>) pass the stdlib exemption.</summary>
-    /// <param name="entity">The SF wrapper entity that will own the synthesized forwarder routine.</param>
+    /// <param name="entity">The MI wrapper entity that will own the synthesized forwarder routine.</param>
     /// <param name="ownerParams">The generic parameter names of the wrapper entity (e.g. <c>["T"]</c> for <c>List[T]</c>).</param>
-    /// <param name="inner">The RF inner-type member routine being forwarded.</param>
+    /// <param name="inner">The RA inner-type member routine being forwarded.</param>
     /// <param name="filePath">The stdlib source file path, used as the forwarder's source location.</param>
-    /// <param name="reWrap">When true the inner call returns a bare <c>RF::System.Y</c> that must be
-    /// re-surfaced as the SF wrapper — the body becomes <c>return X[..](inner: me.inner.m(args))</c>
-    /// instead of returning the raw RF value.</param>
+    /// <param name="reWrap">When true the inner call returns a bare <c>RA::System.Y</c> that must be
+    /// re-surfaced as the MI wrapper — the body becomes <c>return X[..](inner: me.inner.m(args))</c>
+    /// instead of returning the raw RA value.</param>
     private static RoutineDeclaration BuildForwarder(EntityDeclaration entity,
         List<string> ownerParams, RoutineDeclaration inner, string filePath,
         bool reWrap)
@@ -411,9 +411,9 @@ internal static class WrapperForwarderSynthesis
         Expression call =
             new CallExpression(Callee: callee, Arguments: forwardedArgs, Location: loc);
 
-        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RF::System.Y`; surface it as
-        // the SF wrapper via the memberwise `X[..](inner: <call>)` constructor (mirrors the hand-written
-        // ctor), at the return type's own generic arguments. The wrapper's name resolves to the Suflae type
+        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RA::System.Y`; surface it as
+        // the MI wrapper via the memberwise `X[..](inner: <call>)` constructor (mirrors the hand-written
+        // ctor), at the return type's own generic arguments. The wrapper's name resolves to the Mielia type
         // because the forwarder carries the wrapper file's location.
         if (reWrap && inner.ReturnType is { } wrapRet)
         {
@@ -445,7 +445,7 @@ internal static class WrapperForwarderSynthesis
 
         return new RoutineDeclaration(Name: inner.MemberRoutineName!,
             Parameters: valueParams,
-            // A re-wrapped result is the Suflae type: its name is read where the wrapper is written.
+            // A re-wrapped result is the Mielia type: its name is read where the wrapper is written.
             ReturnType: reWrap
                 ? WrittenAt(type: inner.ReturnType, location: loc)
                 : inner.ReturnType,

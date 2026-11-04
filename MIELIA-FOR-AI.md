@@ -1,0 +1,1750 @@
+# Mielia — Reference for AI Assistants
+
+You are reading this because Mielia (`.mi`, v0.1, 2026) is **not in your training data**. Do not guess
+syntax from Python, Ruby or Kotlin intuitions; this file lists where those intuitions are wrong. It is a
+complete reference on its own: you do not need any other document to write correct Mielia.
+
+When unsure, consult ground truth in the repo:
+
+- `Mielia/tests/Fixtures/StdlibMi/*.mi` — Mielia programs with their expected output (`.expected.txt`).
+  Start from the closest one.
+- `Revare/Standard/` — the standard library every Mielia build reads (`System`, `Collections`, `IO`,
+  `EmitterTools`, …). It is written in Revare, the sibling language, but every public routine
+  in it is callable from Mielia exactly as declared.
+- `Mielia/Standard/` — the modules only Mielia builds read (today: `ObjectHacker`).
+
+---
+
+## 1. What Mielia is
+
+Revare and Mielia share one object model, one grammar and one standard library, and differ on two
+axes. Data exists to be shared, and `record` and `entity` are the two ways: a record is shared by handing out
+copies, an entity is the one legitimate version everyone reaches. The first axis is **how an entity is
+reached**. In Mielia, through any number of names: `var b = a` makes a second name for the same object,
+passing it to a routine hands over another name for it, and memory is reclaimed by reference counting plus a
+cycle collector. Because names are free, Mielia has module-level mutable state (`global`),
+cyclic structures with no weak-reference annotations, and runtime checks where the builder cannot follow
+aliases (changing a collection while it is being looped over crashes at run time when the change is hidden
+behind a call). A `record` is a value: copied on assignment, no identity. An `entity` is the one-of-a-kind
+object: it has identity, compared with `===`.
+
+The second axis is **machine visibility**. Mielia hides the machine. Numbers are `Int`
+(arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
+memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Work](args)`
+whose work the runtime schedules, and shared entities are locked for you. A Mielia program has no
+machine-level code at all: no `danger` blocks, no `dangerous` routines, no foreign `C::` routines. C is reached
+through a `.rr` module the program imports (section 18).
+
+## 2. The rules most likely to break your assumptions
+
+1. **Arguments without a label fill the parameters in order from the first** (`volume(2, 3, 4)`), labels pick a
+   parameter (`gcd(a: 252, b: 105)`) and follow the unlabeled ones: an unlabeled argument after a labeled one is
+   MI-S512. A bare variable named like ANOTHER parameter of the routine, sitting in a different parameter's place,
+   is MI-S510 (`f(n - 1, from, to, tmp)`: write `f(n - 1, from, tmp: to, to: tmp)`). Routines annotated
+   `@positional` skip the place check.
+2. **A routine that returns a value returns it on every path** (`return x`). A routine that returns nothing
+   needs no closing `return`: it ends where its body ends. `return` still leaves one early.
+3. **Entities are shared; records are copied.** `var b = a` on an entity gives a second name for the same
+   object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
+   `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
+   A manager type (`FileManager`, `PartitionManager`, `StorageManager`, `CpuEventManager`) is always an `entity`
+   (a copy would keep its own record and diverge), a stateless service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
+   `record` with no member variables (body `nothing`, routines `common`, called on the type). The console is the
+   free routines `show` / `ask` / `alert`.
+   Kinds of type (a way to read a type, nothing is marked): a **data type** is its fields and each routine answers
+   from them alone (`List[Int]`). A **service** answers from state you do not hold as a value. A *stateless* service
+   answers only from something outside (`Clock`, `Entropy`). A *stateful* service keeps part of its state itself: a
+   **manager** hands out a resource, takes it back and answers for its end (`FileManager`), and an **emitter** reads a
+   source and gives the next value on each request. A `Mailbox` mixes both (`count()` from what waits, `for x in box`
+   waits for another job). No `Service` suffix; `Manager` stays; no annotation, no builder check.
+4. **Bare numbers are `Int` and `Decimal`**, not 64-bit machine numbers. `42` is an `Int`, `3.14` a
+   `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`, and a whole number written in base 10
+   to a float or decimal type: `price: 5` for a `Decimal` parameter, but not `0xFF`), but variables of different
+   number types never mix without an explicit conversion (`n.to[S64]()`, §5). The one exception is the two
+   default types: an `Int` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
+   (`3.5 * 2` is `7`), and an `Int` with more significant digits than a `Decimal` holds (34) crashes. Mixing
+   two chosen types (`S32` and `U32`) is MI-S767, whose message names a type holding both
+   (`a.to[S64]() + b.to[S64]()`).
+5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
+   significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Int` values turns each into a `Decimal`
+   first, and an `Int` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
+   `1.0 / 3` is `0.333…` too (§4). Every rounding a `Decimal` does (`/`, text read in, `round()`, `fixed(places:)`)
+   is half up: x goes to the n (at the digit kept) with `n - 0.5 <= x < n + 0.5`, that is `floor(x + 0.5)`. `2.5` goes
+   to `3`, `-2.5` to `-2`, `-7.125` to 2 places to `-7.12`, and `round()` of `-0.5` is `0`, `**`, `sqrt` and the
+   transcendentals included (`D32`, `D64`, `D128` keep IEEE 754's ties to even, cohorts and `-0`). A routine that rounds
+   on purpose takes a `RoundingRule` (`HALF_UP`, `HALF_EVEN`, `HALF_AWAY`, `FLOOR`, `CEIL`, `TRUNC`; left out, the
+   type's own rule: `HALF_UP` for `Decimal`, `HALF_EVEN` for the D types): `x.round(places: 2, rule: RoundingRule.FLOOR)`,
+   `x.fixed(places: 2, rule: ...)`, `a.div_round(b, places: 2)`, `a.add_round(b, places: 2)`, `a.sub_round(b, places: 2)`, `a.mul_round(b, places: 10)` (exact, then rounded once: they round where `+ - *` crash). Without `places:` they round the exact result once to the nearest 34-significant-digit value under `rule:` (`HALF_UP` when left out): `a.sub_round(b)`, `a.mul_round(b)`, `a.div_round(b, rule: RoundingRule.FLOOR)`, `a.add_round(b, rule: RoundingRule.HALF_UP)`; a result past the range (about `1e6144`) still crashes with `NumericOverflowError`. The
+   operators never take a rule, and there is no global rounding state.
+6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
+   mode). `show(...)` needs no import.
+7. **Every routine passes its failures to its caller.** Nothing marks a routine that can fail (`failable` is
+   MI-G230, `routine parse!(...)` is MI-G222), and call sites never mark the call. A failure nobody receives stops
+   the program loudly where it happened. To recover, prefix the call with `try` / `check` and take the result apart
+   with `when`: they receive a failure from any depth below the call. Only `infallible routine` is a wall. There is
+   no try/catch and no `try_parse` name form (§11).
+8. **Conditional expressions are top-level only.** `if c then a else b` is the whole value of `var x =` (also
+   `global`), a plain `x =`, or `return`. Anywhere else it is MI-G112 by design: inside parentheses, an argument
+   (`f(x: if c then a else b)`), an operand (`(if c then a else b) + 1`, `x += if ...`), a subscript, an f-text
+   slot, a branch or condition of another conditional (`else if ...` too), a `when` arm's value, and directly
+   after `try`/`check`. Use `when` or a named intermediate.
+9. **Changing a collection while `for`-looping it is banned.** `for x in xs` with `xs.add_last(...)` in the
+   body is a build error (MI-S625); the same change made inside a called routine crashes at run time with
+   `ReshapingWhileInUseError`. Change it after the loop.
+10. **A result you do not need takes no marker** (`drop` and `discard` are MI-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
+    A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[MI-W007]`,
+    from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
+    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`), which get none.
+    Doc comment notes: MI-W305 a routine with no `###` doc comment, only for a routine of a module another file
+    imports (not the entry file, a script or the REPL), MI-W306 a parameter with no `:param` line, MI-W307 a `:param`
+    line naming no parameter (these two everywhere). There is no `:returns:` note. Files under a `tests`, `playground`,
+    `scratch` or `generated` folder are exempt.
+    Other notes: `until false` gets MI-W304 with the quick fix "Write 'loop'", the body of `until true` gets
+    MI-W057 and is shown faded (as is code after an unconditional `return`, MI-S786,
+    an error). Diagnostics may carry a fix the language server offers as a quick fix, and `mielia check --json`
+    writes all diagnostics as a JSON array (`file`, `line`, `column`, `severity`, `code`, `message`, `endLine?`,
+    `fix?` with 1-based edits).
+11. **A module-level `var` is an error (MI-S435).** Module-level mutable state is `global name: Type = init`
+    (§6). Constants are `preset`.
+12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
+13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Int]`. `<` is a
+    comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
+14. **Containment is a call on the container:** `xs.has(3)`, `"hello".has("ell")`, `xs.lacks(3)`, and a dict's
+    keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
+    `x in xs` as a test is a grammar error (MI-G212); `in` belongs only to `for x in xs`.
+15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
+    `null`, `print`, `main` or `pass` statement.** A line with no work is `nothing`. The words are `entity`/`record`, `routine`, `var`,
+    `preset`, `for`, `when`, `to[Work]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
+
+## 3. Program shape
+
+Script mode — loose statements run top to bottom as the body of an implicit `start()`:
+
+```mielia
+var total = 0
+for n in 1 to 5
+    total += n
+show(f"total = {total}")
+```
+
+With an explicit entry point (most fixtures use this form):
+
+```mielia
+module Tools/Greeter
+
+routine greet(name: Text) -> Text
+    return f"Hello, {name}!"
+
+routine start()
+    show(greet(name: "Mielia"))
+    return
+```
+
+- Declarations (`import`, types, routines, `preset`, `global`) may sit among script statements; they are
+  hoisted.
+- Mixing loose statements with an explicit `routine start()` is an error (MI-G150). Choose one.
+- Only the program's entry file may be a script. Loose statements in an imported file are MI-S443.
+- A top-level `var` in a script belongs to the script's own scope, not the module: routines in the file
+  cannot see it (MI-S444). Pass it as an argument, or make it a `global`.
+- Comments start with `#`. Doc comments use `###` on the lines before a declaration.
+
+**Modules.** `module <Path>` is optional: without it the module path comes from the file's location
+relative to `config.toml` (each folder and the file name PascalCased, joined with `/`:
+`tools/text utils.mi` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
+declare the same `module` are one module and build together. A file there with its own `routine start()` is another
+program and is not built with yours, so a draft that does not build yet can sit next to the program. A file there
+with top-level statements and no `routine start()` is built and is MI-S443, since only the entry file may be a
+script. Only files that are part of the build report their errors. A failed `build` keeps the
+last executable that built.
+
+**Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
+`preset` or `global`) of module `Foo`, and `import Foo.[bar, Baz]` several. A member import brings only
+those names bare (another name of `Foo` used bare is MI-S007 with a hint) unless the file also imports `Foo`
+whole, and a routine is always reachable with its module in front (`Foo.qux(...)`). `as` adds a second
+name and both work: `import Foo.bar as b` → `b` and `Foo.bar` (no bare `bar`), `import Foo as F` →
+`F.qux(...)` and `Foo.qux(...)` (no bare names of `Foo`). An import brings the module it names, never the modules under it
+(`import IO` doesn't bring `IO/Console`). A folder that holds modules but is no module itself (`import IO`) is
+MI-S105 listing the modules in it. A module the Mielia standard library doesn't have (`BuilderQuery`, `Simd`) is
+MI-S116 at the import ("'BuilderQuery' isn't a module of the Mielia standard library, so a Mielia file can't import
+it"). Always available without an import: `System` and every module under
+it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/Numerics`: the number types,
+`Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
+`System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
+(`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
+`PriorityQueue`, …), `EmitterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `ObjectHacker`
+(`type_name(of: x)`, reflection, section 19). Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
+harmless. A standard library module is its folder (`Mielia/Standard/System/Text/` is `System/Text`), and a
+`module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
+`Numerics` and rewrites `Core.X` to `System.X`.
+
+## 4. Naming and vocabulary
+
+- function → **routine**; method → **member routine**, declared outside the type as
+  `routine Type.name(...)`; the receiver is `me`. `Me` (capital) is the receiver's type.
+- class/struct → **`entity`** (shared object with identity) or **`record`** (value). Enum → **`choice`**;
+  bit set → **`flags`**; sum type → **`variant`**; error type → **`crashable`**; interface/trait →
+  **`protocol`**, adopted with **`obeys`**.
+- field → **member variable**, a bare `name: Type` line in the type body (no `var`). Visibility is written
+  only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private: seen in its module and the modules under it). In the standard library a secret name is seen by the whole library and by no program.
+  Giving a `secret` or `posted` member variable a value in `T(field: value, ...)` is allowed only inside the
+  type's module (MI-S403 / MI-S404): outside, build it with a routine the module opens (`HttpResult.ok(body: b)`).
+- Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
+- Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
+  `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
+- No kind or scope prefixes on names (`m_pos`, `_count`, `p_node`, `bDone`, `IComparable`): `lint` hints them.
+- Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
+  (`List[T]`, `Set[T]`, `Work[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
+  `select[TResult]`, `zip[TFirst, TSecond, ...]`), never another single letter (`K`, `V`, `U`, ...). A const generic
+  is `SCREAMING_SNAKE_CASE` with a meaning (`needs U64 CAPACITY`, `COUNT`, `BITS`), never `N`. The `T` prefix shows
+  at a use site (`var k: TKey`, a hover `get(key: TKey) -> TValue?`) that a name is a type parameter and not a real
+  type, and SCREAMING marks a buildtime constant like a `preset`, so case alone tells type, type parameter, buildtime
+  constant and runtime value apart. A receiver pattern's own parameter shadows the owner's parameter of the same name
+  (`routine List[Work[T]].gather() -> List[T]`: that `T` is the pattern's).
+- Builder-written per-type routines (the constructor, `represent`, `diagnose`, `eq`, `compare`, `hash`, …) are
+  **wired routines**. They carry no sigil; you may write your own to replace one.
+- Say "build error" and "builder", not "compile error" and "compiler".
+
+## 5. Types and literals
+
+| Kind                    | Types                                                                      |
+|-------------------------|----------------------------------------------------------------------------|
+| Default numbers         | `Int` (arbitrary precision), `Decimal` (base-10)                       |
+| Fixed-width integers    | `S8 S16 S32 S64 S128 S256`, `U8 U16 U32 U64 U128 U256`                    |
+| Binary floats           | `B16 B32 B64 B128 BF16` (`BF16` computes on B32 values, rounding once)     |
+| Decimal floats          | `D32 D64 D128`                                                             |
+| Complex / quaternion    | `C64 C128 C256`, `Q128 Q256`                                               |
+| Text and bytes          | `Text` (Unicode), `Char`, `Bytes`, `Byte`                             |
+| Other                   | `Bool`, `Duration`, `ByteSize`, `Moment`/`LocalMoment`, tuples `(A, B)`    |
+
+- Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
+  `B128` and `C256` are the widest, and exact arithmetic is `Int` and the decimals.
+- Complex `* / abs norm reciprocal` round each part once from the exact value. `sqrt`, `ln`, the inverse routines
+  and `tan`/`tanh` take principal branches, a `-0` part picking the side of a cut (`sqrt` of `-4 - 0i` is `0-2i`).
+  `exp_unchecked`/`sinh_unchecked`/`cosh_unchecked` give inf past the range, the checked forms crash.
+- Geometry takes `import Math3D` (`B32` elements): `Vector2D`/`Vector3D`/`Vector4D`, `Q128`/`Q256`, and the
+  matrices `Matrix2R2C`, `Matrix3R3C`, `Matrix4R4C`, stored column by column (`vec2`/`vec3`/`vec4` build a column
+  or a vector: `Matrix2R2C(c0: vec2(4.0, 2.0), c1: vec2(7.0, 6.0))` is `[[4, 7], [2, 6]]`). `m.get(row:, col:)` is
+  one element, `m[row]` a row, `m.transform(v:)` is `m · v`, `*` the matrix product. `inverse()` and `solve(b:)`
+  (A x = b) are Gaussian elimination with partial pivoting and are failable: `SingularMatrixError` when a pivot is
+  exactly 0 (no near-singular tolerance), and an inf or NaN during the computation crashes like checked float
+  math. `inverse_unchecked()` is the raw IEEE result. There is no n×n matrix type.
+- **Counts, positions, widths and amounts are always `Int`**, whatever the value's type: a fixed-width
+  number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
+  `Int`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes
+  (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Int`.
+- **`Int`** never overflows. A value in the `S64` range is held in the `Int` itself, with no heap. A bigger value shares its digits between copies. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
+  safe) with 34 significant digits. `+ - *` are exact: a result that needs more than 34 digits crashes with
+  `NumericOverflowError` (`try` recovers it) instead of rounding. `/`, `sqrt`, the transcendentals and `**` give the
+  nearest 34-digit value (`1 / 3`), and a result beyond about `1e6144` crashes. A `Decimal` has one form per value:
+  no `-0` (`(-0.5).fixed(0)` is `0`, `"-0"` reads as `0`) and no trailing zeros, so `1.0` and `1.00` are the same and
+  hash the same (a `Decimal` can be a `Set` or `Dict` key). `2.50` shows as `2.5`, `100` and `1e2` both as `100` (an
+  integer of up to 34 digits is written in full), `1e40` as `1E+40`.
+  `a.rem(you: b)` on `Decimal` is the Euclidean remainder, as integer `%` is: computed exactly, `0 <= r < |b|`, never
+  negative (`-7` by `2` is `1`, `7` by `-2` is `1`, `5.5` by `-2` is `1.5`, `-5.5` by `2` is `0.5`, `1E+30` by `7` is
+  `1`). A zero `b` crashes with `DivisionByZeroError` and a remainder that needs more than 34 digits (`-1e-40` by `7`)
+  with `NumericOverflowError` (`try` / `check` recover both). `Decimal` has no `%` or `//`, and `D32`/`D64`/`D128` keep
+  the IEEE `rem`.
+- Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
+- A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
+  the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`
+  goes too), and otherwise it is an `Int` (a `Decimal` with a fraction point). Where another type is
+  wanted with nothing around to give it, the declaration states it: `var x: U8 = 5`. A variable's type is
+  never guessed from its later uses. A number that names its type (`5_u8`, `7s32`, `10n`, `2.5dn`) is
+  MI-G010, and `migrate --step suffix` rewrites old code.
+- `inf` and `nan` are number literals (reserved words) that take their type from where they go: `var x: B64 = inf`,
+  `limit: B32 = -inf` (negative infinity is `-` on `inf`), `return nan`, `x < inf`. The binary floats (B16 B32 B64
+  B128) and D32 D64 D128 take them. With nothing giving a type (`var x = inf`) it is MI-S019, and where a
+  `Decimal`, `Int` or integer type goes it is MI-S020 (a `Decimal` is always finite).
+- A hex float (`0x1.8p3`, `0x1p-23` where a `B32` goes) is binary-float only and exact, and defaults to
+  `B64`, never `Decimal`.
+- A literal out of range for its type is a build error (MI-S010): `-1` never fits an unsigned type; write
+  `U8_MAX`, `U64_MAX`.
+- Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
+  `1gb`, `1gib`. A size displays as its byte count grouped in threes by `_`: `{4kib}` is `4_096B`, never split
+  into units (`kb_size()`, `mib_size()`, ... convert to a unit).
+- A `Duration`'s counts are `S64` (`Duration.from_seconds(s:)`, `d * n`, `a // b`), so an `Int` variable needs `to[S64]()` first. A `LocalMoment`'s moment and offset are `secret`: read them with `to[Moment]()` and `utc_offset()`.
+- Duration `//` and `%` leave a remainder that is never negative (`-10s // 3s` is `-4`), and overflow or `// 0s`
+  crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
+  hour 25). The time is read from `Clock`, called on the type: `Clock.now()` (a `Moment`), `Clock.monotonic()` (a
+  `Duration` that only goes forward, for measuring and deadlines), `CpuClock.now()` (processor time used). There is
+  no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
+  start no new line after a final line ending.
+- A crash trace shows the program's types (`System.List[System.Int]`, never a handle type) and the program's
+  routines only: a standard library routine has no frame on it, and a crash inside one reports the line where the
+  program called it. `[debug] trace-stdlib = true` (for work on the library) puts the library routines the program can
+  name on the trace too, as `(standard library)` frames. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
+  one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
+- `Pair(first: 1, second: "one")` infers `Pair[Int, Text]`. A routine of a generic entity (`Cell[T].get()`)
+  reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so EmitterTools adapters walk it.
+  `CpuEventManager.when_interrupted` works.
+- A lambda whose parameter type can't be inferred is MI-S638 (annotate it). `Int` mixed with a fixed-width number
+  is MI-S767. A protocol is not a value or element type (`List[Shape]` is MI-S502). `using` on an entity calls its
+  `enter`/`exit` on that entity. Works giving no value can be gathered.
+- `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or MI-S202 (a `return`
+  path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
+  one-item tuple as `(1,)`. `try sv.to[List[Int]]()` recovers a bad element too. A cancelled job nothing
+  started is done (`is_done()` is true).
+- A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
+- Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
+  braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
+  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes). A `Byte` shows
+  (alone or in a `List[Byte]`) as the byte literal that makes it: `b'L'`, `b'\''`, `b'\\'`, and `b'\x0A'` (two
+  uppercase hex digits) for any byte that is not printable ASCII. `Bytes` shows `\xHH` per byte.
+- Tuples: `(1, "a")` has type `(Int, Text)`; read `t.item0`, `t.item1`; destructure with
+  `var (q, r) = pair`. `(a, b) = (b, a)` swaps places (locals, member variables); any other tuple on the left is
+  a build error.
+
+**Conversions: `x.to[T]()`, the one way to convert.**
+
+```mielia
+var small = count.to[U8]()        # Int to U8 (a bare literal is an Int: 200.to[U8]())
+var n = "42".to[S64]()             # text parsing (also Int, Decimal, B64, ...)
+var one = 'x'.to[Text]()           # one-character text
+var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
+var wide: U64 = count.to()         # T left out: the declared type gives it
+var fits: U8? = try count.to()     # none when it does not fit
+var low = count.to_wrap[U8]()      # the low 8 bits (300 -> 44), never fails
+var near = count.to_clamp[U8]()    # the nearest U8 (300 -> 255), never fails
+var why: Check[S64] = check line.to()
+```
+
+**A byte's and a character's numbers are named routines, not conversions.** `b.value()` is a `Byte`'s value and
+`c.codepoint()` a `Char`'s code point, both `Int`. `Byte(v)` makes a byte from a `U8` (`Byte(65)`, `Byte(n.to[U8]())`),
+`Char.from_codepoint(n:)` a character (failable: a surrogate 0xD800..0xDFFF, below 0 or above 0x10FFFF fails).
+`c.to_byte()` is an ASCII character's byte (failable). `c.digit_value()` (`base: 10` default, `base: 16` also takes
+`a-f`/`A-F`) is failable, ASCII only. `b.to[U8]()`, `c.to[U32]()`, `v.to[Byte]()`, `n.to[Char]()` are build errors
+(MI-S646) naming these. A `Byte` is eight bits with no arithmetic: `&`, `|`, `^`, `~` (result `Byte`), `<<` and `>>>`.
+`>>` on a `Byte` is a build error pointing to `>>>`. A bare number where a `Byte` goes is a `Byte` (`b & 0x7F`),
+outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to `Byte(v)` and lists `n.to[Char]()`.
+
+- `Int` converts to every fixed-width integer (`S8..S256`, `U8..U256`), to `Decimal`, and to
+  `B32`/`B64` (the nearest value, as does `Decimal`). Widening
+  never fails. A value that does not fit `T`, or text that does not read as a `T`, crashes loudly
+  (`IntegerOverflowError`, `InvalidValueError`, ...). Recover with `try` (gives `T?`) or `check` (gives
+  `Check[T]`, holding the error).
+- A conversion to a narrower float crashes when a finite value rounds to an infinity
+  (`NumericOverflowError`): `B64.to[B32]()`, `to[B16]()`, `to[BF16]()`, `B32.to[B16]()` / `to[BF16]()`,
+  `B128.to[B64]()` / `to[B32]()` / `to[B16]()`, `D32`/`D64`/`D128` to a binary float whose range they pass
+  (`D64.to[B64]()`, `D32.to[B32]()`, ...), and the integers whose largest values pass a float's range
+  (`S32`..`U256` to `B16`, `U128`/`S256`/`U256` to `B32`). An infinity stays infinite and a NaN stays a NaN.
+  Each has `to_unchecked[T]()`, the raw rounded value (an infinity past the range); a value in range is the
+  same in both. `try big.to[B32]()` recovers. A conversion that can't overflow has only `to[T]()`.
+- `[T]` may be left out where the surrounding code says the type: a declared variable type, the routine's
+  return type (`return count.to()`), a parameter (`takes(n: x.to())`), and through `try`/`check`. Where
+  nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is MI-S645: write
+  `.to[S64]()`.
+- A pair with no conversion is MI-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
+  Converting a value to its own type is MI-S646 too (use the value as it is), and so is building a type from a
+  variable of that type (`Int(n)`: `n` is an `Int` already). A number written out is read as the type (`Int(1)`).
+- A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
+  MI-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`. A number
+  written out is different: `S32(3)`, `U8(255)` read that literal as the type (checked against its range, MI-S010
+  when it does not fit), so `[(Step.CALL, S32(3), 'a')]` is a `List[(Step, S32, Char)]`.
+  In a generic routine `T(x)` is checked per use: `make[U8](x: 300)` with `return T(x)` is MI-S655 naming
+  `make[U8]` and pointing to `x.to[T]()`. `Char(n)` (bits taken as a codepoint, unchecked) and `Bool(x)` (lowest
+  bit only, `Bool(2)` is `false`) are MI-S655 too, pointing to `Char.from_codepoint(n: n)` (takes an `Int`) and
+  `x != 0`.
+  `migrate --step numbers` rewrites `T(x)` to `x.to[T]()` between binary integer and float types, types
+  `var b = U8(200)` as `var b: U8 = 200`, and lists the rest (decimal types, `BF16`, a literal inside an expression).
+- Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
+  they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: hp)` putting an `S64` in an arm);
+  a value computed from one value of another type is a conversion, `x.to[T]()` (`local.to[Moment]()`,
+  `ratio.to[Q128]()` from a `B32`). So `S64(from: x)` is not a routine. A variant's arm comes out
+  the same way: `sv.to[S64]()` / `sv.to[Dict]()` is failable (another arm is active → crash, `try` gives
+  `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (MI-S458 /
+  MI-S646 point at `.to[...]()`).
+- Each conversion is its own routine, written with the target type in the bracket:
+
+  ```mielia
+  routine Fahrenheit.to[Celsius]() -> Celsius
+      return Celsius(degrees: (me.degrees - 32.0) * 5.0 / 9.0)
+  ```
+
+  A call picks the one whose bracket matches (`f.to[Celsius]()`, or `var c: Celsius = f.to()`). A
+  conversion that can fail is declared `routine Text.to![S64]() -> S64`.
+
+**Optionals and `none`.**
+
+- `T?` is the optional type, `Optional[T]`, for an entity too: `E?` is `Optional[E]` and works like any other `T?`
+  (`!!`, `??`, `when` with `is None`). It is the one named type whose kind follows what it holds: over a value it is a
+  value (copied by `=`), and over an entity an `E?` refers to the entity, or holds `none`. `Maybe` is an unknown type
+  whose error names `Optional[T]` and `T?` (`migrate --step type-names` renames it).
+- `None` (capital) is the type and pattern (`is None`, `isnot None`); `none` (lowercase) is the value.
+- `none` is legal only where the target type can be absent: `T?`, a variant with a `None`
+  member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
+- Reading through an `E?` before checking it is MI-S619; check with `if e isnot None` (or return early on
+  `if e is None`, or a `when e` whose `is None` arm returns) and the name is the `E` after the check, until it is
+  given a new value (`cur = cur.next` still reads the checked `cur`). A field path is checked the same way
+  (`if info.returns is None` leaving, then `info.returns.name`, any depth) until the path or a name in front of it is
+  given a new value. A call in between does not end the check, and if another name set the field to `none` meanwhile,
+  the read crashes loudly. An `E?` goes where an `E` is wanted only after
+  the check (`take(b: m)` with `m: Box?` is MI-S502). Putting `none` into a non-optional `E` slot is MI-S252, a type
+  argument included (`List[Box]().add_last(none)`): declare the slot `E?` (`List[Box?]`).
+
+## 6. Variables, constants and globals
+
+```mielia
+var count = 0                       # Int
+var ratio: Decimal = 0.75
+var name: Text                      # declared now, assigned before it is read
+preset MAX_RETRIES: Int = 5     # constant: explicit type, inlined at each use
+```
+
+- There is no `let` and no `const`: `var` for variables, `preset` for constants. A `preset` may be an
+  f-string built from other presets. A preset is computed when the program is built: one that calls a routine,
+  does arithmetic or fills in a text runs once during the build and becomes the value it came to (a number, a
+  Bool, a Text, a Char, or a record, tuple or choice of those; MI-S258 if it fails).
+- **No shadowing inside a routine**: a `var` may not reuse the name of a parameter or of a variable of an
+  enclosing block (MI-S008). Sibling blocks may each declare their own `i`.
+- Compound assignment works: `+=`, `-=`, `*=` and the like.
+
+**`global` — module-level mutable state.**
+
+```mielia
+global hits: Int = 0
+global greeting: Text = f"hits so far: {hits}"
+
+routine record_hit()
+    hits = hits + 1
+    return
+
+routine start()
+    record_hit()
+    record_hit()
+    show(f"{hits}")
+    return
+```
+
+- The type annotation and the initializer are both required; there is no `var` (a global is mutable by
+  definition). A bare module-level `var` is MI-S435.
+- A global is read and written by bare name from any routine in the module, and another module can
+  `import Mod.hits` and read and write the same storage.
+- Globals are initialized once, before any of your code runs, in **dependency order**: when one global's
+  initializer reads another (directly or through free-routine calls), the one it reads goes first, so
+  declaration order does not matter. A cycle, a self-reference included, is MI-S436. A global whose
+  initializer reads another global must be a number, `Text` or `Bool` (MI-S437). A read hidden behind a
+  member-routine call (`global a: Int = x.foo()`) is not followed by this ordering.
+- A program with globals needs an entry point (an explicit `start()` or a script) (MI-S438).
+- **Every global is safe to use from concurrent jobs.** A single-statement read-modify-write
+  (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
+  and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
+  overflow** instead of crashing. Every other type (`Int`, `Decimal`, `Text`, records, wider numbers)
+  is serialized through a lock. A value read earlier and written back later
+  (`var t = g`, other statements, then `g = t + 1`) can overwrite a change another job made in between, so
+  write an update of a shared value based on itself as one statement (`g += 1`, `g = g + 1`, `e.count += 1`). A global and an entity's member variable are
+  the one way to change a shared value: there is no `Unbroken` (MI-S447 names this way).
+- Use a global for state the whole process has one of (a log, configuration, a registry); pass per-task
+  context as parameters.
+
+## 7. Operators
+
+- Arithmetic: `+ - * / // % **`. On `Int`, `+ - *` never fail and `/` gives a `Decimal`. On fixed-width
+  integers `/` is MI-S065, whose message points to `a // b` or `a.to[Decimal]() / b.to[Decimal]()`, and `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
+  `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
+  on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
+  Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
+  and the complex types, `0 / 0` crashes with `NumericDomainError` instead.
+- Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. A chain goes one way: `<`, `<=`,
+  `==` together or `>`, `>=`, `==` together (`a < b > c`, `!=` and `<=>` in a chain are errors). Every operand of a chain is
+  evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`
+  is false), and only the comparisons stop at the first false link, so a failure in any operand is a failure
+  like any other (`try 1 < 5 < 10 // n` recovers it). `==` compares values (it calls `eq`); `===` / `!==`
+  ask whether two entities are the same object (§10).
+- Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
+  (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
+  sign fill for `>>`). A shift amount and a subscript index may be an `Int` or any fixed-width integer
+  (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
+  `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
+  The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `rsqrt` (1 / sqrt(x) rounded once, also on
+  `Decimal` and the D types, a tie as the type rounds one, `x <= 0` stops), `sin_cos`, `gamma`,
+  `ln_gamma`, `mul_add`, `powi(n)` and `midpoint` (each rounded once on `Decimal` and the D types, a D-type power
+  that is exact keeps the exponent `n` times x's: `2.0.powi(2)` is `4.00`), `mod_trunc` (truncated remainder), `rem` (IEEE remainder, on `Decimal` the Euclidean remainder), `fract`, `is_sign_negative`,
+  `total_compare`, and so on. Float/decimal `max`/`min` return the other operand when one is NaN (`migrate --step
+  names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).
+- Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
+  (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
+  (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: MI-S706.
+- Containment: `coll.has(x)`, `coll.lacks(x)`, on a dict `d.has_key(k)` / `d.lacks_key(k)`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
+  `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
+  (`2 to 1` yields nothing, `(2 to 1).has(1)` is `false`). A negative step counts down: `10 to 1 by -1`,
+  `10 to 0 by -2`, also on unsigned types (`3 to 0 by -1` over `U64` yields 3 2 1 0). A step held in a variable
+  decides the direction by its sign. A literal `by 0` is MI-S516, and a zero step held in a variable crashes
+  with `RangeStepZeroError` when the range is iterated. `(0 to 10).has(10)` is `true`, and `has` follows the
+  step (`(10 to 0 by -2).has(4)` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
+  A type after the loop's name types the bounds of the range written in the loop: `for i: S64 in 1 to 10 ** 10`
+  counts in `S64` instead of `Int`, `for k: U8 in 250 to 255` stops at 255 (a bound that doesn't fit is MI-S010).
+  Only with a range literal: `for x: S64 in xs` is MI-G150 (a collection's elements already have their type).
+- Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
+
+**Precedence**, tightest first:
+
+1. indexing, member access, calls
+2. `**` (right-associative, the exponent may carry a sign: `2 ** -1`)
+3. unary `-`, `not`, `~` (`-x ** 2` is `-(x ** 2)`)
+4. `* / // %` (and their `%`/`^`/`!` variants)
+5. `+ -` (and their variants)
+6. bitwise `<< >> >>> & ^ |`, one level: different bitwise operators side by side need parentheses
+   (`(a & b) | c`, `(a >>> 58) << 2`), a chain of one does not (`a | b | c`). Shifts are looser than
+   arithmetic: `1 << n + 1` shifts by `n + 1`.
+7. ranges `to` / `til` / `by` (`0 to n - 1` reads as written, a range test is a call: `(0 to 10).has(x)`)
+8. comparisons `== != < <= > >= <=>` (chained), `is` `isnot` `obeys` (`x & 1 == 0` is
+   `(x & 1) == 0`)
+9. `and` / `or`, one level: mixing them needs parentheses (`a or (b and c)`), a chain of one does not
+10. `??`
+
+Mixing `and` with `or`, or two different bitwise operators, without parentheses is MI-G216.
+
+## 8. Control flow
+
+```mielia
+if x == 3
+    show("three")
+elseif x > 3
+    show("big")
+else
+    show("small")
+
+if not (list.is_empty())
+    show("has items")
+
+for x in 1 to 5
+    if x == 2
+        continue
+    if x > 4
+        break
+    show(f"x={x}")
+
+for (i, word) in words.enumerate()
+    show(f"{i}: {word}")
+
+until n >= 10             # stops when n >= 10, tested before each round
+    n += 1
+
+loop                      # doesn't end by itself: break, return or throw leaves it
+    n += 1
+    if n >= 20
+        break
+```
+
+`for` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry is
+the tuple `(key, value)`, `for (k, v) in d` or `e.item0` / `e.item1`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
+`EmitterTools`) produce tuples that `for (a, b) in ...` takes apart.
+
+Loops are `until c`, `loop` and `for`. `until c` stops when `c` becomes true, tested before each round: write the
+condition that ends the loop. `loop` doesn't end by itself: only a `break`, `return` or `throw` leaves it, so the
+lines after a `loop` without a `break` never run (MI-S786) and a routine whose last statement is such a loop needs no
+`return` after it. `while` is not a keyword: a loop written with it is MI-G224, and `migrate --step until` rewrites it
+(`while true` → `loop`, `while not c` → `until c`, an integer comparison turned around, `while i < n` →
+`until i >= n`, a float comparison and anything else → `until not (c)`, listed). `each` is a reserved word: a loop
+written `each x in xs` is MI-G229, and `migrate --step for` rewrites it to `for`. A `for` loop variable (and each
+name of a destructured element) is bound again every round, so assigning it is MI-S251 (over a range too): put the
+new value in a variable of its own, or write the element through the collection (`xs[i] = ...`). An `until`, `for` or `loop` may end
+with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
+`break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
+loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
+(MI-G219): the case where the loop would not run even once is an `if` before the loop.
+A loop may carry values from one round to the next: `until n <= 1 with n: Int = start, steps: Int = 0`
+(`for x in xs with sum: Int = 0` and `loop with i: Int = 0` too). Each carried value is bound anew every round, from what the round's
+`continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
+is stored, so `continue with x: y, y: x % y` swaps). The names are visible in the condition, the body and the
+`then` block, and nowhere after the loop. A body that carries values must not run off its end: every path ends in
+`continue with`, `break` or a `return` (MI-G217), a bare `continue` in such a loop is MI-G218, as is `continue with`
+in a loop without `with`. `break` takes no values.
+
+```mielia
+routine collatz_steps(start: Int) -> Int
+    until n <= 1 with n: Int = start, steps: Int = 0
+        var after = if n % 2 == 0 then n // 2 else 3 * n + 1
+        continue with n: after, steps: steps + 1
+    then
+        return steps
+```
+
+**Named loops.** `for y in 0 til h as rows` (also `until c as name`, `loop as name`; `as` comes before `with`) names a
+loop, and `break to rows` / `continue to rows` act on it from inside loops nested in it. `break to rows` is `rows`' own
+`break`: `rows`' `then` runs and the `then` of the loops inside it is skipped. `continue to rows` starts `rows`' next
+round (with carried values: `continue to rows with total: total + 1`). A plain `break` / `continue` stays with the
+innermost loop. A name no loop around the statement has, or a name an enclosing loop already has, is MI-G231. A loop
+name nothing uses is warning MI-W010.
+
+**`when` is the pattern match**, as a statement or an expression:
+
+```mielia
+routine classify(n: Int) -> Text
+    when n
+        == 0 => return "zero"
+        < 0 => return "negative"
+        > 100 => return "huge"
+        else => return "positive"
+
+routine describe(v: Number) -> Text
+    when v
+        is S64 as n and n > 100 => return f"big {n}"
+        is S64 as n => return f"int {n}"
+        is Text as t => return f"text {t}"
+        is None => return "nothing"
+        else => return "other"
+```
+
+One arm takes several values after `==`: `== 4, 6, 9, 11 => return 30`.
+
+- Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T as name`), a guard after a
+  binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
+  `else as name` last. A failed guard falls through to the next arm. `else as name` is allowed only when one
+  type is left after the earlier arms, and `name` has that type (the value of a `T?` after `is None`, the last
+  member type of a variant, every error of a `Check` taken as one type). With more left it is `MI-S359`.
+- Record patterns, written like construction: `is Monster(hp: 0) as m`, `is Monster(hp: < 5, name)`,
+  `is Chest(item: is Weapon as w)`, `is Monster(hp: as health)`. `field` alone names it; a value equals; an arm
+  that tests a member variable does not cover its type. Also after `if`: `if c is Monster(hp: 0) as m`.
+- Without a subject, `when` picks the first true condition:
+
+```mielia
+var label = when
+    n > 10 => "big"
+    n > 3 => "medium"
+    else => "small"
+```
+
+- In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
+  as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
+  `becomes value`, the arm's value (without it, MI-S307). An arm may also be `throw ...` (`else => throw
+  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type. The failure goes to the
+  caller (in an `infallible` routine it stops the program on the spot).
+
+```mielia
+when terrain
+    == Terrain.SPIKE_TRAP =>
+        hero.position = cell
+        spring_trap()
+    == Terrain.MONSTER => battle(cell)
+    else => hero.position = cell
+```
+
+- An expression `when` takes one expression per arm after `=>`. Several statements in an arm are a build error
+  (MI-S307): compute the value first, or write a `when` statement that sets a variable.
+- `if x is T as name` tests and binds in one step; the binding exists only inside that branch.
+- `when` must cover every case of a `choice`, a `variant`, or a carrier's success arm; `else` covers the
+  rest.
+
+## 9. Routines
+
+```mielia
+routine add(a: Int, b: Int) -> Int
+    return a + b
+
+routine greet(name: Text, prefix: Text = "Hello") -> Text    # default value
+    return f"{prefix}, {name}!"
+
+routine Account.deposit(amount: Int)                       # member routine, receiver `me`
+    me.balance = me.balance + amount
+    return
+```
+
+- Call with named arguments in any order: `add(b: 2, a: 1)`, `greet(name: "Ada")`. A variable named like its
+  parameter goes by its name alone, also beside written names: `area(width, height: 4)`. A member routine is
+  called on its receiver: `acct.deposit(amount: 5)`.
+- Return types are always written, and a routine with no `->` returns nothing: a `return` with a value in it is
+  MI-S301, and so is a bare `return` in a routine with `-> T` (the value never sets the result type). A parameter may be written
+  without a type (`routine describe(shape) -> Text`): the routine is made and checked for each type it is called
+  with, and a value that lacks what the body uses is a build error naming that use ("(in 'describe' used with
+  shape: Blob)"). A variadic parameter is written `name...: Type`.
+- Routines are declared at module level or as `routine Type.name`; there are no nested routines.
+  `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
+  type-level routine with no `me`, called as `Type.name(...)`.
+- A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
+  `routine Celsius(degrees: B64) -> Celsius` (it throws from its body when it can fail). A conversion is
+  a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
+- **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
+  variables directly. Routine types are written `Callable[(Int,), Int]` (the parameter list is
+  always a tuple: `()`, `(T,)`, `(A, B)`), for a routine value that may fail too (§11). A free routine's bare
+  name is a value:
+  `nums.select(transform: double)`.
+- Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
+- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
+  `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is MI-G221, and a
+  misspelling names the close one. `@noinline` keeps a routine out of its callers (its own body is still optimized),
+  and `@inline` with `@noinline` on one routine is MI-G227. A name that starts with a capital is the program's own annotation (§19): a record
+  that obeys `Annotation`, and MI-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
+  yet.
+- **Routine tests.** `mielia test` builds a file once per `@test` routine, calling it in place of the program's own
+  statements: once per `@case(input: (a, b), output: r)` (arguments in parameter order, the result compared with
+  `==`), or once with no arguments when there is no case. `@skip("reason")` reports it skipped, `@time_limit(1s)`
+  stops it (units `ns us ms s m h d w`), `@memory_limit(64kib)` fails it when the program holds more memory than that
+  at any point (units `b kb mb gb kib mib gib`). Lines read `ok    file::routine`.
+
+## 10. Records, entities, choices, flags, variants
+
+```mielia
+record Point                 # value: copied, no identity
+    x: Int
+    y: Int
+
+entity Account               # object: shared, has identity
+    owner: Text
+    balance: Int
+
+entity Node
+    value: Int
+    next: Node?              # an entity slot that may be empty
+
+routine start()
+    var p = Point(x: 3, y: 4)
+    var q = p                # independent copy
+    q.x = 99                 # p.x is still 3
+
+    var a = Account(owner: "Ada", balance: 100)
+    var b = a                # the same account under a second name
+    b.balance = 150          # a.balance is now 150
+    var c = Account(owner: "Ada", balance: 150)
+    show(a === b)            # true: same object
+    show(a === c)            # false: another object with the same contents
+    show(a == c)             # true: `==` compares the contents
+    return
+```
+
+- Construction is memberwise and named: `Point(x: 3, y: 4)`.
+- An entity passed to a routine, stored in a collection or put in another entity's member variable is the
+  same object everywhere; a change through any name is seen through every name.
+- **Memory is automatic.** Each entity is reference-counted and freed when its last name goes away, and a
+  cycle collector reclaims structures that point at each other (a doubly-linked list, a parent ↔ child
+  pair). There are no weak-reference annotations, no `destruct` to write or call, and no lifetimes. For a
+  resource that must be released at a known point (a file), use `using` (§15).
+- **Identity**: `===` / `!==` compare whether two entity names refer to the same object. On a record or a
+  number they are a build error (MI-S440): values have no identity, use `==`.
+- **Equality and hashing are automatic, order is opt-in.** `==` / `!=` compare values: every record and every
+  entity has them, with no `obeys` line, when each of its member variables has `==` (the builder compares
+  member by member, a `routine T.eq(you: T) -> Bool` you write takes its place). Two different entities with
+  equal contents are `==` and not `===` (`Player("Ada") == Player("Ada")` is true). A member variable without
+  `==` (a routine value such as `Callable[(), None]`) means the type has none: `==` on it, or
+  passing it where `needs T obeys Equatable` is asked, is a build error naming that member variable
+  (MI-S065 / MI-S150). A record also hashes automatically (a `Dict` key or `Set` element, no `obeys`) when every
+  member variable hashes. An entity hashes only when it declares `obeys Hashable`, since its member variables
+  can change while a `Set` or `Dict` holds it: `Set[Player]` without it is MI-S150, and so is a record holding
+  such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
+  `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
+  in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Int` and
+  `Decimal` hash their value (two equal ones hash the same however they were built). `D32`/`D64`/`D128` hash
+  their value too, not the digits they keep: `1.0` and `1.00`, `+0` and `-0` hash the same, and every NaN hashes the same. An optional `T?` has `==`
+  and a hash when `T` does: two absent ones are equal, an absent and a present one differ. When member variables
+  lead back to entities being compared (a parent and its children, a ring of nodes, an entity pointing at itself),
+  meeting such a pair again counts as equal, so the comparison ends and compares the structures by shape. A hash
+  stops at an entity it is already inside of. A hand-written `eq` is used as written.
+- Every type gets `represent()` (what `show` and `f"{x}"` print, e.g. `Point(x: 3, y: 4)`) and
+  `diagnose()` (the debug form, `f"{x:?}"`). Write your own to change them.
+
+```mielia
+choice Color
+    RED
+    GREEN
+    BLUE
+
+choice HttpStatus
+    OK: 200
+    NOT_FOUND: 404
+
+flags Permission
+    READ
+    WRITE
+    EXECUTE
+
+variant Number
+    S64
+    B64
+    Text
+    None
+```
+
+- **choice**: one of a fixed set, compared with `==` (`c == Color.RED`, `when c` with `== Color.RED =>`
+  arms). Cases may carry values (`OK: 200`): every case or none (then 0, 1, 2, ... in order), some with and some
+  without is MI-S417. A flags member may say its bit the same way (`MINE: 0`, 0 to 63, every member or none).
+  Equality, order and hashing come with every choice.
+  `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
+  `Int`); flags have the same two for their members.
+- **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
+  `has` / `has_any` / `lacks` / `==` (`perms.has(WRITE)`, `perms.has(READ and WRITE)` is all of them,
+  `perms.has_any(READ and WRITE)` at least one, `perms.lacks(READ and WRITE)` none), and taken off with `without` (`perms.without(WRITE)`: where a
+  value of the flags type goes, its members are named bare). The flags value with no member on is `none` where the
+  flags type is expected (`var marks: CellMarks = none`, `marks == none`, a preset or record preset). A `CellMarks?`
+  slot takes `none` as the absent value. There is no `all_off()`.
+- **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
+  `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Int | Text`,
+  `List[Circle | Square]` (same types in any order = one type; a smaller one goes where a larger one is expected;
+  `define Circle | Square as Shape` names it). A value of a member goes in as an argument, initializer, `return` or
+  new value.
+- **crashable**: an error type (§11).
+
+## 11. Errors and failure
+
+**Failing.** A routine fails with `throw`, and nothing in its declaration says so. A routine with no value to give
+because something went wrong throws `AbsentValueError()`, an ordinary standard error:
+
+```mielia
+crashable NopeError
+    what: Text
+
+routine NopeError.crash_message() -> Text
+    return f"nope: {me.what}"
+
+routine parse(n: Int) -> Int
+    if n < 0
+        throw NopeError(what: f"{n} is negative")
+    return n * 10
+
+routine find(items: List[Text], name: Text) -> Int
+    for i in 0 til items.count()
+        if items[i] == name
+            return i
+    throw AbsentValueError()
+```
+
+- Every routine passes its failures to its caller. **A failure nobody receives stops the program loudly** where it
+  happened: the error's title and message, where it was thrown, and a stack trace go to stderr (status 82).
+- **`infallible routine` is the only wall.** `infallible routine close(...)` (`infallible` first, before
+  `dangerous` or `common`) promises not to fail: a failure inside it (a `throw`, a checked operation, a call that
+  fails) breaks the promise and stops the program there, even under `try`/`check`. Use it for a routine whose
+  failure means the program can no longer be trusted. `start()` is not marked: a failure that reaches it ends the
+  program with its report. ✗ Marking a routine infallible so you don't have to think about failures: a failure the
+  caller could have received becomes a stop at that point.
+- Call sites never write `!` (`parse!(n: 1)` is MI-G211), and a declaration never does (`routine parse!(...)` is
+  MI-G222). `failable` is MI-G230 (`migrate --step failable` removes it).
+
+**Recovering.** Put a keyword in front of the expression:
+
+| Keyword       | Result                           | Holds                                      |
+|---------------|----------------------------------|--------------------------------------------|
+| `try EXPR`    | `T?` (`Optional[T]`)             | the value, or `None` (any failure)         |
+| `check EXPR`  | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
+
+```mielia
+routine start()
+    when check parse(n: -1)
+        is Int as v => show(f"ok {v}")
+        is NopeError as e => show(f"caught: {e.what}")
+        is Crashables as e => show(f"{e.crash_title()}: {e.crash_message()}")
+
+    var m = try parse(n: 4)
+    when m
+        is None => show("failed")
+        else as v => show(f"got {v}")
+
+    var safe = try parse(n: -5) ?? 0
+    show(f"{safe}")
+
+    when check find(items: ["a", "b"], name: "z")
+        is AbsentValueError => show("not found")
+        is Int as i => show(f"at {i}")
+        is Crashables as e => show(f"failed: {e}")
+    return
+```
+
+- **A call on a `T?` under the keyword.** `try box.doubled()` with `box: Box?` (or a record `Pt?`) is allowed: a `none`
+  receiver counts as an `AbsentValueError` failure that the same keyword receives (`try`: `None`, `check`: the
+  `AbsentValueError`), otherwise the call runs on the value, and a failure below the call is received as usual. It
+  holds for every `T?` and any routine the optional has none of itself. Without a keyword, a call through a `T?` is
+  still MI-S619 or an unknown routine. A chain that ends in a `T?` (`try optionals.first()` over a `List[Int?]`) gives
+  `T?`, not `T??`: a none end is the one absence, `None` under `try`, an `AbsentValueError` under `check`.
+- **`try`/`check` receive a failure from any depth below them.** Code inside calls plainly (`var l =
+  eval(e.left)` in a recursive `eval`), and a failure anywhere under the keyword comes back to it: a `throw`, a
+  fixed-width `+ - *` that overflows (`IntegerOverflowError`), `a // b` by zero (`DivisionByZeroError`), `items[9]`
+  past the end (`IndexOutOfBoundsError`), a missing key, `300.to[S8]()`, `"x".to[Int]()`. The error type tells
+  them apart. Each becomes the result's failure (`try`: `None`, `check`: the error), and evaluation stops at the
+  first one. A keyword over something that cannot fail gives the value. A call with no keyword above it runs as it
+  is and stops where the failure happens.
+- **Routine values.** A lambda and a routine named as a value pass their failures on like any call:
+  `try apply(f: x => 10 // x, x: 0)` gives `None`, and `try items.select(transform: x => 10 // x).to[List]()` is
+  received (an adapter keeps the lambda and calls it later, and the call that works on the adapter passes its
+  failure on). With no keyword above, the lambda's failure stops the program where it happens. A handler given to
+  `CpuEventManager` runs with nothing above it, so a handler that fails stops the program.
+- The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
+- **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
+  running it crashes with `NotImplementedError` naming the routine, even under `try`/`check`. It ends its path, so
+  a body that is only `todo` needs no `return`. The build warns once per routine
+  that still has one (MI-W303). `nothing` is an empty body on purpose, a different thing.
+- Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
+  the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
+- A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
+  under `try` (`true` when it succeeded).
+- A `when` on a `Check` **must** have the success arm (`is T as v`, or `else as v` when every error is already
+  taken by `is Crashables as e`); leaving it out is
+  a build error. `is NopeError as e` takes only that error and binds it as a `NopeError` (its member variables
+  are readable); `is Crashables as e` takes any error, so write it after the specific ones; `else as e` after the
+  success arm takes every error that is left, as `is Crashables as e` would. `x is NopeError` also works as an expression.
+- When the success value is itself a variant, the arms may name the types it holds instead of the whole value
+  (`is Deposit as d`, `is Withdraw as w` on `check parse(...)`), and together they must name every one of them.
+  The same holds on a plain variant that holds another variant.
+- **An error arm is optional.** With no arm for the error, the `when` passes it on, as if
+  `is Crashables as e => throw e` were written: a `try`/`check` above receives it, and with none the program stops
+  there. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
+  its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
+  `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,
+  the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
+- `is None` is an arm of `Optional` only (and the success arm of `Check[None]`). A `Check` has no
+  absent state: "not found" in a `Check` is `is AbsentValueError`.
+- A routine may return `T?`, and it should only when having nothing is a normal result (a find, a lookup):
+  `routine find_index(items: List[Text], name: Text) -> Int?` says `return none`, and the caller takes it apart with
+  `when`. Something gone wrong is a `throw`. Users never write `Check` as a return type (MI-S806), only `check` makes one.
+  `Check` is meant to be taken apart where it is made: they cannot be a parameter type
+  (MI-S754), a member variable type (MI-S755), or copied from one variable to another (MI-S758). `Optional` is
+  an ordinary optional value and may be stored.
+
+**Crashables.** `crashable X` declares an error type. It is a record (a value, no identity) with its own
+category: only a crashable can be thrown.
+
+- It **must** write `routine X.crash_message() -> Text` (MI-S704).
+- `crash_title()` comes from the name in sentence case (`NopeError` → "Nope error",
+  `AbsentValueError` → "Absent value error"); write it only to say something else.
+- `Crashables` (plural) is the standard record for "any caught error". On it, `crash_title()`,
+  `crash_message()`, `represent()` (also `f"{e}"`), `diagnose()` and `crash_type_id()` reach the actual
+  error's own routines. The caught error is held in the `Check` itself, and which routine runs is decided
+  by the error's type among the errors the program throws: nothing is looked up while the program runs.
+- **A crashable holds a few values** (numbers, a `Text`); it has no size limit.
+- **Failure molds.** Every flow (the program's thread, and each piece of work started with `start_now()`)
+  has one failure mold, made when the flow starts, as big as the program's largest crashable. `throw`
+  writes the error into the mold of the flow it runs on (its member variables copied at that moment), and
+  the failure passes up through the routines it fails without its values. The `check` that receives it
+  copies the error out of the mold into the `Check` it gives, so a `Check` kept in a variable keeps its own
+  error after the next failure, and two pieces of work failing at once never mix up their errors. `try`
+  copies nothing. One failure is on its way at a time in each flow: errors are never stacked (to keep
+  several, keep several `Check` values). An error thrown again (`throw e`, a work's error at `retrieve()`)
+  goes back into the mold of the flow that throws it.
+- The builder collects the errors each routine can throw (its own `throw`s and those of the routines it
+  calls). `@throws([NopeError, AbsentValueError])` above a routine fixes that list: an error the routine can
+  throw that the list leaves out is MI-S712, and the annotation on an `infallible` routine is MI-S713.
+- Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
+  `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
+  `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
+  `NotEnoughSpaceError`, `StorageFaultError`, `TaskTimeoutError`, `WorkStartError`,
+  `CancelRequested`, `ChannelClosedError`, `ReshapingWhileInUseError`. `stop()` and `breach()` crash on purpose (`UserTerminationError`,
+  `LogicBreachedError`).
+
+**Fatal walls.** The line between recoverable and fatal is: a **data condition** the program can respond to
+(file missing, key absent, bad input) is recoverable with a keyword above the call; a **physical or
+logic limit** is fatal and cannot be caught.
+
+- Out of memory is fatal, loud and uncatchable (a handler would itself need memory). Very deep recursion
+  is the same wall: Mielia has no "stack" in its vocabulary, frames are memory, and running out of it is
+  reported as out of memory.
+- A segmentation fault cannot happen in Mielia code. If one appears, it is a builder or runtime bug, or it
+  comes from a `.rr` module the program imports, not a language failure mode.
+- Fatal messages describe what the program did, never the machine.
+
+**Exit status.** Every crash (an unrecovered `throw`, a checked-arithmetic failure, out of memory)
+exits with **status 82** (`0x52`, `'R'`). A run that ended with 82 crashed: read stderr for the error and
+the stack trace. Status 1 is not a crash. A process killed from outside (SIGKILL, the OS out-of-memory
+killer) dies before Mielia gets control and reports nothing. A run that returns from `start` normally exits with 0,
+or with the status `set_exit_code(code)` (an `S32`, in System) set last: one atomic value, so any task may set it
+and the last call wins. A crash keeps 82 whatever was set.
+
+## 12. Generics and protocols
+
+```mielia
+routine largest[T](items: List[T]) -> T
+needs T obeys Comparable
+    var best = items[0]
+    for x in items
+        if x > best
+            best = x
+    return best
+
+record Pair[TFirst, TSecond]
+    first: TFirst
+    second: TSecond
+
+protocol Greetable
+    routine Me.greet() -> Text
+
+record Cat
+obeys Greetable
+    name: Text
+
+routine Cat.greet() -> Text
+    return "Meow, I am " + me.name
+
+routine introduce[T](thing: T) -> Text
+needs T obeys Greetable
+    return thing.greet()
+```
+
+- Type parameters go in `[...]` after the name; constraints go on a `needs` line under the signature
+  (several are comma-separated), or inline: `routine f[T obeys Comparable](...)`.
+- `obeys` lines sit under the type's header. A protocol lists the routines a conforming type must have,
+  with `Me` for the conforming type. Writing `obeys` is optional: a type that has the routines (same names,
+  parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
+  Write it to ask the builder for derived routines (`obeys Comparable`, an entity's `obeys Hashable`) or to hear about a missing routine at the
+  declaration. A type that does not fit is MI-S150 where it is passed, naming the missing or mismatched routine.
+  The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is MI-S150.
+- Common protocols: `Equatable`, `Comparable`, `Hashable`, `Emittable[T]`, `Copyable`.
+- Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
+
+## 13. Text and formatting
+
+```mielia
+var name = "Ada"
+var n: S64 = 42
+var price = 1.5
+show(f"Hello, {name}! n={n}")
+show(f"{n:?}")            # the diagnose (debug) form: S64(42), a text Text(count: 2, "a\t")
+show(f"{n:=}")            # n=42
+show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
+```
+
+- `show(value)` prints `value.represent()` and a newline; `show(value: v, end: "")` changes the ending
+  (all arguments named once there are two).
+  `alert(value)` writes the `diagnose()` form to stderr.
+- f-string specs are only `=`, `?` and `=?`. Everything else is a member routine called inside the braces:
+  integers have `hex()`, `bin()`, `oct()`, `to_text(radix:)`; `Decimal` and floats have `fixed(places)`;
+  `Text` has `pad_start(width)`, `pad_end(width)`, `center(width)`, `zero_pad(width)`.
+- `Text` counts and positions with `Int`: `count()`, `count_of(...)`, `s[i]`, `find(other:)` /
+  `find_last(other:)` (an `Int?`, `none` where nothing is found), `repeat(times:)`, and the widths of
+  `pad_start`/`pad_end`/`center`/`zero_pad`. `split(separator:)`, `lines()` and `words()` give a `List[Text]`.
+- `Text` is a value. Useful members: `count()`, `is_empty()`, `starts_with(prefix:)`,
+  `ends_with(suffix:)`, `split(...)`, `words()`, `replace(old:, new:)`, `to_uppercase()`,
+  `to_lowercase()`, `encode_as_utf8()`, and `+` to join. Substring test: `s.has("ell")`. Slices take ranges:
+  `s[0 til 3]`, `s[2 til ^0]` (to the end).
+- `Char` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
+- A binary float shows as the shortest decimal that reads back to the same value
+  (`x + 0.2` with `var x: B64 = 0.1` shows `0.30000000000000004`); a `Decimal` shows exactly (`0.1 + 0.2` shows `0.3`).
+
+**Text patterns** (`import Text/Patterns`, one engine for every language). A pattern is
+built from named pieces, one after another: `preset DATE: TextPattern = TextPattern.of([capture("year",
+digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pattern is compiled at build time).
+- Pieces (`TextPiece`): `text("-")`, `digit`/`letter`/`space`/`word_char` (ASCII), `unicode_digit`/`unicode_letter`/
+  `unicode_space`/`unicode_word_char`, `any_char` (line feed included), `one_of("aeiou")`, `none_of(",;")`,
+  `char_range(from: 'a', to: 'z')`, anchors `start_of_text`, `end_of_text`, `start_of_line`, `end_of_line`,
+  `word_boundary`. The bare ones are presets (no parentheses).
+- Repetition: `p.repeat(4)`, `p.repeat(2 to 4)` (`til` excludes the end), `p.repeat_at_least(1)`, `optional(p)`,
+  `any_number_of(p)`, `one_or_more(p)`. Every repetition is greedy (takes as many rounds as it can); there is no
+  shortest repetition. To take text up to a delimiter, repeat a piece that can't be it (`any_number_of(none_of("<"))`),
+  since `any_number_of(any_char)` runs to the last delimiter.
+- Alternatives name their rule, there is no default: `either_longer([...])` (the longest match there),
+  `either_shorter([...])` (the shortest), the first written winning a tie.
+- `capture("name", p)`, `ignoring_case(p)`, and `TextPattern.of(pieces: [...], ignore_case: true)`.
+- Searches: `p.matches(text)` (whole text), `p.find(text)` (a `TextMatch?`, `none` where nothing matches), `p.find_all(text)`
+  (non-overlapping, `List[TextMatch]`), `p.replace(text: t, with: "#")`, `p.split(text)`. A `TextMatch` has `start()`,
+  `end()` (character positions, `Int`), `text()`, `group("name")` (a `Text?`: `none` for a capture that took no part,
+  `CaptureNameError` for an unknown name).
+- `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes(b"PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
+  `end_of_bytes`; `BytesMatch.bytes()`. Text and bytes pieces never mix (a type error).
+- Failable `TextPattern.from_regex(text)` / `BytesPattern.from_regex` read the usual regex syntax (unnamed groups
+  capture as `"1"`, `"2"`, `|` is the longest alternative, `(?i)` `(?m)` `(?s)` at the start). Backreferences,
+  lookaround, `*?` and `*+` throw `PatternSyntaxError` with the position; malformed pieces throw `InvalidPatternError`.
+- A search takes time linear in the text times the pattern size (no backtracking blow-up).
+
+## 14. Collections
+
+```mielia
+var nums = [3, 1, 2]                      # List[Int]
+var ages = {"ada": 36, "alan": 41}        # Dict[Text, Int]
+var tags = {"red", "blue"}                # Set[Text]
+var empty = List[Text]()
+
+nums.add_last(value: 4)
+show(nums[0])                             # 3
+show(nums[^1])                            # 4, the last element
+ages["grace"] = 85
+show(ages["ada"])
+if ages.has_key("alan")
+    show("found")
+for (name, age) in ages
+    show(f"{name} -> {age}")
+```
+
+- `List`, `Dict` and `Set` are always available; `[]`, `{k: v}` and `{a, b}` are their literals. The
+  specialized containers (`SortedDict`, `SortedList`, `SortedSet`, `PriorityQueue`,
+  `BitList`, `Items[T, COUNT]`) are constructor-only and come from `import Collections`.
+- A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
+  on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
+  `{1: "a"}` given to an `Emittable[(U16, Text)]` builds a `Dict[U16, Text]`. With nothing to go by,
+  `[1, 2]` is a `List[Int]`. The empty set literal is `{}` and the empty dict literal `{:}`
+  (`s[b] = {:}` on a `List[Dict[Int, Int]]`). A `{}` where a dict is expected is MI-S558.
+- `sv.to[List[Int]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
+  `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Int]]()`). A type rebuilds itself in
+  `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
+  builder's own: a program that writes or calls `from_serial` gets MI-S809 and uses `sv.to[T]()` instead. Every
+  collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `RotatableList`), a dictionary's keys
+  from their text (`sv.to[Dict[Int, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
+  read back: naming it in `sv.to[T]()` is MI-S813.
+- A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is MI-G250, which names that spelling.
+- An entity goes into a variant parameter or variable as itself (`add_point(seat: ada)` with `variant Seat` holding
+  `Player`), and a list literal whose type the context gives takes values of every member type
+  (`var keys: List[Int | Text] = [1, "two"]`). Inside a `when` arm the matched variable may take a new value
+  (`seat = "empty"`); the arm's name keeps the entity it matched, and later reads see the new value.
+- `n ** -1` on an `Int` crashes with `NumericDomainError` (no integer result); `try n ** -1` gives `none`.
+- `import Collections.SortedDict` makes the whole module available, as `import Collections` does. A file's `module`
+  line names its module wherever it lives (`geometry/shapes.mi` with `module Geometry/Shapes` is imported as
+  `Geometry/Shapes`).
+- Inside a protocol-constrained routine, the routines of a protocol the constraint's protocol obeys can be called
+  (`animal.name()` with `protocol Animal obeys Named`), and an associated type (`T/Item`) stands for the obeying
+  type's own (`relates Text as Item`).
+- **Showing a collection.** `show(xs)` and `f"{xs}"` write the elements, each in the form it has inside a
+  collection (`Text` quoted `"a"`, `Char` as `'a'`, everything else its `represent`): `List`, `Items` and the
+  other sequences `[1, 2, 3]`, sets `{1, 2}`, dictionaries `{1: 10, 2: 20}`, the empty set `{}` and the empty
+  dictionary `{:}`. `Dict` and `Set` show in insertion order, the sorted collections in order. A `PriorityQueue`
+  shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
+  and the queue does not change. A range shows as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`.
+  `f"{xs:?}"` (diagnose) puts the type and the count around the same text:
+  `List[Int](count: 3, [1, 2, 3])`, `Dict[Int, Int](count: 0, {:})`. There a
+  text element is quoted with its escapes (`["a\", \"b"]` is one text), and a variant, alone or as an element, names
+  the member type its value has (`S32(1)`, `Text("a")`, `none`).
+- Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
+  slice `xs[1 til 3]` returns a new list.
+- Indices and counts are `Int`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
+  `xs.enumerate()` (pairs `(Int, T)`). A negative index crashes with `NegativeIndexError`; count from the
+  end with `^` (`xs[^1]`).
+- The collections are Mielia's own, written in Mielia: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
+  `SortedDict`, `PriorityQueue`, `BitList`, `Bits`, `RotatableList`. A `List` keeps its elements from the first
+  place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
+  Searches return `Int?` (`none` where there is no match): `index_of` on `Items`, and `first_true`, `next_true`,
+  `first_false`, `next_false` on `Bits` and `BitList`.
+  `RotatableList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
+  and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Items[T, COUNT]` is Revare's
+  fixed-size record, counted and indexed with `Int` too. Revare's `SplitList` / `SplitItems`
+  (structure-of-arrays layouts) are not available in Mielia.
+- Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
+  `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
+  same way.
+- `dict[k] = v` replaces the value of a key that is there and adds the key otherwise. `set.add(value:)`,
+  `set.remove(value:)`, `dict.remove(key:)` return `Bool`:
+  a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
+- **Stack loops.** Recursion hides how far it got and what to do next in the call stack. Where that state should be visible, write a stack loop. We recommend recursion only for a branching structure where each call returns a result and changes no state. The stack is a `List`: `stack.remove_last()` takes the next step, and `stack.add_next(a, b, c)` adds steps given in the order they run, so they come back in that order (values, records and entities). `PartialItems[T, N]` holds up to `N` values in place: `add_last` / `add_next` throw `FullCollectionError` when full (`check` receives it), `remove_last` throws `AbsentValueError` when empty, `count()`, `capacity()`, `is_empty()`, `is_full()`, `clear()`, `xs[i]` inside the count, and `for` walks the elements held.
+- Lists: `add_first`, `add_last`, `add_at`, `add_range(you:)`, `has(value:)`, `lacks(value:)` (there is no `contains`), `sort()`, `sorted()`, `sort_by(...)`,
+  `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
+- Making room up front is failable: `reserve(new_capacity:)` on `List`, `RotatableList`, `BitList` and
+  `PriorityQueue`, and the creators `List[T](capacity:)`, `List[T](count:, fill_value:)`, `RotatableList[T](capacity:)`,
+  `BitList(capacity:)`, `BitList(count:, fill_value:)`, `PriorityQueue[P, E](capacity:)`, `Memory[T](capacity:)` and `Memory[T](count:, fill:)`
+  throw `OutOfMemoryError` when the elements take more bytes than a `U64` counts or there is no memory left for
+  them, and `NegativeIndexError` for a negative count. `check xs.reserve(new_capacity: n)` receives the failure,
+  and the collection then stays as it was. Growing on the way (`add_last` past the capacity) is not failable:
+  running out of memory there stops the program.
+- `Memory[T]` (`System/Memory`) is the row of places every collection keeps its elements in, and a program can use
+  it too: `Memory[Int](capacity: 5)` makes five places that start as zero (`0`, `""`, `false`, no entity),
+  `Memory[Text](count: 3, fill: "a")` fills them. `mem[i]`, `mem[i] = v`, `take(index:)`, `erase(index:)`,
+  `move(from:, into:, count:)`, `swap`, `fill`, `rotate_left`, `reverse`, `sort()`, `sort_by(compare:)` and
+  `grow(capacity:)` work on it. A range `mem[1 til 4]` is a `Span[T]`: a view that shares the places with no copy
+  (writing through it changes the memory) and keeps the memory alive. A span has the same reading, writing and
+  arranging routines over its own places, counted from 0, and a range of a span is a span, but a span does not
+  grow. A memory is one row however many names it has: after `var b = a`, `a.grow(capacity: 9)` and `a[0] = 1` are
+  seen through `b`, also when a routine grows a memory it was given. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
+  holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
+  `Memory[T]`).
+- **Emitters.** An emitter reads a source (a collection, a range, the step before it) and gives the next value each
+  time it is asked. An adapter is an emitter whose source is the step before it. So changing the source's shape while
+  it walks crashes, and one that handed out everything cannot be used again (MI-S517).
+  What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
+  with `emitter()`. `for` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
+  for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `for x in it`,
+  which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
+  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An emitter hands out each value once: a `for` over a named
+  emitter after one that ended by itself (no `break`), or a `for` inside a loop over an emitter made outside it, is
+  MI-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `for x in nums` /
+  `for x in nums.emitter()`. An entity a program writes that obeys `Emitter[T]` (it has a
+  failable `emit()`) is walked as it is: `for n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
+  An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
+  member variable, a returned value, an argument, or the next link of a chain. So a member variable or a return type
+  may name an adapter (`big: WhereEmittable[Int, List[Int]]`, `-> WhereEmittable[Int, List[Int]]`),
+  and the adapter stays valid after the variable that named the collection is given another value or goes away.
+  Changing the collection's shape while a `for` walks it crashes, as below.
+- Library routines written for every emittable (`to[List]()`, `sum()`, `first()`, `where(...)`, `select(...)`,
+  `take(count:)`, ...) work on an entity the program writes that obeys `Emitter[T]` or `Emittable[T]`, and a
+  protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
+  works on the program's entities the same way.
+- Emitter adapters (`import EmitterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
+  `reverse`, `enumerate`, `zip(a:, b:)`, `min_by`, … are lazy (there is no `chain` routine in Mielia yet: `add_range(you:)` appends one list to another); finish with `for` or by collecting:
+  `nums.where(predicate: x => x % 2 == 0).to[List]()`.
+- **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
+  values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
+  (pairs), `to[RotatableList]()`, `to[BitList]()` (Bools), `to[PriorityQueue]()` (`(priority, element)` pairs).
+  `to[Items[T, N]]()` names the size (`xs.to[Items[Int, 3]]()`) and is failable: fewer or more than `N` values
+  throw `ElementCountMismatchError`.
+
+**Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that
+its next element is really the next one, so it is not allowed:
+
+```mielia
+routine grow(xs: List[Int])
+    xs.add_last(value: 99)
+    return
+
+routine start()
+    var nums = [1, 2]
+    for x in nums
+        grow(xs: nums)        # crashes: ReshapingWhileInUseError
+    return
+```
+
+- Writing `nums.add_last(...)` directly in the loop body is a build error (MI-S625).
+- A dictionary's `d[k] = v` may add the key, so writing a key of the dictionary being looped over crashes with
+  `ReshapingWhileInUseError`, even when the key is already there. A list's `xs[i] = v` only replaces an
+  element and is fine.
+- When the change is inside a called routine, the builder cannot see that `xs` and `nums` are the same
+  list, so the loop marks the list as in use and the change crashes at run time with
+  `ReshapingWhileInUseError`. The same holds for a change made by a lambda that captured the list, for a loop
+  over a global list, for a loop over an adapter of the list (`for x in nums.where(...)` walks `nums`), and for
+  a change through an element (`rows[0].add_last(...)` while a loop walks `rows[0]`).
+- Changing the list after the loop, after `break`, or after a `return` out of the loop is fine. Changing an
+  element's contents (`boxes[0].n = 5`) is not an add or remove and is always fine.
+- The check assumes a single job; two jobs changing and looping over the same list concurrently are
+  not protected.
+
+## 15. Console, files and resources
+
+- Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Int = ask()`,
+  failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Int, Int) = ask()`,
+  `"3 4".to[(Int, Int)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
+  `ask_lines()`, `ask_words()`. A blank line is `""`. At the end of the input `ask_line()`/`ask_word()` crash with
+  `EndOfInputError` (`IO/Errors`): read until the end with `when check ask_line()` + `is EndOfInputError => break`.
+  An `ask_line()` right after `ask_word()` skips the line end the word left.
+- Files: `FileManager` (the operating system's file manager) is the one place that touches the disk, its routines
+  called on the type. Storage has three layers: `StorageManager` (one storage device), `PartitionManager` (one
+  partition of it) and the file system on one partition, which the operating system manages (a partition has exactly
+  one file manager, a second one over it fails). `FileManager.partition(at: dir)`, `PartitionManager.all()`, `StorageManager.all()`
+  and `device.partitions()` only ask. `File(at: "notes.txt")` and `Directory(at: "data")` only say where (no I/O at
+  construction), with path members `name`, `stem`, `extension` (no leading dot), `parent`, `with_extension(ext:)`,
+  `with_name(name:)`, `file(name:)`, `go_to(name:)`. `FileManager.read_text(at:)`, `write_text(at:, content:)`,
+  `append_text`, `read_bytes`, `write_bytes`, `open_read`/`open_write`/`open_append`, `size`, `metadata`, `exists`,
+  `is_file`, `is_directory`, `delete`, `delete_all`, `copy(from:, to:)`, `list`, `entries`, `walk`.
+  `rename(at:, to: name)` changes a file's or directory's NAME (a separator in it fails), `move(at:, into:
+  directory)` puts it into another directory under its own name: a copy then a delete (the operating system renames
+  instead on the same partition), not atomic: a failed copy deletes nothing, a failed delete leaves both and says
+  so. **A file must exist before it is read, written or opened**: a missing one is a `NotFoundError`, nothing is
+  created silently. `FileManager.make_file(at:, replacing: false)` makes one (an existing file is an `IOError`
+  unless `replacing: true`, which empties it), `make_directory(at:, parents: false)` makes a directory.
+  `rename`/`move`/`copy` refuse an existing destination unless `replacing: true`. There is no `touch` and no
+  `IO/FileSystem`. Failures are recovered with `try`/`check`: `NotFoundError`, `NotEnoughPermissionError`,
+  `NotEnoughSpaceError`, `StorageFaultError` (the device failed to read or write), and `IOError` for the rest, each
+  its own error (`is IOError` doesn't take the other four, `is Crashables` takes all).
+- Files are read and written whole or through sessions. There is no mapped storage in Mielia
+  (`FileManager.open_storage` is gone): read the bytes with `read_bytes`, or a session in chunks.
+- The environment (`Environment`, always available): `arguments()` (a list, the program's own name left out),
+  `variable(name:)` (a `Text?`, `none` where it is not set), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
+  `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
+  `Directory` and build paths from it. `Entropy.next[T]()` gives random bits from the operating system,
+  `Random.from_entropy()` a generator seeded with them (`make_random(seed:)` one that replays its stream). A draw
+  names its type: `rng.next[T]()` gives an integer type (`U8` to `U128`, `S8` to `S128`) over its full range, and
+  `B32` / `B64` a value in `[0, 1)`. `next_u64()` / `next_u32()` / `next_b64()` are build errors that name the new
+  form (`migrate --step random`). `rng.chance(probability:)` and `rng.range(low:, high:)` stay.
+- `FileManager.read_text` / `write_text` are safe inside a job's work: it waits while other jobs run.
+- `migrate --step files` rewrites `OsFileManager` / `OsEnvironment` / `OsEntropy` → `FileManager` /
+  `Environment` / `Entropy`, the directory routines → `Environment`,
+  `subdir` → `go_to`, `move(from:, to:)` → `rename` or `move(at:, into:)` when the paths show which, and lists the
+  rest.
+- **`using`** binds a resource for a block and releases it at the block's end, however the block is left:
+
+```mielia
+var out = FileManager.make_file(at: File(at: "out.txt"), replacing: true)
+using FileManager.open_write(at: out) as sink
+    sink.write("hello")
+```
+
+  A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
+  There is no `defer`.
+- **Text over a session:** `FileSink.write(value, end: "\n")` works like `show` (Text as UTF-8, any value in its
+  representable form, `Bytes` as they are). `FileSource` reads like the console's `ask` family: `read_line()`,
+  `read[T]()` (a line as a `T`), `read_word()`, `read_all()`, `read_lines()`, `read_words()`, `read_raw()` (the rest
+  as `Bytes`), `read_bytes(count)`. At the end `read_line`/`read[T]`/`read_word` throw `EndOfInputError`, the others
+  give an empty result. There is no bare `read()` without a type.
+- A byte flow (`FileSource`, `FileSink`, `stdin()`, `stdout()`) is read with `pull(max:)` and written with
+  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places (a memory cell), where
+  reading again gives the same value. `migrate --step verbs` rewrites the old `load` / `store` on a flow.
+
+## 16. Concurrency
+
+Any routine can run concurrently. **`f.to[Work](args)`** computes the arguments now (and a receiver that is a
+value, as in `p.total.to[Work]()`), defers the call into a `Work[T]`, and starts
+nothing. **Nothing runs until a verb starts it.** Where the work runs is the runtime's business.
+
+```mielia
+routine fetch(id: Int) -> Int
+    waitfor(50ms)            # this job waits, others run meanwhile
+    return id * 10
+
+routine start()
+    var a = fetch.to[Work](id: 1)           # Work[Int], not started
+    a.start_now()                        # starts it now
+    show(f"one => {a.retrieve()}")       # wait for the value
+
+    var jobs = [fetch.to[Work](id: 2), fetch.to[Work](id: 3)]
+    jobs.start_now()                     # start both together
+    var results = jobs.gather()          # wait for all
+    show(f"{results[0]} {results[1]}")
+    return
+```
+
+- The routine is named, not called, and the conversion takes the routine's own arguments. Only that routine is the
+  work: `f.to[Work](x).retrieve()` makes the Work and collects it at once.
+- A failure is recovered where the Work is collected: `try job.retrieve()`, `check job.retrieve()`.
+- A Work of a routine that returns nothing is `Work[None]`, and the type can be inferred:
+  `var jobs = [work.to[Work](), work.to[Work]()]` then `jobs.gather()`.
+- `job.start_now()` starts the work now. Collect it later with `retrieve()` or `gather()`.
+- `start_now()` is the only start verb: `start_here()` and `start_apart()` are build errors that point to it.
+  `migrate --step work` rewrites them to `start_now()`, and an older `Agent` / `to[Agent]` to `Work` / `to[Work]`
+  (a remaining `Agent` is a build error naming `Work`).
+- `job.retrieve()` waits for its value, starting it first if nothing has. Inside a job it parks (other
+  jobs keep running).
+- A failure stays in its Work. A failure inside the work does not end the program where the work runs,
+  and the other jobs keep running. It surfaces where the Work is retrieved: `a.retrieve()` rethrows it
+  (bare, it crashes loudly there like any failure), `check a.retrieve()` / `try a.retrieve()` recover it
+  The crash report's trace ends with `work in start()` (the line that made the
+  Work) and `Thrown again at` names the `retrieve()` line.
+- `job.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
+  at its next wait (`waitfor`, `retrieve`, a channel), which returns early, or through
+  `cancellation_requested()`. Work that waits again after that stops at that wait, its entities let go of,
+  so a loop of waits that never asks still ends. Retrieving a cancelled Work waits for it to stop, then crashes with `CancelRequested` (the name
+  carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
+- Starting a Work twice, or retrieving it twice, crashes with `WorkStartError`.
+- `jobs.start_now()` starts every Work of a `List[Work[T]]` together: each one is made ready first and then all are
+  let go at once, so none runs before the others are ready (a Work of the list started already is a
+  `WorkStartError`). `gather`, `race` and the rest only collect, and start the Works nothing started the same way.
+- `jobs.gather()` runs a `List[Work[T]]` concurrently and returns every result in input order, and
+  throws the first failure it meets (in list order). `jobs.race()` returns the first finisher's value,
+  and throws the winner's failure. `jobs.cancel_all()` returns nothing: it cancels every job and
+  waits until each has stopped, dropping what each came to. Work nothing started yet never runs.
+  `jobs.next_finished()` waits for the first job to finish, takes it out of the list and returns it (call it
+  in a loop to handle results in finishing order). `jobs.gather_all()` waits for all and returns a
+  `List[Check[T]]`: each job's value or failure, so one failure does not hide the others' results.
+  `jobs.take_finished()` takes the finished jobs out of the list in place and returns them (a server
+  collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
+- When the last holder of a Work lets go of it before anything retrieved it, its work is cancelled and waited
+  for (work nothing started never runs). A failure the work came to crashes the program there with the failure's
+  message. Call `job.cancel()` first to throw away what it comes to, a failure included.
+- `job.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
+  `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the Work:
+  one already started with `start_now()` is refused with `WorkStartError`.
+- `job.is_done()` and `job.is_running()` are snapshots for polling.
+- Free routines: `waitfor(duration)` pauses (parks a job), `yield_now()` lets other jobs run,
+  `cancellation_requested()` tells a long loop to stop early. Cancellation is cooperative.
+- A Work that nothing starts never runs. `f.to[Work]()` as a statement is warning
+  MI-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
+- Jobs that talk to each other (over a channel) must all be started before you wait on one:
+  `producer.start_now()` first, then `consumer.retrieve()`.
+- **Shared entities are safe to share between jobs.** The runtime may run jobs on several cores. An entity
+  that reaches another job gets an atomic reference count and a lock taken around each access, with no
+  code from you. An entity reaches another job as a Work's argument, inside a value sent on a channel, as an
+  element of a list the jobs share, and when a lambda captures it (the capture alone counts, since the lambda can
+  be handed anywhere). As with globals, one statement is atomic; a read-then-write spread over several
+  statements is not. A program that uses Work checks every entity access, and a program without Work doesn't.
+- **Jobs waiting on each other stop the program.** Two jobs that use two shared entities in one statement
+  each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`
+  build, off in the release modes except in a program with globals, `= false` / `= true` in config.toml overrides)
+  then stops the program with a
+  `Deadlock error` that says which job waits for an entity which other job is using, instead of hanging. The
+  message names jobs and entities only. All the globals of a program are behind one lock, so statements that use
+  globals of several modules never wait on each other, and a statement that uses globals and a shared entity, run by
+  two jobs in opposite orders, ends with a `Deadlock error` in every build mode.
+- **Finding a race the program has.** `[debug] sanitize = "thread"` in config.toml builds the program with
+  ThreadSanitizer (Linux and macOS): every memory access of the program and of the runtime is watched, and two
+  accesses from different threads that no lock or atomic orders are reported when they happen, with both places
+  (`WARNING: ThreadSanitizer: data race`). The program runs several times slower, is built by the local build (not the
+  daemon or the JIT), and the exit status is 66 when something was reported. A debug build also checks the sharing of
+  entities: an entity that other jobs can reach must hold only entities they can reach safely, and a build that finds
+  one that does not stops with `Sharing violation error` naming the type that holds it. That is a bug in the builder
+  or a library, not in your program. The release modes carry neither check.
+- There is no thread type in Mielia.
+
+```mielia
+routine checked(n: Int) -> Int
+    if n < 0
+        throw VerificationFailedError()
+    return n
+
+routine slow(n: Int) -> Int
+    for i in 0 til 2000
+        if cancellation_requested()
+            return -1
+        waitfor(1ms)
+    return n
+
+routine start()
+    var bad = checked.to[Work](n: -1)
+    var good = checked.to[Work](n: 3)
+    bad.start_now()
+    good.start_now()
+    show(f"good: {good.retrieve()}")     # 3
+    when check bad.retrieve()
+        is Int as v => show(f"bad: {v}")
+        is Crashables as e => show(f"bad failed: {e.crash_message()}")
+    var running = slow.to[Work](n: 1)
+    running.start_now()
+    running.cancel()
+    when check running.retrieve()
+        is CancelRequested => show("cancelled")
+        else => show("finished")
+    return
+```
+
+**Mailboxes** (always available): one `Mailbox[T]` that every job that adds or takes holds.
+
+```mielia
+routine produce(m: Mailbox[Int], n: Int) -> Int
+    var i = 1
+    until i > n
+        m.add_last(value: i)
+        i = i + 1
+    m.close()
+    return n
+
+routine start()
+    var m = Mailbox[Int](capacity: 2)
+    var job = produce.to[Work](m: m, n: 5)
+    job.start_now()
+    var first = m.remove_first()
+    var total = first
+    for x in m
+        total = total + x
+    show(f"total: {total}")
+    return
+```
+
+`add_last` waits while the mailbox is full (`capacity: 0`: each `add_last` waits for a taker) and crashes with
+`ChannelClosedError` once the mailbox is closed. `remove_first()` takes one value, waiting while it is empty, and
+crashes once it is closed and empty. `for x in m` waits while it is empty and ends when it is closed and empty.
+Nothing closes a mailbox by itself: the side that is done calls `close()`. Several jobs taking from one mailbox
+each get different values. `m.count()` and `m.is_closed()` are snapshots another job can change at once.
+`m.add_last_if_room(value: x)` never waits: it adds and returns `true` when there is room, returns `false` when the
+mailbox is full, and crashes with `ChannelClosedError` once it is closed (a broadcast over subscribers' mailboxes uses
+it, so one full subscriber does not hold up the rest).
+
+A statement is one step for the jobs that share an entity, so two statements can be split by another job. A
+shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
+and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two jobs both add), and `d.items()` returns a copy
+of the pairs to walk, `for (k, v) in d.items()` (`for e in d` crashes when another job adds or removes an entry during the walk).
+
+## 17. Process events
+
+`CpuEventManager` (System/Cpu, no import) holds one handler per kind of event the operating system sends when it
+asks the process to stop. Its routines are called on the type:
+
+```mielia
+global stop_requests: Int = 0
+
+routine on_stop()
+    show("stopping")
+    stop_requests += 1
+
+routine start()
+    CpuEventManager.when_interrupted(on_stop)     # Ctrl+C, SIGINT
+    until stop_requests != 0
+        waitfor(200ms)
+    show("cleaned up")
+```
+
+- `CpuEventManager.when_terminated(h)`: a request to end (SIGTERM, a console window closed, a logoff or a shutdown
+  on Windows). When `h` returns, the process ends at once with the status `set_exit_code` stored last, so the
+  cleanup that must happen is the handler's.
+- `CpuEventManager.when_interrupted(h)`: SIGINT, Ctrl+C or Ctrl+Break. When `h` returns, the program goes on.
+- The handler is a `Callable[(), None]` (a named routine or a lambda, taking nothing). It runs beside the rest of the
+  program, so `show` and everything else work in it, and the state it changes is a `global`.
+- One slot per kind: setting a handler returns the one before as `Callable[(), None]?`, `none` when the system's
+  action held the slot (the result may be dropped silently). Setting it again puts it back, and `none` gives the
+  event back to the system. A library that adds its own handling calls the one it got back from its handler.
+- An event of a kind whose handler is still running takes the system's action: a second Ctrl+C ends a program whose
+  handler is stuck.
+- A forced end (SIGKILL, the OOM killer, Windows ending the program after a timeout) can't be caught, and a fault
+  ends the program as a crash.
+- The `Signals` module is gone: `migrate --step cpu-events` drops `import Signals` and writes
+  `CpuEventManager.when_interrupted(h)`.
+
+## 18. C and other machine-level code
+
+A Mielia program never handles memory directly and never calls C directly. `danger` blocks (MI-S800),
+`dangerous` routines (MI-S800) and foreign `C::` / `LLVM::` routines (MI-S810) are build errors in a program's
+`.mi` files. The words `danger` and `dangerous` stay reserved.
+
+To use a C library, write a small `.rr` module that declares and wraps it, and import that module:
+
+```revare
+# cmath.rr
+routine C::labs(n: S64) -> S64
+
+routine absolute(n: S64) -> S64
+    return C::labs(n: n)
+```
+
+```mielia
+# main.mi
+import Cmath
+
+routine start()
+    show(f"{absolute(n: -42)}")   # 42
+    return
+```
+
+The `.rr` module is checked by Revare's rules (section 23), and inside it `danger`, `dangerous` and `C::`
+are available. Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait)
+`@blocking` there: called from a job's work it runs on one of the runtime's I/O threads while the job parks.
+
+The standard library uses `danger` internally; that is never visible to a program.
+
+## 19. ObjectHacker (runtime reflection)
+
+`import ObjectHacker` works on live objects from the outside. Every verb takes the object as an argument
+(`peek(target: hero, ...)`), never as a receiver. A value whose type is known only while the program runs is an
+`Unknown`; `SerialValue` is only for serialization.
+
+```mielia
+import ObjectHacker
+
+entity Hero
+    name: Text
+    hp: S64
+    secret seed: S64
+
+record Point
+    x: S64
+    y: S64
+
+routine start()
+    var hero = Hero(name: "Ada", hp: 10, seed: 7)
+    var alias = hero
+    show(type_name(of: hero))                          # Hero
+    for info in memvars(of: hero)
+        show(f"{info.order}: {info.name}: {info.type.name}, secret: {info.is_secret}")
+    show(peek(target: hero, memvar: "hp"))             # 10 (an Unknown)
+    var hp: S64 = 25
+    poke(target: hero, memvar: "hp", value: hp)
+    show(alias.hp)                                     # 25: every name sees the change
+    var p = Point(x: 1, y: 2)
+    var y: S64 = 9
+    p = poked(target: p, memvar: "y", value: y)        # a record changes only as a copy
+    var u = Unknown(from: p)
+    show(u.is[Point]())                                # true
+    when try u.to[Point]()
+        is None => show("not a Point")
+        else as q => show(q.y)                         # 9
+    show(type_info(of: hero).kind)                     # ENTITY
+    var seen = watch(target: hero)
+    show(seen.is_alive())                              # true
+```
+
+- `Unknown(from: value)` keeps a copy of a record (any non-entity value) or one more name for an entity
+  (`Unknown(from: an_unknown)` is that same `Unknown`). `u.is[T]()`, `try u.to[T]()` (absent when the kept
+  value is not a `T`), `u.represent()` (`f"{u}"` shows the kept value), `u.serialize()`, `u.type_info()`.
+  Every verb below also takes an `Unknown` target and works on what it keeps. `u == v` is true when both keep
+  values of one type that are equal by that type's own `==` (values of two types are never equal), and `u.hash()`
+  is the kept value's hash, so `Unknown` works as a `Set`/`Dict` key. A kept type with no `==` or no hash fails
+  loudly when compared or hashed (`UnknownOperationError`, naming the type).
+- `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program can't import
+  `BuilderQuery`, MI-S116). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
+  (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
+  (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
+  ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Int` obeys `Comparable`, so
+  `Equatable` too), `obeys_protocol(name:)`, `cases` (a choice's or flags' case names) and
+  `arms` (a variant's arm types). `memvars(of: x)` is `type_info(of: x).memvars`.
+- `peek(target:, memvar:) -> Unknown` is failable: `NoSuchMemberVariableError` for a name the type does not have.
+- `poke(target:, memvar:, value:)` changes an entity in place, under its lock; the value must be of the member
+  variable's exact type (`MemberVariableTypeError` names both types: a bare `5` is an `Int`, so give an
+  `S64` slot a typed variable). Given a record it throws `PokeKindError`: take the changed copy with
+  `p = poked(target: p, memvar:, value:)` instead (`poked` given an entity throws `PokeKindError` too).
+- `watch(target:)`: an observation that does not keep the entity alive; `is_alive()`.
+- `call(target:, name:, args: Dict[Text, Unknown]) -> Unknown` (failable) calls a member routine by its name
+  (`"attack"`) or full name (`"Game.Hero.attack"`), arguments by parameter name, a defaulted one may be left out;
+  a routine that returns nothing gives an `Unknown` keeping `none`. `create(type: TypeInfo, args:) -> Unknown`
+  makes a value by a creator chosen by the arguments (every record and entity has the one taking one argument
+  per member variable). `type_info(of:).routines` / `.creators` are `List[RoutineInfo]` (`name`, `full_name`,
+  `module_name`, `kind: RoutineKind` = `MEMBER`/`COMMON`/`CREATOR`/`FREE`, `parameters: List[ParameterInfo]`
+  with `name`, `order`, `type`, `has_default`, `default`, `returns: TypeInfo?`, `is_failable`, `is_generic`).
+  `types(in: "Game")` and `routines(in: "Game")` list a module's types and free routines. `call(info:, args:)`
+  calls a free routine, a common routine or a creator from its `RoutineInfo`.
+- `when_changed(target: hero, handler: (memvar: Text, old: Unknown, now: Unknown) => ...) -> U64` calls the handler
+  after every change of one of that object's member variables, by the program (`hero.hp = 3`, inside its own
+  routines too) or by `poke`, with the name, the old and the new value. Several hooks per object run in the order
+  added. `remove_hook(target: hero, hook: id)` takes one off (`false` when it is not there). Hooks belong to one
+  object: another object of the type is not hooked, and a record has none (a value). A hook keeps its object alive
+  until it is removed. A build that imports `ObjectHacker` tests for hooks at every member variable change (about
+  0.3 ns per change while no object has hooks), a build that does not pays nothing. Annotate the lambda's
+  parameters (MI-S638 otherwise). Hooks and implants may be added, removed and used from several jobs at once: the
+  program's hooks are looked at and changed by one job at a time, and a hook runs on the job that made the change,
+  after that look. A change pairs with the old value its own job saw: two jobs changing one hooked object at once
+  each hand their hooks their own old value.
+- `implant(target: ada, replacing: Hero.attack, with: (hero: Hero, power: S64) => ...)` replaces a member routine for
+  that one object: its calls run the replacement, given the object first and then the arguments. The member routine
+  is named by its type and name (`Hero.attack`, an entity's routine that is not common, has no type parameters and
+  types every parameter, and is not overloaded by name), and a replacement of another signature is a build error
+  where `implant` is written (MI-S201, naming `implant`, the routine and both signatures). Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
+  gives it back (`false` when there was none). An implant keeps its object alive until it is removed. In a build
+  that imports `ObjectHacker` every member routine of an entity starts with the test for a replacement.
+- **The program's own annotations.** A record that obeys `Annotation` is an annotation of that name, written on a
+  routine, a record or an entity with named build-time constant arguments: `@Memoize(limit: 100)`. Its
+  `routine Memoize.apply(to: RoutineInfo)` (`to: TypeInfo` on a type) runs once per declaration it is on when the
+  program starts, after the globals are set and before the body of `start()`, in module order (a module after the
+  ones it imports) and source order. Its `routine Memoize.around(call: Invocation) -> Unknown` runs instead of every
+  call of the routine, recursive calls too: `call.routine_info`, `call.args` (`List[Unknown]`, parameter order) and
+  `call.proceed()` (runs the routine, any number of times, and gives its result as an `Unknown`, one keeping `none`
+  for a routine that returns nothing). What `around` returns must be of the routine's return type (else a loud
+  failure). A routine takes at most one annotation with an `around` (MI-S706), and neither goes on a routine or type
+  with type parameters. A failure of the routine passes on through the `around` to the caller (an `infallible`
+  `around` stops the program there). `RoutineInfo.annotations` and `TypeInfo.annotations` give the values back (`List[Unknown]`: `a.is[Route]()`,
+  `try a.to[Route]()`). An annotated routine stays in the build even when nothing calls it.
+
+```mielia
+record Memoize
+obeys Annotation
+    limit: S64
+
+global memo: Dict[Unknown, Unknown] = Dict[Unknown, Unknown]()
+
+routine Memoize.around(call: Invocation) -> Unknown
+    var key = call.args[0]
+    when try memo[key]
+        is None =>
+            var result = call.proceed()
+            memo[key] = result
+            return result
+        else as hit => return hit
+
+@Memoize(limit: 100)
+routine fib(n: Int) -> Int
+    if n < 2
+        return n
+    return fib(n: n - 1) + fib(n: n - 2)
+```
+
+- Only what the build reached is listed and callable: a routine nothing in the program calls is left out of
+  the program, and naming it fails with `RoutineNotBuiltError`. Mark a type `@reflectable` to keep every routine
+  it has. Other errors: `NoSuchRoutineError`, `ArgumentError` (missing, unknown or wrongly typed argument),
+  `GenericRoutineCallError` (a routine with type parameters of its own), `CallTargetError` (`call(info:)` given
+  a member routine).
+
+## 20. CLI and `config.toml`
+
+```
+mielia new [folder]          # start a project: config.toml, main.mi, .gitignore, .vscode/ (keeps existing files)
+mielia run hello.mi          # build and run
+mielia build hello.mi        # build a native executable, don't run it
+mielia check hello.mi        # check the program without building it
+mielia test <dir-or-file>... # build and run each .mi against <name>.expected / .exit / .error / .input
+mielia fmt [--check] <paths> # rewrite sources in the canonical layout
+mielia lint <paths>          # report code that is not in the canonical layout
+mielia lsp                   # language server, for an editor
+mielia help | version
+```
+
+- A bare file is not a command: `mielia hello.mi` is an error that points to `mielia run hello.mi`.
+- **There are no build flags.** Configuration lives in `config.toml`; with no entry file, the CLI walks up
+  from the current directory to find it.
+
+```toml
+[package]
+name = "my-app"
+
+[target]
+executable = "MainModule"   # the entry MODULE name, not a file path
+module_paths = ["../shared"]  # folders whose modules join the solution (optional), a header-less file is named by its place
+mode = "debug"              # debug | debug-jit | release | release-time | release-space
+```
+
+- A single script needs no manifest: `mielia run script.mi`. Without a manifest the build mode is `debug`.
+- **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mi`
+  (`--step extensions` does only that, with the `MI-` spelling of diagnostic codes in comments and `mielia-version`
+  in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4
+  (`migrate --step indent` does only that, text literals keep their lines), renames the 0.1 manifest file to
+  `config.toml` (the old file alone is a build error that names `config.toml`), and then rewrites the old
+  spellings: `try_f(x)` → `try f(x)`, `check_f(x)` / `lookup_f(x)` → `check f(x)`, `routine T.create(...)` →
+  `routine T(...)` (a member routine `create` that gives back its own type is MI-W104), `-x ** n` → `(-x) ** n`
+  (the old meaning), and `C64` / `C128` → `C128` / `C256` in a project with a manifest. It lists what it cannot
+  decide (a range whose start is not a literal may have counted down). Run the named steps after it and
+  `--step suffix` last. A build error on an old name (`Result`, `Indexable`, `try_f`, `gather`, `IO/FileSystem`,
+  `Moment.now`, ...) names what is written now.
+
+## 21. Reading build errors
+
+Format: `error[MI-S###]: file:line:col: message`, then the source line with a caret. Families: `MI-G###`
+grammar, `MI-S###` semantic, `MI-W###` warning (warnings print as `warning[MI-W###]`). The prefix follows
+the file the diagnostic points into (an error inside an imported `.rr` module is spelled `RA-` with the same
+number). At most 20 are shown per batch.
+
+| Code          | Usual cause                                         | Fix                                               |
+|---------------|-----------------------------------------------------|---------------------------------------------------|
+| MI-S510/S512  | positional arguments in a multi-parameter call      | name every argument                               |
+| MI-S010       | literal out of range for its type                   | use the right constant (`U8_MAX`)                 |
+| MI-G010       | a number names its type (`5_u8`)                    | `var x: U8 = 5`, or let the place it goes type it |
+| MI-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
+| MI-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
+| MI-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
+| MI-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
+| MI-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
+| MI-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
+| MI-G230       | `failable` written on a routine                     | remove it: every routine passes its failures on   |
+| MI-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
+| MI-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
+| MI-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
+| MI-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
+| MI-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
+| MI-G229       | a loop written `each x in xs`                       | `for x in xs` (`migrate --step for`)              |
+| MI-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
+| MI-S517       | `for` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `for x in xs` |
+| MI-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
+| MI-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
+
+## 22. Keywords
+
+A keyword can still be a name when written between backticks (`` `check` ``), and so can words with one space
+between them (`` `total count` ``); `` `count` `` and `count` are the same name.
+
+Every reserved word in Mielia. There is NO `for`, `def`, `fn`, `let`, `const`, `class`, `struct`, `enum`,
+`match`, `trait`, `impl`, `async`, `await`, `spawn`, `external`, `null`, `self` or `this`.
+
+- **Declarations**: `routine` `entity` `record` `choice` `flags` `crashable` `variant` `protocol`
+- **Bindings**: `var` `preset` `global` `lateinit`
+- **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
+- **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
+- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `for` `with`
+  `break` `continue` `return` `throw` `todo` `becomes`
+- **Failure**: `infallible` (a wall: `infallible routine close(...)`) · **Recovery**: `try` `check`
+- **Ranges**: `in` (loops only) `to` `til` `by`
+- **Modules**: `import` `module`
+- **Other**: `using` `as` `define` `given` `nothing` (an empty body: a type's, or a block's that
+  does nothing)
+- **Logic**: `and` `or` `not`
+- **Literals**: `true` `false` `None` `none`
+- **Concurrency**: `f.to[Work](args)`
+- **Reserved, not usable in a program**: `danger` `dangerous`
+
+Nothing marks a routine that can fail (`failable` is MI-G230, `routine parse!(...)` is MI-G222), and a call never
+writes `!`. `steal` and `expand` are not Mielia words.
+
+The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
+operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `for x in xs`). Anywhere
+else they are names: `var to = 3`, `routine step(by: Int, to: Int)`, `by + to`. Two places keep them
+keywords: a `when` arm that starts with `is`/`isnot`, and `else as p`. `not` starts an expression, so it is always a
+keyword.
+
+## 23. Relation to Revare and interop
+
+Revare is the same object model where an entity has one original, reached by permission or through a
+manager (explicit `steal` hand-overs, deterministic teardown at scope exit), and the machine visible
+(fixed-width numbers by default, OS threads, build-time reflection). Mielia reaches an entity through any
+number of names and hides the machine. The two share the grammar and the standard library, which is written in Revare.
+
+A Mielia program may import Revare (`.rr`) modules; a Revare program may not import Mielia files.
+
+- **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Optional` and `Range` are the same
+  types in both languages.
+- **An entity of an imported `.rr` module is held like a Mielia entity.** In Mielia code it is a shared
+  handle: a second name (`var d = c`) or a member variable reaches the same entity, a Mielia routine takes
+  it as a parameter or gives it back (`routine bump_twice(c: Counter)`), a `.rr` routine's entity result
+  (`new_counter(start: 5)`) is received by name, and it is released when nothing holds it. The `.rr`
+  routines' own bodies keep Revare's rules.
+- **A Revare library entity (`RA::List`) keeps one original.** It may not cross a Mielia routine
+  signature by value (MI-S439), and keeping it under a second name is MI-S413.
+- `RA::Name` and `MI::Name` name a type in a specific language when both have one with that name.
+- **Collections do not cross as-is.** Mielia's `List` is not Revare's (`RA::List`, counted with `U64`).
+  Convert at the boundary: `rf_list.to[List]()` makes a Mielia list from a Revare one, and
+  `xs.to[RA::List]()` makes a Revare list from a Mielia one.
+
+## 24. Status (do not generate as if shipped)
+
+Built and tested: the language described above, end to end: shared entities with cycle collection,
+nullable entities, script mode, globals, `Int`/`Decimal` defaults, the error model, Work
+concurrency, the iterate-and-mutate checks, C through imported `.rr` modules, and `ObjectHacker`'s
+`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations, `when_changed`, `implant` and `watch`. The `StdlibMi` fixtures run in CI with their expected output.
+
+Not built yet:
+
+- a REPL and hot reload;
+- `ObjectHacker`'s `when_destroyed`; annotations on parameters and member variables;
+  hot reload and `morph` come after 0.5.
+
+When generating Mielia: start from the closest `Mielia/tests/Fixtures/StdlibMi/*.mi` program, name every
+argument, return a value on every path of a routine that has one, use bare `Int`/`Decimal` numbers, and
+prefer `when` over nested conditionals.

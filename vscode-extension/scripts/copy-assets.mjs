@@ -4,6 +4,6 @@ import { copyFileSync, mkdirSync } from "node:fs";
 
 mkdirSync("syntaxes", { recursive: true });
 mkdirSync("icons", { recursive: true });
-copyFileSync("../Suflae.tmbundle/Syntaxes/Suflae.tmLanguage.json", "syntaxes/Suflae.tmLanguage.json");
+copyFileSync("../Mielia.tmbundle/Syntaxes/Mielia.tmLanguage.json", "syntaxes/Mielia.tmLanguage.json");
 copyFileSync("../rider-plugin/bundle/language-configuration.json", "language-configuration.json");
-copyFileSync("../rider-plugin/src/main/resources/icons/suflae.svg", "icons/suflae.svg");
+copyFileSync("../rider-plugin/src/main/resources/icons/mielia.svg", "icons/mielia.svg");

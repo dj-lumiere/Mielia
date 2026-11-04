@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -14,7 +14,7 @@ public class NumberLiteralOfTypeTests
     [Fact]
     public void Analyze_NumberTypeCalledWithALiteral_IsThatType()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                           choice Step
                                               CALL
                                               VISIT
@@ -33,7 +33,7 @@ public class NumberLiteralOfTypeTests
     [Fact]
     public void Analyze_NumberTypeCalledWithALiteralOutOfRange_ReportsTheRangeOnce()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                           routine start()
                                               var b = U8(300)
                                               return
@@ -46,7 +46,7 @@ public class NumberLiteralOfTypeTests
     [Fact]
     public void Analyze_NumberTypeCalledWithAVariable_PointsToTheConversion()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                           routine start()
                                               var n = 5
                                               var a = S32(n)

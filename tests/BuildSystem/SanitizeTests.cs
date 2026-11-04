@@ -1,6 +1,6 @@
 using Builder;
 
-namespace Suflae.Tests.BuildSystem;
+namespace Mielia.Tests.BuildSystem;
 
 /// <summary>
 /// The <c>[debug] sanitize</c> key of config.toml and the IR mark that makes ThreadSanitizer instrument a routine.

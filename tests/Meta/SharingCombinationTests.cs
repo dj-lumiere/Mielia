@@ -1,19 +1,19 @@
 using System.Diagnostics;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// The sharing combination programs (<c>tests/SharingCombos</c>): a Work and the main task update a count through
 /// a handle stored into something they share, over every store site, destination and stored value, built in debug
 /// mode with ThreadSanitizer on and the sharing check on. Heavy (about 170 builds), so it runs only when the
-/// environment variable <c>SF_SHARING_COMBOS</c> names a scratch folder to build in.
+/// environment variable <c>MI_SHARING_COMBOS</c> names a scratch folder to build in.
 /// </summary>
 public sealed class SharingCombinationTests
 {
     [Fact]
     public void EveryCombination_CountsRight()
     {
-        string? work = Environment.GetEnvironmentVariable(variable: "SF_SHARING_COMBOS");
+        string? work = Environment.GetEnvironmentVariable(variable: "MI_SHARING_COMBOS");
         if (string.IsNullOrWhiteSpace(value: work))
         {
             return;

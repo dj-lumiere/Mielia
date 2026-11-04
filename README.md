@@ -1,13 +1,13 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="branding/suflae-dark.svg">
-    <img src="branding/suflae.svg" alt="Suflae logo" width="112">
+    <source media="(prefers-color-scheme: dark)" srcset="branding/mielia-dark.svg">
+    <img src="branding/mielia.svg" alt="Mielia logo" width="112">
   </picture>
 </p>
 
-<h1 align="center">Suflae</h1>
+<h1 align="center">Mielia</h1>
 
-<p align="center"><strong>Make programming sweet again.</strong></p>
+<p align="center"><strong>Sweet to write, sure to run.</strong></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.5.0-informational.svg" alt="Version 0.5.0">
@@ -16,18 +16,18 @@
 </p>
 
 <p align="center">
-  <a href="https://suflae.lumi-dev.xyz/">Documentation</a> ·
+  <a href="https://mielia.lumi-dev.xyz/">Documentation</a> ·
   <a href="#quick-start">Quick start</a> ·
-  <a href="SUFLAE-FOR-AI.md">Reference for AI assistants</a> ·
+  <a href="MIELIA-FOR-AI.md">Reference for AI assistants</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
-Suflae (`.sf`) is a natively compiled language for building applications without managing memory by
-hand. It is the sibling of [RazorForge](https://github.com/dj-lumiere/RazorForge): the same grammar,
+Mielia (`.mi`) is a natively compiled language for building applications without managing memory by
+hand. It is the sibling of [Revare](https://github.com/dj-lumiere/Revare): the same grammar,
 the same standard library, the same loud failures, and every entity shared for you. A file
-can be just its statements, and running it is one command: `suflae run hello.sf`.
+can be just its statements, and running it is one command: `mielia run hello.mi`.
 
-```suflae
+```mielia
 import IO/Console
 
 entity Point
@@ -50,9 +50,9 @@ show(0.1 + 0.2 == 0.3)      # true: bare numbers are Int and Decimal
 show(99999999999999999999 * 99999999999999999999)
 ```
 
-> **Early alpha.** Suflae 0.5 is the current version, numbered together with RazorForge. Programs build and run on Windows, Linux, and
-> macOS, and every commit runs the Suflae test suite and its end-to-end programs in CI, several of
-> them locked to produce the same output as their RazorForge twins. APIs will change, and you will
+> **Early alpha.** Mielia 0.5 is the current version, numbered together with Revare. Programs build and run on Windows, Linux, and
+> macOS, and every commit runs the Mielia test suite and its end-to-end programs in CI, several of
+> them locked to produce the same output as their Revare twins. APIs will change, and you will
 > find bugs.
 
 ## What we are trying to keep
@@ -64,7 +64,7 @@ show(99999999999999999999 * 99999999999999999999)
 - **Nothing goes wrong silently.** A failure is loud, a hang is reported, and no work is left running that nobody will
   ever check.
 
-And for Suflae, the joy of having made something.
+And for Mielia, the joy of having made something.
 
 ## What it is like
 
@@ -91,7 +91,7 @@ crashes with a message (exit status 82). `try` or `check` in front of the call r
 or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
 **Nothing unsafe is reachable.** `danger` blocks, `dangerous` routines, raw handles, and `steal` are
-not part of Suflae. Changing a list while a `for` loop walks it is stopped with a clear error: at
+not part of Mielia. Changing a list while a `for` loop walks it is stopped with a clear error: at
 build time when you do it directly, at run time when a called routine does it.
 
 ## Quick start
@@ -99,14 +99,14 @@ build time when you do it directly, at run time when a called routine does it.
 ### 1. Install
 
 Download the package for your platform from the
-[releases page](https://github.com/dj-lumiere/Suflae/releases). Suflae and RazorForge ship in one
-package, so the file name starts with `razorforge-`:
+[releases page](https://github.com/dj-lumiere/Mielia/releases). Mielia and Revare ship in one
+package, so the file name starts with `revare-`:
 
 | Platform              | File                                 |
 |-----------------------|--------------------------------------|
-| Windows x64           | `razorforge-v<version>-win-x64.zip`    |
-| Linux x64             | `razorforge-v<version>-linux-x64.tar.gz` |
-| macOS (Apple Silicon) | `razorforge-v<version>-osx-arm64.tar.gz` |
+| Windows x64           | `revare-v<version>-win-x64.zip`    |
+| Linux x64             | `revare-v<version>-linux-x64.tar.gz` |
+| macOS (Apple Silicon) | `revare-v<version>-osx-arm64.tar.gz` |
 
 The package is self-contained: the builder, the standard library, the runtime, and the LLVM
 toolchain are all inside it. Unpack it anywhere and run the installer from that folder:
@@ -124,10 +124,10 @@ install.cmd
 Open a new terminal and check that it works:
 
 ```bash
-suflae version
+mielia version
 ```
 
-The short alias `sf` works as well.
+The short alias `mi` works as well.
 
 > **Linux:** linking needs the C library's development files. Most machines have them. Otherwise
 > install `libc6-dev` (Debian/Ubuntu) or `glibc-devel` (Fedora) once.
@@ -138,101 +138,101 @@ The short alias `sf` works as well.
 
 ### 2. Hello, world
 
-```suflae
-# hello.sf
+```mielia
+# hello.mi
 import IO/Console
 
-show("Hello from Suflae!")
+show("Hello from Mielia!")
 ```
 
 ```bash
-suflae run hello.sf
+mielia run hello.mi
 ```
 
-`run` builds the file and runs it. `suflae build hello.sf` stops after building
+`run` builds the file and runs it. `mielia build hello.mi` stops after building
 and leaves `hello.exe` next to the source.
 
 ### Using an AI assistant?
 
-Suflae is not in any model's training data yet, so assistants tend to guess Python-flavored syntax
-that does not build. Point yours at [`SUFLAE-FOR-AI.md`](SUFLAE-FOR-AI.md) together with
-[`RAZORFORGE-FOR-AI.md`](https://github.com/dj-lumiere/RazorForge/blob/master/RAZORFORGE-FOR-AI.md)
+Mielia is not in any model's training data yet, so assistants tend to guess Python-flavored syntax
+that does not build. Point yours at [`MIELIA-FOR-AI.md`](MIELIA-FOR-AI.md) together with
+[`REVARE-FOR-AI.md`](https://github.com/dj-lumiere/Revare/blob/master/REVARE-FOR-AI.md)
 (the shared grammar). Both ship in every release package. The CI-verified programs in
-[`tests/Fixtures/StdlibSf/`](tests/Fixtures/StdlibSf/) make good starting points.
+[`tests/Fixtures/StdlibMi/`](tests/Fixtures/StdlibMi/) make good starting points.
 
 ## Command line
 
 ```
-suflae new [folder]                    Start a project (config.toml, main.sf, editor files)
-suflae migrate [--check] <paths>...    Move sources from the previous release to this one
-suflae check [--json] [entry-file]     Check the program without building it
-suflae build [entry-file]              Build a native executable for this OS (no run)
-suflae run [entry-file]                Build the program and run it
-suflae test <dir-or-file>...           Run test programs against their expected output
-suflae fmt [--check] <file-or-dir>...  Format sources in place
-suflae lint <file-or-dir>...           Report code that is not in the canonical style
-suflae docs <source-dir> <output-dir>  Write the API reference pages of a library
-suflae lsp                             Run the language server (for an editor)
-suflae help | version
+mielia new [folder]                    Start a project (config.toml, main.mi, editor files)
+mielia migrate [--check] <paths>...    Move sources from the previous release to this one
+mielia check [--json] [entry-file]     Check the program without building it
+mielia build [entry-file]              Build a native executable for this OS (no run)
+mielia run [entry-file]                Build the program and run it
+mielia test <dir-or-file>...           Run test programs against their expected output
+mielia fmt [--check] <file-or-dir>...  Format sources in place
+mielia lint <file-or-dir>...           Report code that is not in the canonical style
+mielia docs <source-dir> <output-dir>  Write the API reference pages of a library
+mielia lsp                             Run the language server (for an editor)
+mielia help | version
 ```
 
 There are no build flags. A solution is configured in a `config.toml` manifest, the same one
-RazorForge uses (see the
-[RazorForge README](https://github.com/dj-lumiere/RazorForge#command-line)), and the standard library
-is found next to the `suflae` executable, so a `.sf` file anywhere on disk builds.
+Revare uses (see the
+[Revare README](https://github.com/dj-lumiere/Revare#command-line)), and the standard library
+is found next to the `mielia` executable, so a `.mi` file anywhere on disk builds.
 
-## Mixing with RazorForge
+## Mixing with Revare
 
-A `.sf` file can `import` a RazorForge module and use its types and routines directly. An entity
-that comes from RazorForge keeps RazorForge's rules for sharing: you can use it freely as a local or
-a field, and to pass one across a Suflae routine's signature you share it through a `Retained[T]`. This is how a Suflae program reaches lower-level code written in RazorForge.
+A `.mi` file can `import` a Revare module and use its types and routines directly. An entity
+that comes from Revare keeps Revare's rules for sharing: you can use it freely as a local or
+a field, and to pass one across a Mielia routine's signature you share it through a `Retained[T]`. This is how a Mielia program reaches lower-level code written in Revare.
 
 ## Not there yet
 
 The REPL and hot reload are planned and not implemented (runtime reflection is `import ObjectHacker`). Async networking is
-missing in both languages. See the status note at the end of [`SUFLAE-FOR-AI.md`](SUFLAE-FOR-AI.md)
+missing in both languages. See the status note at the end of [`MIELIA-FOR-AI.md`](MIELIA-FOR-AI.md)
 for the current state.
 
 ## Documentation
 
-The documentation lives at [suflae.lumi-dev.xyz](https://suflae.lumi-dev.xyz/):
+The documentation lives at [mielia.lumi-dev.xyz](https://mielia.lumi-dev.xyz/):
 
-- [Hello World](https://suflae.lumi-dev.xyz/Hello-World) ·
-  [Entities](https://suflae.lumi-dev.xyz/Entities) ·
-  [Numeric Types](https://suflae.lumi-dev.xyz/Numeric-Types)
-- [Error Handling](https://suflae.lumi-dev.xyz/Error-Handling) ·
-  [Collections](https://suflae.lumi-dev.xyz/Collections) ·
-  [Concurrency Model](https://suflae.lumi-dev.xyz/Concurrency-Model)
-- [Choosing a Language](https://suflae.lumi-dev.xyz/Choosing-Language) ·
-  [RazorForge Interop](https://suflae.lumi-dev.xyz/RazorForge-Interop) ·
-  [Design Philosophy](https://suflae.lumi-dev.xyz/Design-Philosophy)
+- [Hello World](https://mielia.lumi-dev.xyz/Hello-World) ·
+  [Entities](https://mielia.lumi-dev.xyz/Entities) ·
+  [Numeric Types](https://mielia.lumi-dev.xyz/Numeric-Types)
+- [Error Handling](https://mielia.lumi-dev.xyz/Error-Handling) ·
+  [Collections](https://mielia.lumi-dev.xyz/Collections) ·
+  [Concurrency Model](https://mielia.lumi-dev.xyz/Concurrency-Model)
+- [Choosing a Language](https://mielia.lumi-dev.xyz/Choosing-Language) ·
+  [Revare Interop](https://mielia.lumi-dev.xyz/Revare-Interop) ·
+  [Design Philosophy](https://mielia.lumi-dev.xyz/Design-Philosophy)
 
 ## This repository
 
 ```
-Suflae/
+Mielia/
 ├── src/
-│   ├── Lexer/             # The Suflae lexer
-│   ├── Passes/            # Suflae-only lowering: shared entities, module globals, loop shape checks
-│   └── SuflaeCli.cs       # The `suflae` command line
-├── tests/                 # Suflae.Tests: unit tests and end-to-end fixtures
-│   └── Fixtures/StdlibSf/ #   programs with expected output
-├── Suflae.tmbundle/       # TextMate grammar
-└── SUFLAE-FOR-AI.md       # Reference for AI assistants
+│   ├── Lexer/             # The Mielia lexer
+│   ├── Passes/            # Mielia-only lowering: shared entities, module globals, loop shape checks
+│   └── MieliaCli.cs       # The `mielia` command line
+├── tests/                 # Mielia.Tests: unit tests and end-to-end fixtures
+│   └── Fixtures/StdlibMi/ #   programs with expected output
+├── Mielia.tmbundle/       # TextMate grammar
+└── MIELIA-FOR-AI.md       # Reference for AI assistants
 ```
 
 The builder itself is [Anvila](https://github.com/dj-lumiere/Anvila), the standard library lives in
-[RazorForge](https://github.com/dj-lumiere/RazorForge/tree/master/Standard), and the shared library
+[Revare](https://github.com/dj-lumiere/Revare/tree/master/Standard), and the shared library
 under it is [Ingrid](https://github.com/dj-lumiere/Ingrid).
 
 ## Building from source
 
-You only need this to work on the builder or the standard library. Suflae is built from five
+You only need this to work on the builder or the standard library. Mielia is built from five
 repositories checked out side by side: the builder core
 ([Anvila](https://github.com/dj-lumiere/Anvila)), the shared library
-([Ingrid](https://github.com/dj-lumiere/Ingrid)), [RazorForge](https://github.com/dj-lumiere/RazorForge)
-(whose standard library Suflae uses), this repository, and
-[Tessera](https://github.com/dj-lumiere/Tessera), whose builder compiles part of the native runtime.
+([Ingrid](https://github.com/dj-lumiere/Ingrid)), [Revare](https://github.com/dj-lumiere/Revare)
+(whose standard library Mielia uses), this repository, and
+[Lapila](https://github.com/dj-lumiere/Lapila), whose builder compiles part of the native runtime.
 
 You need the .NET 10 SDK, LLVM 22 (`clang` and `opt` on `PATH`), CMake 3.20+, and Ninja on Windows.
 
@@ -240,20 +240,20 @@ You need the .NET 10 SDK, LLVM 22 (`clang` and `opt` on `PATH`), CMake 3.20+, an
 mkdir LumiFoundry && cd LumiFoundry
 git clone https://github.com/dj-lumiere/Anvila.git
 git clone https://github.com/dj-lumiere/Ingrid.git
-git clone https://github.com/dj-lumiere/RazorForge.git
-git clone https://github.com/dj-lumiere/Suflae.git
-git clone https://github.com/dj-lumiere/Tessera.git
+git clone https://github.com/dj-lumiere/Revare.git
+git clone https://github.com/dj-lumiere/Mielia.git
+git clone https://github.com/dj-lumiere/Lapila.git
 
-dotnet build Suflae/Suflae.csproj                # also builds the native runtime
-dotnet test Suflae/tests/Suflae.Tests.csproj     # optional
+dotnet build Mielia/Mielia.csproj                # also builds the native runtime
+dotnet test Mielia/tests/Mielia.Tests.csproj     # optional
 ```
 
-The built command is `Suflae/bin/Debug/net10.0/Suflae` (`Suflae.exe` on Windows).
+The built command is `Mielia/bin/Debug/net10.0/Mielia` (`Mielia.exe` on Windows).
 
 ## Contributing
 
 Bug reports, feature suggestions, documentation fixes, and code are all welcome. Report bugs at
-[github.com/dj-lumiere/Suflae/issues](https://github.com/dj-lumiere/Suflae/issues).
+[github.com/dj-lumiere/Mielia/issues](https://github.com/dj-lumiere/Mielia/issues).
 
 ## License
 

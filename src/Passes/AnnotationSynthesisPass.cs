@@ -4,10 +4,10 @@ using Builder.Desugaring;
 using SyntaxTree;
 using TypeModel.Enums;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
-/// Gives a Suflae program's own annotations their effect, on the user programs before analysis. An annotation is a
+/// Gives a Mielia program's own annotations their effect, on the user programs before analysis. An annotation is a
 /// record that obeys <c>Annotation</c> (ObjectHacker's), written on a routine, a record or an entity with the
 /// record's name: <c>@Memoize(limit: 100)</c>. Two routines of the record do the work, and either may be missing:
 /// <list type="bullet">
@@ -146,7 +146,7 @@ internal static class AnnotationSynthesisPass
         foreach (string annotation in annotations ?? [])
         {
             string name = Builder.Parser.Parser.AnnotationName(annotation: annotation);
-            if (!Builder.Parser.Parser.IsProgramAnnotation(name: name, language: Language.Suflae))
+            if (!Builder.Parser.Parser.IsProgramAnnotation(name: name, language: Language.Mielia))
             {
                 continue;
             }
@@ -300,7 +300,7 @@ internal static class AnnotationSynthesisPass
             Annotations = routine.Annotations.Where(predicate: a =>
                                        !Builder.Parser.Parser.IsProgramAnnotation(
                                            name: Builder.Parser.Parser.AnnotationName(annotation: a),
-                                           language: Language.Suflae))
+                                           language: Language.Mielia))
                                   .ToList(),
             Visibility = VisibilityModifier.Secret
         };
@@ -393,8 +393,8 @@ internal static class AnnotationSynthesisPass
         string text = new string(c: '\n', count: Math.Max(val1: 0, val2: line - 2)) +
                       $"routine reflected_written()\n{source}";
         List<Builder.Tokenizer.Token> tokens =
-            Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Suflae);
-        var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Suflae, fileName: filePath)
+            Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Mielia);
+        var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Mielia, fileName: filePath)
         {
             PrintsErrors = false
         };

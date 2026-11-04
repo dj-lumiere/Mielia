@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -10,11 +10,11 @@ using static TestHelpers;
 /// </summary>
 public class LibrarySecretTests
 {
-    /// <summary>A program naming the library's <c>Places</c> row gets SF-S402.</summary>
+    /// <summary>A program naming the library's <c>Places</c> row gets MI-S402.</summary>
     [Fact]
     public void Analyze_ProgramNamesLibrarySecretType_Fails()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        routine start()
                                            var p = Places[S64](capacity: 4)
                                            return

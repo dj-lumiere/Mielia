@@ -4,10 +4,10 @@ using Builder.Lowering.Passes;
 using SyntaxTree;
 using TypeModel.Types;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
-/// Routes every Suflae module-level <c>global</c> through the hidden per-program
+/// Routes every Mielia module-level <c>global</c> through the hidden per-program
 /// <c>__ModuleGlobals</c> entity so the globals become thread-safe: a bare global reference
 /// <c>g</c> (read, write, f-string interpolation, or member-call receiver) is rewritten to
 /// <c>__globals__.g</c> — a field access on the single promoted <c>Roamed[__ModuleGlobals]</c>

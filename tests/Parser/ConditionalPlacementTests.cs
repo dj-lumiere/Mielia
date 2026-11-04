@@ -1,14 +1,14 @@
 using Builder.Diagnostics;
 using SyntaxTree;
 
-namespace Suflae.Tests.Parser;
+namespace Mielia.Tests.Parser;
 
 using static TestHelpers;
 
 /// <summary>
 /// A conditional value <c>if c then a else b</c> stands only as the whole value of <c>var x =</c>, <c>x =</c> or
 /// <c>return</c>. Every other position (inside parentheses, an argument, an operand, a subscript, an f-text slot, a
-/// branch of another conditional, after <c>try</c>/<c>check</c>) is SF-G112 with a message that points at a named
+/// branch of another conditional, after <c>try</c>/<c>check</c>) is MI-G112 with a message that points at a named
 /// value or <c>when</c>.
 /// </summary>
 public sealed class ConditionalPlacementTests
@@ -46,14 +46,14 @@ public sealed class ConditionalPlacementTests
     [InlineData("var x = if c then try f() else 3")]
     public void Parse_TopLevelConditional_Parses(string line)
     {
-        Program program = AssertParsesSuflae(source: Wrap(line: line));
+        Program program = AssertParsesMielia(source: Wrap(line: line));
         Assert.NotNull(@object: program);
     }
 
     [Fact]
     public void Parse_GlobalConditional_Parses()
     {
-        AssertParsesSuflae(source: "global limit: S64 = if true then 4 else 3\n");
+        AssertParsesMielia(source: "global limit: S64 = if true then 4 else 3\n");
     }
 
     private static string Wrap(string line)
@@ -63,7 +63,7 @@ public sealed class ConditionalPlacementTests
 
     private static void AssertRejected(string source, bool recovery)
     {
-        (Program _, Builder.Parser.Parser parser) = ParseSuflaeWithErrors(source: source);
+        (Program _, Builder.Parser.Parser parser) = ParseMieliaWithErrors(source: source);
         GrammarException? error = parser.GetStructuredErrors()
                                         .FirstOrDefault(predicate: e => e.RawMessage.Contains(value: "conditional value"));
         Assert.NotNull(@object: error);
@@ -77,14 +77,14 @@ public sealed class ConditionalPlacementTests
 }
 
 /// <summary>
-/// <c>@noinline</c> is a routine annotation in Suflae too, and together with <c>@inline</c> it is SF-G227.
+/// <c>@noinline</c> is a routine annotation in Mielia too, and together with <c>@inline</c> it is MI-G227.
 /// </summary>
 public sealed class NoinlineAnnotationTests
 {
     [Fact]
     public void Parse_Noinline_IsKept()
     {
-        Program program = AssertParsesSuflae(source: "@noinline\nroutine cold(x: S64) -> S64\n    return x * 3\n");
+        Program program = AssertParsesMielia(source: "@noinline\nroutine cold(x: S64) -> S64\n    return x * 3\n");
         RoutineDeclaration routine = program.Declarations.OfType<RoutineDeclaration>().Single();
         Assert.Contains(expected: "noinline", collection: routine.Annotations);
     }
@@ -93,13 +93,13 @@ public sealed class NoinlineAnnotationTests
     public void Parse_InlineAndNoinline_IsG227()
     {
         (_, Builder.Parser.Parser parser) =
-            ParseSuflaeWithErrors(source: "@inline\n@noinline\nroutine cold(x: S64) -> S64\n    return x * 3\n");
-        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "SF-G227"));
+            ParseMieliaWithErrors(source: "@inline\n@noinline\nroutine cold(x: S64) -> S64\n    return x * 3\n");
+        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "MI-G227"));
     }
 }
 
 /// <summary>
-/// The loop over a range or a collection is <c>for</c>. A loop written with <c>each</c> is SF-G229, whose quick fix
+/// The loop over a range or a collection is <c>for</c>. A loop written with <c>each</c> is MI-G229, whose quick fix
 /// writes <c>for</c>, and the parser reads it as that loop.
 /// </summary>
 public sealed class ForLoopKeywordTests
@@ -107,7 +107,7 @@ public sealed class ForLoopKeywordTests
     [Fact]
     public void Parse_ForLoop_Parses()
     {
-        AssertParsesSuflae(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    for x in xs\n" +
+        AssertParsesMielia(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    for x in xs\n" +
                                    "        sum += x\n    for (i, x) in xs.enumerate()\n        sum += i\n    return sum\n");
     }
 
@@ -115,11 +115,11 @@ public sealed class ForLoopKeywordTests
     public void Parse_EachLoop_IsG229WithForFix()
     {
         (_, Builder.Parser.Parser parser) =
-            ParseSuflaeWithErrors(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    each x in xs\n" +
+            ParseMieliaWithErrors(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    each x in xs\n" +
                                           "        sum += x\n    return sum\n");
         Builder.Diagnostics.GrammarException error = Assert.Single(collection: parser.GetStructuredErrors());
         Assert.Equal(expected: Builder.Diagnostics.GrammarDiagnosticCode.EachKeyword, actual: error.Code);
         Assert.Equal(expected: "for", actual: error.Fix?.Edits[index: 0].NewText);
-        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "SF-G229"));
+        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "MI-G229"));
     }
 }

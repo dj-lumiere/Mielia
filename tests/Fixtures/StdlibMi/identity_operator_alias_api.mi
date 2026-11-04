@@ -1,0 +1,24 @@
+module Tests/StdlibMi/IdentityOperatorAliasApi
+
+import IO/Console
+# Reference identity (=== / !==) in Mielia. Unlike Revare (single-owner entities), MI entities
+# alias freely — `var b = a` shares the SAME entity — so identity has a distinct, first-class use
+# here (like Python's `is`). This fixture is intentionally MI-only (no RA twin): the aliasing
+# behaviour it shows has no Revare equivalent.
+
+entity Cell
+    value: S32
+
+routine start()
+    var a = Cell(value: 1)
+    var b = a
+    var c = Cell(value: 1)
+
+    # a and b are the SAME object (aliased); c is a distinct entity with equal fields.
+    show(f"a === b: {a === b}")
+    show(f"a === c: {a === c}")
+    show(f"a !== c: {a !== c}")
+    show(f"a !== b: {a !== b}")
+
+    show("DONE")
+    return

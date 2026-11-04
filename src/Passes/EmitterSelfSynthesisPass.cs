@@ -2,11 +2,11 @@ using Builder.Diagnostics;
 using SyntaxTree;
 using TypeModel.Enums;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
 /// Walking an emitter goes on from where it is (<c>for n in steps</c> takes the values <c>steps</c> has not handed out
-/// yet). An entity a Suflae program writes that obeys <c>Emitter[T]</c> and writes no <c>emitter()</c> gets one that
+/// yet). An entity a Mielia program writes that obeys <c>Emitter[T]</c> and writes no <c>emitter()</c> gets one that
 /// gives the entity itself: <c>routine Steps.emitter() -> Steps</c> with <c>return me</c>. It is the entity's own
 /// routine, so it takes and gives the entity's handle as the entity's other routines do (its <c>emit</c> among them),
 /// and the walk calls <c>emit</c> on that handle. Run on the user programs before analysis.
@@ -46,8 +46,8 @@ internal static class EmitterSelfSynthesisPass
                     : entity.Name;
                 string source = $"routine {self}.{EmitterRoutineName}() -> {self}\n    return me\n";
                 List<Builder.Tokenizer.Token> tokens = Builder.Tokenizer.Lexers.Tokenize(source: source,
-                    fileName: filePath, language: Language.Suflae);
-                var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Suflae, fileName: filePath)
+                    fileName: filePath, language: Language.Mielia);
+                var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Mielia, fileName: filePath)
                 {
                     PrintsErrors = false
                 };

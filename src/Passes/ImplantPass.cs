@@ -3,7 +3,7 @@ using Builder.Diagnostics;
 using SyntaxTree;
 using TypeModel.Enums;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
 /// ObjectHacker's <c>implant</c>, on the user programs before analysis, in a build that imports ObjectHacker. A member
@@ -217,8 +217,8 @@ internal static class ImplantPass
         string text = new string(c: '\n', count: Math.Max(val1: 0, val2: line - 2)) +
                       $"routine reflected_written()\n{source}";
         List<Builder.Tokenizer.Token> tokens =
-            Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Suflae);
-        var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Suflae, fileName: filePath)
+            Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Mielia);
+        var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Mielia, fileName: filePath)
         {
             PrintsErrors = false
         };

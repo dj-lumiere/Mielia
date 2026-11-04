@@ -1,0 +1,107 @@
+module System
+
+### The probe table under Mielia's `Dict` and `Set`: open addressing over a power-of-two number of slots, each slot
+### holding a tag and the position of its entry in the collection's own entry buffers. The collection keeps its
+### entries in insertion order and asks the table which entry a hash may be.
+###
+### A tag is 0 for a slot never used (so a fresh, zeroed table is empty), 1 for a slot whose entry was removed, and
+### 2 to 129 for a used slot: the low 7 bits of its hash plus 2, which rules most other entries out without
+### comparing keys.
+entity HashIndex
+    ### The tag of every slot.
+    secret tags: Places[U8]
+    ### The entry position of every used slot.
+    secret entries: Places[U64]
+    ### How many slots hold a removed entry's tag.
+    secret removed: U64
+
+### Creates an empty table with enough slots for `capacity` entries.
+### :param capacity: How many entries the table should hold before growing.
+secret routine new_hash_index(capacity: U64) -> HashIndex
+    var slots = hash_index_slots(wanted: capacity)
+    return HashIndex(tags: Places[U8](room: slots), entries: Places[U64](room: slots), removed: 0)
+
+### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
+### :param wanted: The number of entries the table must hold.
+### :returns: The slot count, a power of two.
+secret routine hash_index_slots(wanted: U64) -> U64
+    var slots: U64 = 16
+    until wanted * 8 < slots * 7
+        slots = slots * 2
+    return slots
+
+### The slot a hash starts probing at.
+### :param hash: The hash of a key.
+### :returns: The slot number.
+secret routine HashIndex.home(hash: U64) -> U64
+    return (hash >> 7) & (me.tags.room() - 1)
+
+### The tag a used slot of this hash carries.
+### :param hash: The hash of a key.
+### :returns: The tag, 2 or more.
+secret routine HashIndex.tag_of(hash: U64) -> U8
+    return (hash & 127).to[U8]() +% 2
+
+### The tag of `slot`: 0 never used, 1 removed, else used.
+### :param slot: The slot number in the table.
+### :returns: The tag.
+secret routine HashIndex.tag(slot: U64) -> U8
+    return me.tags.at(position: slot)
+
+### Whether `slot`, where a probe stopped, holds the entry looked for: a probe that finds nothing stops at a slot
+### never used.
+### :param slot: The slot number in the table.
+### :returns: true when the slot is in use.
+secret routine HashIndex.holds(slot: U64) -> Bool
+    return me.tags.at(position: slot) != 0
+
+### The entry position `slot` holds.
+### :param slot: The slot number in the table.
+### :returns: The entry position stored in the slot.
+secret routine HashIndex.entry(slot: U64) -> U64
+    return me.entries.at(position: slot)
+
+### The slot probed after `slot`.
+### :param slot: The slot number in the table.
+### :returns: The next slot, wrapping to the first after the last.
+secret routine HashIndex.next(slot: U64) -> U64
+    return (slot + 1) & (me.tags.room() - 1)
+
+### Records that the entry at `entry` has hash `hash`, in the first free slot of its probe.
+### :param hash: The hash of the key.
+### :param entry: The position of the entry.
+secret routine HashIndex.place(hash: U64, entry: U64)
+    var slot = me.home(hash: hash)
+    loop
+        var tag = me.tags.at(position: slot)
+        if tag <= 1
+            if tag == 1
+                me.removed = me.removed - 1
+            me.tags.put(position: slot, value: me.tag_of(hash: hash))
+            me.entries.put(position: slot, value: entry)
+            return
+        slot = me.next(slot: slot)
+
+### Marks `slot` as holding a removed entry, so probes keep going past it.
+### :param slot: The slot number in the table.
+secret routine HashIndex.retire(slot: U64)
+    me.tags.put(position: slot, value: 1)
+    me.removed = me.removed + 1
+    return
+
+### Whether a table holding `count` entries is too full to take another.
+### :param count: The number of live entries.
+### :returns: true when one more entry would fill the table past 7/8.
+secret routine HashIndex.crowded(count: U64) -> Bool
+    return (count + me.removed + 1) * 8 >= me.tags.room() * 7
+
+### Empties the table, giving it enough slots for `capacity` entries.
+### :param capacity: The number of entries to reserve space for.
+secret routine HashIndex.reset(capacity: U64)
+    var slots = hash_index_slots(wanted: capacity)
+    if slots > me.tags.room()
+        me.tags.grow_to(room: slots)
+        me.entries.grow_to(room: slots)
+    me.tags.fill(value: 0)
+    me.removed = 0
+    return

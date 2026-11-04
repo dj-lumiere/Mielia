@@ -1,12 +1,12 @@
 using SyntaxTree;
 
-namespace Suflae.Tests.Parser;
+namespace Mielia.Tests.Parser;
 
 using static TestHelpers;
 
 /// <summary>
 /// A member routine named with a keyword (<c>for</c>) is a grammar error that says the word is a keyword, in the
-/// declaration and at the call, the same as in RazorForge.
+/// declaration and at the call, the same as in Revare.
 /// </summary>
 public sealed class KeywordNameTests
 {
@@ -27,7 +27,7 @@ public sealed class KeywordNameTests
                             return
                         """;
 
-        (Program _, Builder.Parser.Parser parser) = ParseSuflaeWithErrors(source: source);
+        (Program _, Builder.Parser.Parser parser) = ParseMieliaWithErrors(source: source);
         List<string> messages = parser.GetStructuredErrors().Select(selector: e => e.Message).ToList();
         Assert.Equal(expected: 2, actual: messages.Count);
         Assert.All(collection: messages,

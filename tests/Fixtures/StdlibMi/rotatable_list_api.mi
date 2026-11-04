@@ -1,0 +1,86 @@
+module Tests/StdlibMi/RotatableListApi
+
+import IO/Console
+import Collections
+import ObjectHacker
+
+# A RotatableList keeps its elements in a ring: it is a queue and a deque, rotates, and keeps a fixed-size latest-N
+# history. A List keeps them from the first place on, so it adds and removes at its front by moving the rest.
+
+entity Box
+    id: Int
+
+routine start()
+    var xs = RotatableList[Int](capacity: 4)
+    xs.add_last(value: 2)
+    xs.add_last(value: 3)
+    xs.add_first(value: 1)
+    xs.add_first(value: 0)
+    show(f"both ends: {xs} count={xs.count()} capacity={xs.capacity()}")
+    show(f"removed: {xs.remove_first()} {xs.remove_last()} left {xs}")
+    xs.add_last(value: 4)
+    xs.add_last(value: 5)
+    show(f"wrapped: {xs} xs[3]={xs[3]}")
+    xs.add_at(index: 1, value: 9)
+    show(f"inserted: {xs} capacity={xs.capacity()}")
+    show(f"removed at 2: {xs.remove_at(index: 2)} left {xs}")
+    xs.add_first(value: -1)
+    xs.rotate_left(n: 2)
+    show(f"rotated left: {xs}")
+    xs.rotate_right(n: 3)
+    show(f"rotated right: {xs}")
+    xs.sort()
+    show(f"sorted: {xs} first={xs.first()} last={xs.last()}")
+    xs.reverse_in_place()
+    show(f"reversed: {xs}")
+
+    var history = RotatableList[Text](capacity: 3)
+    for word in ["a", "b", "c", "d", "e"]
+        history.add_last_keeping(value: word, keeping: 3)
+    show(f"history: {history} capacity={history.capacity()}")
+    history.keep_first(n: 2)
+    show(f"kept first: {history}")
+    history.clear()
+    show(f"cleared: {history} empty={history.is_empty()}")
+
+    var queue = RotatableList[Int]()
+    var i = 0
+    until i >= 10
+        queue.add_last(value: i)
+        if i % 3 == 2
+            queue.remove_first()
+        i = i + 1
+    var total = 0
+    for n in queue
+        total = total + n
+    show(f"queue: {queue} total={total} have 7: {queue.has(7)}")
+    show(f"copy equal: {queue.duplicate() == queue} slice: {queue[1 til 3]}")
+
+    var box = Box(id: 1)
+    var seen = watch(target: box)
+    var boxes = RotatableList[Box]()
+    boxes.add_last(value: box)
+    boxes.add_first(value: box)
+    boxes.add_at(index: 1, value: box)
+    boxes.rotate_left(n: 1)
+    boxes.remove_first()
+    boxes.truncate(new_count: 1)
+    box = Box(id: 0)
+    boxes = RotatableList[Box]()
+    show(f"released: {not seen.is_alive()}")
+
+    var empty = RotatableList[Int]()
+    var removed = try empty.remove_first()
+    show(f"empty remove: {removed is None}")
+
+    var words: RotatableList[Text] = ["alpha", "beta", "gamma"]
+    words.rotate_left(n: 1)
+    words.swap(first: 0, second: 2)
+    show(f"swap: {words}")
+    var plain = [3, 4, 5]
+    plain.add_first(value: 2)
+    var front = plain.remove_first()
+    plain.add_at(index: 1, value: 9)
+    show(f"list: {plain} front={front} removed={plain.remove_at(index: 0)} left {plain} capacity={plain.capacity()}")
+    show("DONE")
+    return

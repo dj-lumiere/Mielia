@@ -1,0 +1,287 @@
+module System/Numerics
+
+# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A finite-only canonical software decimal128 value (shares D128's i128 BID storage).
+@ra("Decimal")
+record Decimal
+obeys Numeric, Comparable, Copyable, Hashable
+    nothing
+
+### Views this Decimal as its underlying `D128` (bit-for-bit; a Decimal is always finite).
+### :param x: The Decimal to view.
+### :returns: The same bits as a D128.
+@ra("dec_to_d128")
+routine dec_to_d128(x: Decimal) -> D128
+
+### Wraps a finite `D128` as a Decimal in its one form: trailing zeros of the coefficient stripped, a zero +0 (the
+### caller guarantees finiteness).
+### :param x: A finite D128.
+### :returns: The Decimal.
+@ra("dec_of_d128")
+routine dec_of_d128(x: D128) -> Decimal
+
+### Crashes if `d` is non-finite, else wraps it as a Decimal. The single guard that keeps
+### Decimal finite-only on every conversion from a possibly infinite/NaN source.
+### :param d: The D128 to wrap.
+### :returns: The Decimal.
+### :throws: {NumericOverflowError} if `d` is +-infinity; {NumericDomainError} if `d` is NaN.
+@ra("dec_of_d128_finite")
+routine dec_of_d128_finite(d: D128) -> Decimal
+
+### Returns the raw i128 BID storage of this value.
+@ra("Decimal.to_bits")
+routine Decimal.to_bits() -> U128
+
+### Reads a raw U128 as a Decimal in its one form (assumes a valid finite BID encoding).
+### :param bits: The bit pattern.
+### :returns: The value with exactly those bits.
+@ra("Decimal.from_bits")
+common routine Decimal.from_bits(bits: U128) -> Decimal
+
+### Returns the raw 16 bytes of this value in little-endian order.
+@ra("Decimal.to_bytes_le")
+routine Decimal.to_bytes_le() -> Items[Byte, 16]
+
+### Returns the raw 16 bytes of this value in big-endian order.
+@ra("Decimal.to_bytes_be")
+routine Decimal.to_bytes_be() -> Items[Byte, 16]
+
+### Builds a Decimal from a sign + U128 coefficient at the given exponent (rounds to <= 34 digits).
+### :param sign: `true` for a negative value.
+### :param coeff: The integer coefficient.
+### :param exp: The power of ten.
+### :returns: The value (-1)^sign * coeff * 10^exp, rounded if the coefficient has too many digits.
+@ra("Decimal.from_components")
+common routine Decimal.from_components(sign: Bool, coeff: U128, exp: S64) -> Decimal
+
+### True when this is a finite value (always true for a Decimal built through the normal paths).
+@ra("Decimal.is_finite")
+routine Decimal.is_finite() -> Bool
+
+### True when this is +-infinity (never true through the normal paths).
+@ra("Decimal.is_infinite")
+routine Decimal.is_infinite() -> Bool
+
+### True when this is NaN (never true through the normal paths).
+@ra("Decimal.is_nan")
+routine Decimal.is_nan() -> Bool
+
+### Three-way comparison under IEEE ordered semantics (delegated to D128).
+### :param you: The value to compare against.
+### :returns: Whether `me` is smaller than, equal to, or larger than `you`.
+@ra("Decimal.compare")
+routine Decimal.compare(you: Decimal) -> ComparisonSign
+
+### Value equality (delegated to D128): `1.0` and `1.00` are equal (and are the same bits).
+### :param you: The value to compare against.
+### :returns: `true` if the two compare equal.
+@ra("Decimal.eq")
+routine Decimal.eq(you: Decimal) -> Bool
+
+### Returns a SipHash-2-4 keyed hash of the bits. A Decimal has one form, so equal values hash equal.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@ra("Decimal.hash")
+routine Decimal.hash(k0: U64, k1: U64) -> U64
+
+### Returns `me * you`, exactly.
+### :param you: The factor to multiply by.
+### :returns: `me * you`.
+### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.
+@ra("Decimal.mul")
+routine Decimal.mul(you: Decimal) -> Decimal
+
+### Returns `me + you`, exactly.
+### :param you: The value to add.
+### :returns: `me + you`.
+### :throws: {NumericOverflowError} when the exact sum needs more than 34 significant digits.
+@ra("Decimal.add")
+routine Decimal.add(you: Decimal) -> Decimal
+
+### Returns `me - you`, exactly.
+### :param you: The value to subtract.
+### :returns: `me - you`.
+### :throws: {NumericOverflowError} when the exact difference needs more than 34 significant digits.
+@ra("Decimal.sub")
+routine Decimal.sub(you: Decimal) -> Decimal
+
+### Returns `me / you`.
+### :param you: The divisor.
+### :returns: `me / you`.
+@ra("Decimal.truediv")
+routine Decimal.truediv(you: Decimal) -> Decimal
+
+### Returns `me + you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `+` fails past 34 digits, this rounds.
+### :param you: The number added.
+### :param rule: How the digits past the 34th go.
+### :returns: The rounded sum.
+### :throws: {NumericOverflowError} when the rounded sum is past the range of a Decimal.
+@ra("Decimal.add_round")
+routine Decimal.add_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+
+### Returns `me - you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `-` fails past 34 digits, this rounds.
+### :param you: The number taken away.
+### :param rule: How the digits past the 34th go.
+### :returns: The rounded difference.
+### :throws: {NumericOverflowError} when the rounded difference is past the range of a Decimal.
+@ra("Decimal.sub_round")
+routine Decimal.sub_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+
+### Returns `me * you` computed exactly, then rounded once, by `rule` (half up when left out), to the nearest value of 34
+### significant digits. Where `*` fails past 34 digits, this rounds.
+### :param you: The other factor.
+### :param rule: How the digits past the 34th go.
+### :returns: The rounded product.
+### :throws: {NumericOverflowError} when the rounded product is past the range of a Decimal.
+@ra("Decimal.mul_round")
+routine Decimal.mul_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+
+### Returns `me / you` rounded once, by `rule` (half up when left out), to the nearest value of 34 significant digits:
+### `1.div_round(3)` is `0.3333333333333333333333333333333333`.
+### :param you: The divisor.
+### :param rule: How the digits past the 34th go.
+### :returns: The rounded quotient.
+### :throws: {DivisionByZeroError} when `you` is zero; {NumericOverflowError} when the quotient is past the range of a Decimal.
+@ra("Decimal.div_round")
+routine Decimal.div_round(you: Decimal, rule: RoundingRule = RoundingRule.HALF_UP) -> Decimal
+
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
+@ra("Decimal.min")
+routine Decimal.min(you: Decimal) -> Decimal
+
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
+@ra("Decimal.max")
+routine Decimal.max(you: Decimal) -> Decimal
+
+### Restricts `me` to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound.
+### :param max_val: The upper bound.
+### :returns: The clamped value.
+@ra("Decimal.clamp")
+routine Decimal.clamp(min_val: Decimal, max_val: Decimal) -> Decimal
+
+### Returns the reciprocal `1 / me`. Crashes if `me` is zero (no finite inverse), as for all
+### `Decimal` arithmetic.
+### :returns: The multiplicative inverse.
+@ra("Decimal.recip")
+routine Decimal.recip() -> Decimal
+
+### Returns `(me + you) / 2`, rounded once to 34 digits (a tie half up): the sum is not rounded on its own, so the
+### midpoint of two Decimals is always a Decimal.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@ra("Decimal.midpoint")
+routine Decimal.midpoint(you: Decimal) -> Decimal
+
+### Returns the canonical decimal text of this value. Fractional trailing zeros (exponent < 0)
+### are stripped up toward exponent 0 so equal values render identically (2.50 -> "2.5", 1.230 ->
+### "1.23"), while integers (exponent >= 0) keep their zeros (100 -> "100"). The stripped parts are
+### then formatted by the shared D128 formatter.
+@ra("Decimal.represent")
+routine Decimal.represent() -> Text
+
+### Returns a debug rendering of this value, e.g. `Decimal(3.5)`. Mirrors the D32/D64/D128 surface.
+@ra("Decimal.diagnose")
+routine Decimal.diagnose() -> Text
+
+### Parses a decimal literal into a Decimal.
+### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
+@ra("Text.to")
+routine Text.to[Decimal]() -> Decimal
+
+### S8 -> Decimal.
+@ra("S8.to")
+routine S8.to[Decimal]() -> Decimal
+
+### S16 -> Decimal.
+@ra("S16.to")
+routine S16.to[Decimal]() -> Decimal
+
+### S32 -> Decimal.
+@ra("S32.to")
+routine S32.to[Decimal]() -> Decimal
+
+### S64 -> Decimal.
+@ra("S64.to")
+routine S64.to[Decimal]() -> Decimal
+
+### S128 -> Decimal.
+@ra("S128.to")
+routine S128.to[Decimal]() -> Decimal
+
+### S256 -> Decimal (rounds half up when the magnitude exceeds 34 digits).
+@ra("S256.to")
+routine S256.to[Decimal]() -> Decimal
+
+### U8 -> Decimal.
+@ra("U8.to")
+routine U8.to[Decimal]() -> Decimal
+
+### U16 -> Decimal.
+@ra("U16.to")
+routine U16.to[Decimal]() -> Decimal
+
+### U32 -> Decimal.
+@ra("U32.to")
+routine U32.to[Decimal]() -> Decimal
+
+### U64 -> Decimal.
+@ra("U64.to")
+routine U64.to[Decimal]() -> Decimal
+
+### U128 -> Decimal.
+@ra("U128.to")
+routine U128.to[Decimal]() -> Decimal
+
+### U256 -> Decimal (rounds half up when the magnitude exceeds 34 digits).
+@ra("U256.to")
+routine U256.to[Decimal]() -> Decimal
+
+### B16 -> Decimal (correctly rounded half up, crashes if the value is non-finite).
+@ra("B16.to")
+routine B16.to[Decimal]() -> Decimal
+
+### B32 -> Decimal (correctly rounded half up, crashes if the value is non-finite).
+@ra("B32.to")
+routine B32.to[Decimal]() -> Decimal
+
+### B64 -> Decimal (correctly rounded half up, crashes if the value is non-finite).
+@ra("B64.to")
+routine B64.to[Decimal]() -> Decimal
+
+### Converts a `Decimal` to the nearest `B32`.
+### :returns: The `B32` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
+@ra("Decimal.to")
+routine Decimal.to[B32]() -> B32
+
+### Converts a `Decimal` to the nearest `B64`.
+### :returns: The `B64` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
+@ra("Decimal.to")
+routine Decimal.to[B64]() -> B64
+
+### B128 -> Decimal (correctly rounded half up, crashes if the value is non-finite).
+@ra("B128.to")
+routine B128.to[Decimal]() -> Decimal
+
+### D32 -> Decimal (exact widen; crashes if the value is non-finite).
+@ra("D32.to")
+routine D32.to[Decimal]() -> Decimal
+
+### D64 -> Decimal (exact widen; crashes if the value is non-finite).
+@ra("D64.to")
+routine D64.to[Decimal]() -> Decimal
+
+### D128 -> Decimal (bit-for-bit; crashes if the value is non-finite).
+@ra("D128.to")
+routine D128.to[Decimal]() -> Decimal

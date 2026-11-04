@@ -1,5 +1,5 @@
 {
-  "name": "suflae",
+  "name": "mielia",
   "displayName": "%displayName%",
   "description": "%description%",
   "version": "0.1.0",
@@ -17,26 +17,26 @@
   "contributes": {
     "languages": [
       {
-        "id": "suflae",
+        "id": "mielia",
         "aliases": [
-          "Suflae",
-          "suflae"
+          "Mielia",
+          "mielia"
         ],
         "extensions": [
-          ".sf"
+          ".mi"
         ],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "./icons/suflae.svg",
-          "dark": "./icons/suflae.svg"
+          "light": "./icons/mielia.svg",
+          "dark": "./icons/mielia.svg"
         }
       }
     ],
     "grammars": [
       {
-        "language": "suflae",
-        "scopeName": "source.sf",
-        "path": "./syntaxes/Suflae.tmLanguage.json"
+        "language": "mielia",
+        "scopeName": "source.mi",
+        "path": "./syntaxes/Mielia.tmLanguage.json"
       }
     ],
     "semanticTokenTypes": [
@@ -73,7 +73,7 @@
     ],
     "semanticTokenScopes": [
       {
-        "language": "suflae",
+        "language": "mielia",
         "scopes": {
           "type": [
             "entity.name.type"
@@ -99,25 +99,25 @@
       }
     ],
     "configurationDefaults": {
-      "[suflae]": {
+      "[mielia]": {
         "editor.semanticHighlighting.enabled": true
       },
       "editor.semanticTokenColorCustomizations": {
         "rules": {
-          "decorator:suflae": "#E5C07B",
-          "interface:suflae": {
+          "decorator:mielia": "#E5C07B",
+          "interface:mielia": {
             "foreground": "#8CCBFF",
             "fontStyle": "italic"
           },
-          "recordType:suflae": "#4EC9B0",
-          "entityType:suflae": "#5CB2FF"
+          "recordType:mielia": "#4EC9B0",
+          "entityType:mielia": "#5CB2FF"
         }
       }
     },
     "configuration": {
-      "title": "Suflae",
+      "title": "Mielia",
       "properties": {
-        "suflae.serverPath": {
+        "mielia.serverPath": {
           "type": "string",
           "default": "",
           "markdownDescription": "%setting.path%"
@@ -126,68 +126,68 @@
     },
     "commands": [
       {
-        "command": "suflae.restartServer",
+        "command": "mielia.restartServer",
         "title": "%command.restart%",
-        "category": "Suflae"
+        "category": "Mielia"
       },
       {
-        "command": "suflae.runFile",
+        "command": "mielia.runFile",
         "title": "%command.runFile%",
-        "category": "Suflae",
+        "category": "Mielia",
         "icon": "$(play)"
       },
       {
-        "command": "suflae.runFolder",
+        "command": "mielia.runFolder",
         "title": "%command.runFolder%",
-        "category": "Suflae",
+        "category": "Mielia",
         "icon": "$(run-all)"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "suflae.runFile",
-          "when": "resourceLangId == suflae",
+          "command": "mielia.runFile",
+          "when": "resourceLangId == mielia",
           "group": "z_commands@1"
         },
         {
-          "command": "suflae.runFolder",
-          "when": "resourceLangId == suflae",
+          "command": "mielia.runFolder",
+          "when": "resourceLangId == mielia",
           "group": "z_commands@2"
         }
       ],
       "explorer/context": [
         {
-          "command": "suflae.runFile",
-          "when": "resourceLangId == suflae",
+          "command": "mielia.runFile",
+          "when": "resourceLangId == mielia",
           "group": "z_commands@1"
         }
       ],
       "editor/title": [
         {
-          "command": "suflae.runFile",
-          "when": "resourceLangId == suflae",
+          "command": "mielia.runFile",
+          "when": "resourceLangId == mielia",
           "group": "navigation@1"
         },
         {
-          "command": "suflae.runFolder",
-          "when": "resourceLangId == suflae",
+          "command": "mielia.runFolder",
+          "when": "resourceLangId == mielia",
           "group": "navigation@2"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "suflae.runFile",
+        "command": "mielia.runFile",
         "key": "ctrl+f5",
         "mac": "cmd+f5",
-        "when": "editorLangId == suflae"
+        "when": "editorLangId == mielia"
       },
       {
-        "command": "suflae.runFolder",
+        "command": "mielia.runFolder",
         "key": "ctrl+shift+f5",
         "mac": "cmd+shift+f5",
-        "when": "editorLangId == suflae"
+        "when": "editorLangId == mielia"
       }
     ]
   },
@@ -195,7 +195,7 @@
     "assets": "node scripts/copy-assets.mjs",
     "compile": "npm run assets && esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license -o dist/suflae.vsix"
+    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license -o dist/mielia.vsix"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"

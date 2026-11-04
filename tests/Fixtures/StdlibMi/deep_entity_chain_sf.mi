@@ -1,0 +1,41 @@
+module Tests/StdlibMi/DeepEntityChainMi
+
+import IO/Console
+
+# A chain of a million entities ends without a nested call per node (the last strong handle of a node ends it, and the
+# node it was the only handle to ends after it, in a loop), and a tree ends too.
+entity Link
+    value: Int
+    next: Link?
+
+entity Cell
+    value: Int
+    left: Cell?
+    right: Cell?
+
+routine chain_of(length: Int) -> Int
+    var head = Link(value: 0, next: none)
+    for i in 1 til length
+        head = Link(value: i, next: head)
+    return head.value
+
+routine build_tree(low: Int, high: Int) -> Cell
+    var middle = (low + high) // 2
+    var left: Cell? = none
+    var right: Cell? = none
+    if low < middle
+        left = build_tree(low: low, high: middle - 1)
+    if middle < high
+        right = build_tree(low: middle + 1, high: high)
+    return Cell(value: middle, left: left, right: right)
+
+routine tree_of(size: Int) -> Int
+    var root = build_tree(low: 1, high: size)
+    return root.value
+
+routine start()
+    show(f"chain head: {chain_of(length: 1000000)}")
+    show(f"short chain head: {chain_of(length: 3)}")
+    show(f"tree root: {tree_of(size: 65535)}")
+    show("DONE")
+    return

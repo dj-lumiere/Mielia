@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -52,11 +52,11 @@ public class CompoundAssignmentTests
     #region Operand type checking
 
     /// <summary>
-    /// A Suflae <c>Int += S64</c> needs an explicit conversion. Unchecked, the emitter passed the raw
+    /// A Mielia <c>Int += S64</c> needs an explicit conversion. Unchecked, the emitter passed the raw
     /// <c>i64</c> where <c>Int.add</c> takes an <c>Int</c> record and the program crashed.
     /// </summary>
     [Fact]
-    public void Analyze_SuflaeIntegerPlusFixedWidthCompoundAssignment_ReportsError()
+    public void Analyze_MieliaIntegerPlusFixedWidthCompoundAssignment_ReportsError()
     {
         string source = """
                         routine accumulate(start_value: Int, v: S64)
@@ -65,7 +65,7 @@ public class CompoundAssignmentTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch);
     }

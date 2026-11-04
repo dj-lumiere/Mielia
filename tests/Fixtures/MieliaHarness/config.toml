@@ -1,0 +1,9 @@
+[package]
+name = "mielia-harness"
+version = "0.0.1"
+revare-version = "0.1.0"
+
+[target]
+executable = "MieliaHarness"
+mode = "debug"
+module_paths = ["../StdlibMi"]

@@ -1,0 +1,73 @@
+module Tests/StdlibMi/PartialItemsApi
+
+import IO/Console
+
+# PartialItems[T, N] holds up to N values in place: the count changes while the program runs, nothing is allocated,
+# and adding when every place holds a value is a failure try and check can receive.
+
+entity Task
+    name: Text
+
+routine start()
+    var p = PartialItems[Int, 4]()
+    show(f"empty={p.is_empty()} count={p.count()} capacity={p.capacity()} full={p.is_full()}")
+    p.add_last(value: 10)
+    p.add_last(value: 20)
+    show(f"{p} first={p.first()} last={p.last()}")
+    p[0] = 7
+    show(f"{p[0]} {p[1]} has20={p.has(20)} lacks5={p.lacks(5)}")
+    for x in p
+        show(f"walk {x}")
+    show(p.diagnose())
+    show(f"removed {p.remove_last()}")
+    show(f"{p}")
+
+    # A copy is its own value.
+    var q = p
+    q.add_last(value: 99)
+    show(f"{p} {q}")
+
+    var out_of_range = check p[3]
+    when out_of_range
+        is Crashables as e => show(e.crash_message())
+        else => show("in range")
+
+    var small = PartialItems[Text, 2]()
+    small.add_last(value: "a")
+    small.add_last(value: "bb")
+    var overflow = check small.add_last(value: "ccc")
+    when overflow
+        is Crashables as e => show(e.crash_message())
+        else => show("added")
+    show(f"{small} full={small.is_full()}")
+    small.clear()
+    show(f"{small} count={small.count()}")
+
+    # add_next takes the steps in the order they run, and remove_last gives them back in that order.
+    var steps = PartialItems[Text, 6]()
+    steps.add_next("first", "second", "third")
+    steps.add_next("a", "b")
+    show(f"{steps}")
+    until steps.is_empty()
+        show(f"run {steps.remove_last()}")
+
+    var stack: List[Int] = [100]
+    stack.add_next(1, 2, 3)
+    show(f"{stack}")
+    until stack.count() == 1
+        show(f"run {stack.remove_last()}")
+
+    # An entity step goes in with a handle of its own, and a full PartialItems is a failure add_next gives.
+    var plan = PartialItems[Task, 2]()
+    plan.add_next(Task(name: "plan"), Task(name: "build"))
+    var tasks = List[Task]()
+    tasks.add_next(Task(name: "x"), Task(name: "y"), Task(name: "z"))
+    show(f"{tasks.remove_last().name} {tasks.remove_last().name} {tasks.remove_last().name}")
+    var over = check plan.add_next(Task(name: "late"))
+    when over
+        is Crashables as e => show(e.crash_message())
+        else => show("added")
+    var first = plan.remove_last()
+    var second = plan.remove_last()
+    show(f"{first.name} {second.name}")
+    return

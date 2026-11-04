@@ -1,20 +1,20 @@
 {
-  "name": "suflae",
-  "displayName": "Suflae",
+  "name": "mielia",
+  "displayName": "Mielia",
   "contributes": {
     "languages": [
       {
-        "id": "suflae",
-        "aliases": ["Suflae", "suflae"],
-        "extensions": [".sf"],
+        "id": "mielia",
+        "aliases": ["Mielia", "mielia"],
+        "extensions": [".mi"],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "suflae",
-        "scopeName": "source.sf",
-        "path": "./syntaxes/Suflae.tmLanguage.json"
+        "language": "mielia",
+        "scopeName": "source.mi",
+        "path": "./syntaxes/Mielia.tmLanguage.json"
       }
     ]
   }

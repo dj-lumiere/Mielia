@@ -1,0 +1,13 @@
+Node (Tests/StdlibMi/ObjectHackerTypeInfoApi.Node) in Tests/StdlibMi/ObjectHackerTypeInfoApi: ENTITY
+  0 value: S64 RECORD
+  1 next: Optional[Node] RECORD
+  next is a Optional[Node]: true
+Point: RECORD, Equatable: true
+Color: CHOICE ["RED", "GREEN", "BLUE"]
+Perm: FLAGS ["READ", "WRITE"]
+Shape: VARIANT
+  arm Point: RECORD
+  arm Text: RECORD
+Int: RECORD
+Comparable: true, Equatable: true
+DONE

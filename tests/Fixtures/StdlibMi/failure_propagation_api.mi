@@ -1,0 +1,55 @@
+module Tests/StdlibMi/FailurePropagationApi
+
+# Every routine passes its failures to its caller: a `try` or `check` above a call receives a failure from any depth
+# below it, through plain calls. An overflowing `+` and an index past the end are failures told apart by their type.
+import EmitterTools
+
+entity Node
+    op: Text
+    value: Int
+    kids: List[Node]
+
+routine leaf(value: Int) -> Node
+    return Node(op: "num", value: value, kids: [])
+
+routine join(op: Text, left: Node, right: Node) -> Node
+    return Node(op: op, value: 0, kids: [left, right])
+
+routine eval(e: Node) -> Int
+    if e.op == "num"
+        return e.value
+    var l = eval(e.kids[0])
+    var r = eval(e.kids[1])
+    if e.op == "div"
+        return l // r
+    return l + r
+
+routine wide(a: S64) -> S64
+    return a + S64_MAX
+
+routine pick(xs: List[Int], i: Int) -> Int
+    return xs[i]
+
+routine apply(f: Callable[(Int,), Int], x: Int) -> Int
+    return f(x)
+
+routine start()
+    var ok = join(op: "add", left: leaf(value: 2), right: leaf(value: 3))
+    var deep = join(op: "add", left: leaf(value: 1), right: join(op: "div", left: leaf(value: 7), right: leaf(value: 0)))
+    show(f"ok: {try eval(ok)}")
+    when check eval(deep)
+        is Int as v => show(f"deep: {v}")
+        is DivisionByZeroError => show("deep: division by zero")
+        is Crashables as e => show(f"deep: {e.crash_title()}")
+    when check wide(a: 1)
+        is S64 as v => show(f"wide: {v}")
+        is IntegerOverflowError => show("wide: overflow")
+        is Crashables as e => show(f"wide: {e.crash_title()}")
+    when check pick(xs: [1, 2, 3], i: 9)
+        is Int as v => show(f"pick: {v}")
+        is IndexOutOfBoundsError => show("pick: out of range")
+        is Crashables as e => show(f"pick: {e.crash_title()}")
+    show(f"lambda: {try apply(f: x => 10 // x, x: 0)}")
+    show(f"select: {try [1, 0].select(transform: x => 6 // x).to[List]()}")
+    show(f"nothing to fail: {try 5}")
+    return

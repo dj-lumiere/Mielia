@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// A library entity marked <c>secret</c> (a tree node, a block of places, a gate) is touched only inside the routines of
@@ -110,10 +110,10 @@ public sealed class LibraryEntityLeakTests
 
     private static string[] LibraryFiles(string repo)
     {
-        string[] roots = [Path.Combine(path1: repo, path2: "Standard"), Path.Combine(paths: [repo, "..", "RazorForge", "Standard"])];
+        string[] roots = [Path.Combine(path1: repo, path2: "Standard"), Path.Combine(paths: [repo, "..", "Revare", "Standard"])];
         return roots.Where(predicate: Directory.Exists)
                     .SelectMany(selector: root => Directory.EnumerateFiles(path: root, searchPattern: "*.*", searchOption: SearchOption.AllDirectories))
-                    .Where(predicate: f => f.EndsWith(value: ".sf") || f.EndsWith(value: ".rf"))
+                    .Where(predicate: f => f.EndsWith(value: ".mi") || f.EndsWith(value: ".rr"))
                     .ToArray();
     }
 
@@ -122,7 +122,7 @@ public sealed class LibraryEntityLeakTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -136,6 +136,6 @@ public sealed class LibraryEntityLeakTests
             dir = parent;
         }
 
-        throw new InvalidOperationException(message: "Could not find the Suflae repository root.");
+        throw new InvalidOperationException(message: "Could not find the Mielia repository root.");
     }
 }

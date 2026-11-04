@@ -1,0 +1,233 @@
+using Builder.Declaration;
+using Builder.Diagnostics;
+using Builder.Frontends;
+using Builder.Lowering;
+using Builder.Tokenizer;
+using Revare;
+using Mielia.Lexer;
+using Mielia.Passes;
+using SyntaxTree;
+using TypeModel.Enums;
+using TypeModel.Symbols;
+
+namespace Mielia;
+
+/// <summary>
+/// Mielia's rules: entities are shared, reference-counted handles (<c>Roamed[E]</c>) that may be none,
+/// module-level <c>global</c>s live on one locked singleton, a container reshaped while it is looped over
+/// crashes at run time, the memory-unsafe surface is hidden, and unsuffixed numbers default to arbitrary
+/// precision. Mielia reads its own standard library on top of Revare's.
+/// </summary>
+public sealed class MieliaRules : LanguageRules
+{
+    /// <summary>The one instance the front end registers.</summary>
+    public static readonly MieliaRules Instance = new();
+
+    private MieliaRules()
+    {
+    }
+
+    public override Language Language => Language.Mielia;
+    public override string Name => "Mielia";
+    public override string ToolName => "mielia";
+    public override string Version => RevareRules.VersionOf(assembly: typeof(MieliaRules).Assembly);
+    public override string FileExtension => ".mi";
+    public override string? PreviousFileExtension => ".sf";
+    public override string ShortName => "MI";
+    public override bool HasOwnStandardLibrary => true;
+
+    /// <summary>
+    /// Console and file I/O and the environment (arguments, variables, the working directory) are always available,
+    /// so <c>show(...)</c> needs no import. The numbers
+    /// (<c>Int</c>, <c>Decimal</c> and the fixed-width types) are in <c>System/Numerics</c>, which every file
+    /// sees without one.
+    /// </summary>
+    public override IReadOnlyList<(string Module, IReadOnlyList<string>? Symbols)> PreludeImports { get; } =
+        [("IO/Console", null), ("IO/File", null), ("IO/Environment", null)];
+
+    public override List<Token> Tokenize(string source, string fileName)
+    {
+        return new MieliaLexer(source: source, fileName: fileName).Tokenize();
+    }
+
+    /// <inheritdoc/>
+    public override LanguageServerProfile LanguageServer { get; } = new MieliaLanguageServer();
+
+    /// <inheritdoc/>
+    public override (List<Token> Tokens, List<CommentTrivia> Comments) TokenizeWithComments(string source,
+        string fileName)
+    {
+        var lexer = new MieliaLexer(source: source, fileName: fileName);
+        return (lexer.Tokenize(), lexer.Comments);
+    }
+
+    public override bool AllowsUnsafeCode => false;
+    public override bool RoutinesEndWithReturn => false;
+    public override bool HasNothingStatement => false;
+    public override bool TakesUntypedParameters => true;
+    public override bool HasModuleGlobals => true;
+    public override bool HasTargetDirectives => false;
+    public override bool DefaultsToArbitraryPrecision => true;
+    public override bool HasDataSizeQuery => false;
+
+    public override bool EntitiesAreShared => true;
+    public override bool ChecksOwnership => false;
+    public override bool ChecksAccessTokens => false;
+    public override bool ChecksReadonly => false;
+    public override bool MarksDroppedResults => false;
+    public override bool ChecksShapeAtRunTime => true;
+    public override bool ZeroIsEmptyPlace => true;
+
+    /// <summary>A Mielia user writes and reads <c>Account</c>, never the <c>Roamed[Account]</c> handle the
+    /// builder carries an entity in.</summary>
+    public override TypeModel.Types.TypeSymbol SurfaceType(TypeModel.Types.TypeSymbol type)
+    {
+        return type is TypeModel.Types.RecordTypeSymbol
+        {
+            GenericDefinition.Name: RuntimeContract.Roamed, TypeArguments: [var entity]
+        }
+            ? entity
+            : type;
+    }
+
+    /// <summary>Drops every <c>Roamed[...]</c> wrapper from the text, keeping what it wraps, at any depth
+    /// (<c>List[Roamed[Account]]</c> reads <c>List[Account]</c>).</summary>
+    public override string SurfaceText(string text)
+    {
+        const string wrapper = RuntimeContract.Roamed + "[";
+        int at = FindWrapper(text: text, wrapper: wrapper, from: 0);
+        while (at >= 0)
+        {
+            int close = MatchingBracket(text: text, open: at + wrapper.Length - 1);
+            if (close < 0)
+            {
+                break;
+            }
+
+            // The handle's module qualifier (`System.` of `System.Roamed[...]`, as a type argument is named) goes
+            // with it, or the entity would read `System.MI::System.List`.
+            int start = QualifierStart(text: text, at: at);
+            text = text[..start] + text[(at + wrapper.Length)..close] + text[(close + 1)..];
+            at = FindWrapper(text: text, wrapper: wrapper, from: start);
+        }
+
+        return text;
+    }
+
+    /// <summary>Where the module qualifier written right before the name at <paramref name="at"/> starts
+    /// (<c>System.</c>, <c>System/Memory.</c>), or <paramref name="at"/> when there is none.</summary>
+    private static int QualifierStart(string text, int at)
+    {
+        int start = at;
+        while (start > 0 && text[index: start - 1] == '.')
+        {
+            int word = start - 1;
+            while (word > 0 && (char.IsLetterOrDigit(c: text[index: word - 1]) || text[index: word - 1] is '_' or '/'))
+            {
+                word--;
+            }
+
+            if (word == start - 1)
+            {
+                break;
+            }
+
+            start = word;
+        }
+
+        return start;
+    }
+
+    /// <summary>The next <paramref name="wrapper"/> that starts a name (not the tail of a longer one), or -1.</summary>
+    private static int FindWrapper(string text, string wrapper, int from)
+    {
+        for (int at = text.IndexOf(value: wrapper, startIndex: from, comparisonType: StringComparison.Ordinal);
+             at >= 0;
+             at = text.IndexOf(value: wrapper, startIndex: at + 1, comparisonType: StringComparison.Ordinal))
+        {
+            if (at == 0 || !(char.IsLetterOrDigit(c: text[index: at - 1]) || text[index: at - 1] == '_'))
+            {
+                return at;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>The <c>]</c> that closes the <c>[</c> at <paramref name="open"/>, or -1 when it is unbalanced.</summary>
+    private static int MatchingBracket(string text, int open)
+    {
+        int depth = 0;
+        for (int i = open; i < text.Length; i++)
+        {
+            if (text[index: i] == '[')
+            {
+                depth++;
+            }
+            else if (text[index: i] == ']' && --depth == 0)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public override bool RequiresLateinitForDeferredInit => false;
+    public override bool RequiresEnterableForUsing => false;
+    public override bool RewritesDisplayWrapperArguments => false;
+
+    public override string ScriptVariableAdvice(string name)
+    {
+        return $"Pass it in as an argument, or declare it as 'global {name}: <Type> = ...' to share it " +
+               "across routines.";
+    }
+
+    public override bool SynthesizeBeforeAnalysis(List<(Program Program, string FilePath)> files,
+        Action<SemanticDiagnosticCode, string, SourceLocation> report)
+    {
+        EmitterSelfSynthesisPass.Run(files: files);
+        // Annotations first: the globals' setup goes in front of the annotations' apply calls in start().
+        bool annotated = AnnotationSynthesisPass.Run(files: files, report: report);
+        // Before the globals: their setup in start() changes the globals' holder, which no hook can reach.
+        ChangeHookBarrierPass.Run(files: files);
+        bool implanted = ImplantPass.Run(files: files, report: report);
+        return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report) && annotated && implanted;
+    }
+
+    public override void SynthesizeStandardLibrary(
+        IReadOnlyList<(Program Program, string FilePath, string Module)> programs)
+    {
+        WrapperForwarderSynthesis.Run(programs: programs);
+    }
+
+    public override void LowerEntities(Program program, TypeRegistry registry)
+    {
+        new EntityLoweringPass(registry: registry).Run(program: program);
+    }
+
+    public override RoutineDeclaration LowerEntitiesInRoutine(RoutineDeclaration routine, TypeRegistry registry)
+    {
+        return new EntityLoweringPass(registry: registry).LowerRoutine(r: routine);
+    }
+
+    public override Statement LowerEntitiesInVariantBody(Statement body, RoutineInfo routine, TypeRegistry registry)
+    {
+        return new EntityLoweringPass(registry: registry).LowerVariantBody(body: body, routine: routine);
+    }
+
+    public override void LowerFirst(PostprocessingContext ctx, Program program)
+    {
+        new GlobalEntityRewritePass(ctx: ctx).Run(program: program);
+    }
+
+    public override void LowerFirstInVariantBodies(PostprocessingContext ctx)
+    {
+        new GlobalEntityRewritePass(ctx: ctx).RunOnVariantBodies();
+    }
+
+    public override void LowerShapeUse(PostprocessingContext ctx, Program program)
+    {
+        new ShapeUseLoweringPass(ctx: ctx).Run(program: program);
+    }
+}

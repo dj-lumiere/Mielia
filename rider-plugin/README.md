@@ -1,19 +1,19 @@
-# Suflae for Rider
+# Mielia for Rider
 
-A Rider plugin for Suflae (`.sf`):
+A Rider plugin for Mielia (`.mi`):
 
-- Syntax highlighting from `../Suflae.tmbundle`, plus `#` comment toggling and bracket pairing (`bundle/`).
-- The Suflae file icon.
-- The Suflae language server (`Suflae lsp`), through Rider's LSP client: diagnostics, completion, hover, go to
+- Syntax highlighting from `../Mielia.tmbundle`, plus `#` comment toggling and bracket pairing (`bundle/`).
+- The Mielia file icon.
+- The Mielia language server (`Mielia lsp`), through Rider's LSP client: diagnostics, completion, hover, go to
   definition, references, rename, signature help, inlay hints, code actions, symbols and formatting.
 
 ## Which server runs
 
-Settings | Languages & Frameworks | Suflae sets the server: `Suflae.dll` (run with `dotnet`) or a Suflae executable.
-Left empty, the plugin uses the dev build, `<project>/Suflae/bin/Debug/net10.0/Suflae.dll` (the LumiFoundry
-workspace) or `<project>/bin/Debug/net10.0/Suflae.dll`.
+Settings | Languages & Frameworks | Mielia sets the server: `Mielia.dll` (run with `dotnet`) or a Mielia executable.
+Left empty, the plugin uses the dev build, `<project>/Mielia/bin/Debug/net10.0/Mielia.dll` (the LumiFoundry
+workspace) or `<project>/bin/Debug/net10.0/Mielia.dll`.
 
-The server runs from a copy of its folder in Rider's system directory (`suflae-lsp/`), never from `bin/`, so it never
+The server runs from a copy of its folder in Rider's system directory (`mielia-lsp/`), never from `bin/`, so it never
 holds the files the next `dotnet build` overwrites. When the build folder changes and then stays the same for a few
 seconds, the plugin restarts the server from a fresh copy, so a rebuilt builder takes over by itself.
 
@@ -30,7 +30,7 @@ org.gradle.java.installations.paths=C:/Users/<you>/AppData/Local/Programs/Rider/
 Without `riderLocalPath`, the build downloads the Rider named by `platformVersion` in `gradle.properties`.
 
 ```
-gradlew buildPlugin    # -> build/distributions/suflae-rider-<version>.zip
+gradlew buildPlugin    # -> build/distributions/mielia-rider-<version>.zip
 gradlew runIde         # a sandbox Rider with the plugin loaded
 ```
 

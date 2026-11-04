@@ -1,0 +1,34 @@
+module Tests/StdlibMi/ShiftAmountApi
+
+# A shift amount and a subscript index may be any integer type: a literal, an Int, a fixed-width variable or an
+# expression. A shift by more than the width gives 0.
+
+import IO/Console
+
+routine start()
+    var n = 2
+    show(1 << n)
+    show(1 << n + 1)
+    show(64 >> n)
+    show(-5 >> 1)
+    var m = 5
+    m <<= n
+    show(m)
+    var x: S64 = 1
+    show(x << n)
+    var u: U8 = 128
+    show(u >> n)
+    show(u >>> n + 5)
+    var by: S64 = 4
+    show(x << by)
+    var far = 70
+    show(x << far)
+    var xs = [10, 20, 30]
+    var i: S64 = 1
+    var j: U8 = 2
+    xs[i] = 7
+    show(f"{xs[j]} {xs}")
+    var back: S64 = -2
+    when check xs[back]
+        is NegativeIndexError as e => show(e.crash_message())
+        else => show("other")

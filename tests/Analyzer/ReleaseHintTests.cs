@@ -1,19 +1,19 @@
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
-/// The errors a previous-release spelling meets name what a Suflae program writes now, with no word of access tokens
-/// (a Suflae program has none).
+/// The errors a previous-release spelling meets name what a Mielia program writes now, with no word of access tokens
+/// (a Mielia program has none).
 /// </summary>
 public class ReleaseHintTests
 {
     /// <summary>The messages of the errors <paramref name="source"/> gives, one string.</summary>
     private static string Errors(string source, [System.Runtime.CompilerServices.CallerMemberName] string? name = null)
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: name);
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: name);
         return string.Join(separator: "\n", values: result.Errors.Select(selector: e => e.Message));
     }
 

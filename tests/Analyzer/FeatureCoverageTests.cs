@@ -5,29 +5,29 @@ using Builder.Verification.Results;
 using SyntaxTree;
 using TypeModel.Enums;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
 /// Drives the full in-process compile pipeline (parse → semantic analysis + lowering + monomorphization
-/// → LLVM IR emission) over feature-rich RazorForge and Suflae programs. Unlike the spawned
+/// → LLVM IR emission) over feature-rich Revare and Mielia programs. Unlike the spawned
 /// <c>buildandrun</c> stdlib harness (whose child process is not coverage-instrumented), these run the
 /// builder IN the test host, so they exercise — and count coverage for — the lowering/instantiation/
 /// codegen passes that only fire for constructs like pattern matching, lambdas, generics, error-handling
-/// variants, iterator inlining, and Suflae module globals.
+/// variants, iterator inlining, and Mielia module globals.
 ///
 /// Each case asserts the program analyzes without errors and emits non-empty IR; the point is breadth of
 /// executed builder paths, not output shape (the stdlib harness owns behavioral snapshots).
 /// </summary>
 public class FeatureCoverageTests
 {
-    /// <summary>Parse + analyze + codegen a RazorForge program to IR, asserting a clean compile.</summary>
+    /// <summary>Parse + analyze + codegen a Revare program to IR, asserting a clean compile.</summary>
     private static string GenerateIr(string source)
     {
         Program program = Parse(source: source);
-        var analyzer = new SemanticVerifier(language: Language.RazorForge,
-            buildMode: RfBuildMode.ReleaseSpace);
+        var analyzer = new SemanticVerifier(language: Language.Revare,
+            buildMode: RaBuildMode.ReleaseSpace);
         AnalysisResult result = analyzer.Analyze(program: program);
         AssertNoErrors(result: result);
 
@@ -37,12 +37,12 @@ public class FeatureCoverageTests
         return ir;
     }
 
-    /// <summary>Suflae sibling of <see cref="GenerateIr"/> — analyzed in Suflae realm.</summary>
-    private static string GenerateIrSuflae(string source)
+    /// <summary>Mielia sibling of <see cref="GenerateIr"/> — analyzed in Mielia realm.</summary>
+    private static string GenerateIrMielia(string source)
     {
-        Program program = ParseSuflae(source: source);
-        var analyzer = new SemanticVerifier(language: Language.Suflae,
-            buildMode: RfBuildMode.ReleaseSpace);
+        Program program = ParseMielia(source: source);
+        var analyzer = new SemanticVerifier(language: Language.Mielia,
+            buildMode: RaBuildMode.ReleaseSpace);
         AnalysisResult result = analyzer.Analyze(program: program);
         AssertNoErrors(result: result);
 
@@ -59,7 +59,7 @@ public class FeatureCoverageTests
             options: new LlvmEmitterOptions
             {
                 StdlibPrograms = result.Registry.StdlibPrograms,
-                BuildMode = RfBuildMode.ReleaseSpace,
+                BuildMode = RaBuildMode.ReleaseSpace,
                 SynthesizedBodies = result.SynthesizedBodies,
                 InstantiatedGenericBodies = result.InstantiatedGenericBodies
             });
@@ -98,13 +98,13 @@ public class FeatureCoverageTests
 
     // ---- control flow ---------------------------------------------------------------------------
 
-    // ---- Suflae realm: module globals + script-ish program --------------------------------------
+    // ---- Mielia realm: module globals + script-ish program --------------------------------------
 
     [Fact]
-    public void Suflae_ModuleGlobal_Compiles()
+    public void Mielia_ModuleGlobal_Compiles()
     {
         const string source = """
-                              module Test/Feat/SfGlobal
+                              module Test/Feat/MiGlobal
                               import IO/Console
 
                               global counter: S64 = 0
@@ -119,16 +119,16 @@ public class FeatureCoverageTests
                                   show(f"{counter}")
                                   return
                               """;
-        _ = GenerateIrSuflae(source: source);
+        _ = GenerateIrMielia(source: source);
     }
 
     [Fact]
-    public void Suflae_ScriptGlobals_ReleasedAtStartExit()
+    public void Mielia_ScriptGlobals_ReleasedAtStartExit()
     {
         // Script mode (no explicit start) with a routine that reads the global: the global must reach
         // the __ModuleGlobals singleton, and the singleton is released at start()'s exit.
         const string source = """
-                              module Test/Feat/SfGlobalTeardown
+                              module Test/Feat/MiGlobalTeardown
                               import IO/Console
 
                               global name: Text = "abc"
@@ -141,12 +141,12 @@ public class FeatureCoverageTests
                               bump()
                               show(f"{name} {counter}")
                               """;
-        string ir = GenerateIrSuflae(source: source);
+        string ir = GenerateIrMielia(source: source);
         // The definition line itself: the first mention of start() may be a call from main.
         int defAt = ir.Split(separator: '\n')
                       .Select(selector: (line, index) => (line, index))
                       .Where(predicate: l => l.line.StartsWith(value: "define ", comparisonType: StringComparison.Ordinal) &&
-                                             l.line.Contains(value: "SfGlobalTeardown.start()\"", comparisonType: StringComparison.Ordinal))
+                                             l.line.Contains(value: "MiGlobalTeardown.start()\"", comparisonType: StringComparison.Ordinal))
                       .Select(selector: l => ir.IndexOf(value: l.line, comparisonType: StringComparison.Ordinal))
                       .First();
         int endAt = ir.IndexOf(value: "\n}", startIndex: defAt, comparisonType: StringComparison.Ordinal);
@@ -155,10 +155,10 @@ public class FeatureCoverageTests
     }
 
     [Fact]
-    public void Suflae_DependentGlobals_Compile()
+    public void Mielia_DependentGlobals_Compile()
     {
         const string source = """
-                              module Test/Feat/SfGlobal2
+                              module Test/Feat/MiGlobal2
                               import IO/Console
 
                               global base: S64 = 10
@@ -168,14 +168,14 @@ public class FeatureCoverageTests
                                   show(f"{base} {derived}")
                                   return
                               """;
-        _ = GenerateIrSuflae(source: source);
+        _ = GenerateIrMielia(source: source);
     }
 
     [Fact]
-    public void Suflae_BasicArithmeticProgram_Compiles()
+    public void Mielia_BasicArithmeticProgram_Compiles()
     {
         const string source = """
-                              module Test/Feat/SfBasic
+                              module Test/Feat/MiBasic
                               import IO/Console
 
                               routine start()
@@ -184,6 +184,6 @@ public class FeatureCoverageTests
                                   show(f"{y}")
                                   return
                               """;
-        _ = GenerateIrSuflae(source: source);
+        _ = GenerateIrMielia(source: source);
     }
 }

@@ -1,0 +1,88 @@
+module Tests/StdlibMi/CarrierVariantApi
+
+import IO/Console
+# Check[T] = T | Crashables and Lookup[T] = None | T | Crashables: a specific crashable arm, the any-error arm,
+# an unhandled error passing on out of a failable routine, a rethrow moving the error, and `is` as an expression.
+crashable NopeError
+    what: Text
+
+routine NopeError.crash_message() -> Text
+    return f"nope: {me.what}"
+
+crashable OtherError
+    code: Int
+
+routine OtherError.crash_message() -> Text
+    return f"other {me.code}"
+
+routine inner(n: Int) -> Int
+    if n == 3
+        throw NopeError(what: f"three {n}")
+    if n == 4
+        throw OtherError(code: n)
+    return n * 10
+
+# No error arm: the error passes on to the caller.
+routine passes(n: Int) -> Int
+    when check inner(n: n)
+        is Int as v =>
+            return v + 1
+
+# Rethrows the caught error: it moves to this routine's carrier.
+routine rethrows(n: Int) -> Int
+    when check inner(n: n)
+        is Int as v =>
+            return v + 2
+        is Crashables as e =>
+            throw e
+
+routine start()
+    var i = 2
+    until i >= 5
+        when check inner(n: i)
+            is Int as v =>
+                show(f"ok {v}")
+            is NopeError as e =>
+                show(f"nope arm: {e.what}")
+            is Crashables as e =>
+                show(f"other arm: {e.crash_title()} / {e}")
+        when check passes(n: i)
+            is Int as v =>
+                show(f"passes ok {v}")
+            is Crashables as e =>
+                show(f"passes caught {e.crash_message()}")
+        when check rethrows(n: i)
+            is Int as v =>
+                show(f"rethrows ok {v}")
+            is Crashables as e =>
+                show(f"rethrows caught {e.crash_message()}")
+        var c = check inner(n: i)
+        if c is NopeError
+            show("is NopeError")
+        when c
+            is Int as v =>
+                show(f"c ok {v}")
+            is Crashables as e =>
+                show(f"c err {e}")
+        when check inner(n: i)
+            is AbsentValueError =>
+                show("absent")
+            is Int as v =>
+                show(f"check ok {v}")
+            is Crashables as e =>
+                show(f"check err {e}")
+        i += 1
+
+    # Many rethrows: each error object moves once and is freed once.
+    var total = 0
+    var k = 0
+    until k >= 20000
+        when check rethrows(n: 3 + k % 2)
+            is Int as v =>
+                total += v
+            is Crashables as e =>
+                total += 1
+        k += 1
+    show(f"total {total}")
+    show("DONE")
+    return

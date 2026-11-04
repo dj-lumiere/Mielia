@@ -1,0 +1,17 @@
+module Tests/StdlibMi/TypeArgOptionalApi
+
+# `T?` works inside the type arguments of a constructor call, as it does in an annotation: `List[Box?]()` is
+# `List[Optional[Box]]()`.
+entity Box
+    n: Int
+
+routine start()
+    var xs = List[Box?]()
+    xs.add_last(value: Box(n: 1))
+    var d = Dict[Int, Box?]()
+    d[3] = Box(n: 9)
+    var nested = List[List[Box?]]()
+    nested.add_last(value: List[Box?]())
+    show(f"{xs.count()} {d.count()} {nested.count()}")
+    show("DONE")
+    return

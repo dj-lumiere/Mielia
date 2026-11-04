@@ -6,17 +6,17 @@ using TypeModel.Enums;
 using TypeModel.Symbols;
 using TypeModel.Types;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
-/// Suflae-only lowering: an SF <c>entity</c> is a <c>Roamed[E]</c> biased-refcounted handle, not a
+/// Mielia-only lowering: an MI <c>entity</c> is a <c>Roamed[E]</c> biased-refcounted handle, not a
 /// bare single-owner entity. This pass runs at the START of Phase 7 (before
 /// <c>RoutineReachabilityPass</c>) so that once entity-typed
 /// bindings carry a <c>Roamed[E]</c> resolved type, reachability seeds the roam/promote/lock/cycle
 /// machinery off the live wrapper type (the existing <c>Roamed</c>-base seeding), and the Phase-8 RC
 /// lifecycle passes (retain-on-copy, release-on-scope-exit) apply — with NO codegen-site changes.
 ///
-/// <para>STAGE 1 (this cut): construction + aliasing + scope-exit release. For every SF construction
+/// <para>STAGE 1 (this cut): construction + aliasing + scope-exit release. For every MI construction
 /// <c>E(...)</c> (a <see cref="CreatorExpression"/> whose resolved type is a bare
 /// <see cref="EntityTypeSymbol"/>) the value is rewritten to <c>E(...).roam()</c> and retyped to
 /// <c>Roamed[E]</c>; locals bound to such a value (or aliased from one) are tracked so their
@@ -33,7 +33,7 @@ internal sealed class EntityLoweringPass
 
     // Per-routine scope: names that are BORROWED Roamed handles (`me` + Roamed parameters). Returning
     // one hands a fresh reference to the caller while the borrow itself is NOT released at scope exit
-    // (ScopeTeardownLoweringPass skips `me` and SF Roamed params), so the return must RETAIN — otherwise
+    // (ScopeTeardownLoweringPass skips `me` and MI Roamed params), so the return must RETAIN — otherwise
     // the caller's binding and the original owner both release the same controller (double free). An
     // owned local returned by move is NOT in this set, so it is correctly left alone.
     private readonly HashSet<string> _borrowNames = new();
@@ -124,11 +124,11 @@ internal sealed class EntityLoweringPass
     /// Post-resolve invariant (the "unification tail" guard): after <see cref="Builder.Declaration.TypeResolver"/>
     /// centralized entity→<c>Roamed[E]</c> substitution at every signature slot
     /// (<see cref="Builder.Declaration.TypeResolver.RoamSharedEntitySlot"/>), NO parameter or return in a
-    /// SUFLAE USER routine may still be a BARE <see cref="EntityTypeSymbol"/> — an entity is always the
+    /// MIELIA USER routine may still be a BARE <see cref="EntityTypeSymbol"/> — an entity is always the
     /// <c>Roamed[E]</c> handle. A bare entity here means a resolution site slipped the choke point (the
     /// class of bug the centralization was meant to eliminate), so fail LOUDLY at build time rather than
     /// mis-codegen a raw controller access at runtime.
-    /// <para>Carve-outs: the stdlib is borrowed RazorForge source (bare single-owner entities — correct);
+    /// <para>Carve-outs: the stdlib is borrowed Revare source (bare single-owner entities — correct);
     /// a <c>create</c> constructor legitimately builds and returns the bare entity before any controller
     /// exists (its <c>me</c>/return stay bare per <see cref="SignatureResolver"/>), so its RETURN is
     /// exempt — but its PARAMETERS (passed-in entity values) must still be <c>Roamed</c>.</para>
@@ -137,7 +137,7 @@ internal sealed class EntityLoweringPass
     {
         string? file = r.Location.FileName;
         if (file == null ||
-            Builder.Frontends.Languages.OfFile(fileName: file) != Language.Suflae ||
+            Builder.Frontends.Languages.OfFile(fileName: file) != Language.Mielia ||
             IsStdlibPath(file: file))
         {
             return;
@@ -149,7 +149,7 @@ internal sealed class EntityLoweringPass
             {
                 throw new InvalidOperationException(
                     message:
-                    $"SF representation-unification invariant violated: parameter '{p.Name}' of routine " +
+                    $"MI representation-unification invariant violated: parameter '{p.Name}' of routine " +
                     $"'{r.Name}' ({file}:{r.Location.Line}) resolved to a BARE entity '{bareParam.Name}' " +
                     "instead of Roamed[E]. An entity slot slipped TypeResolver.RoamSharedEntitySlot.");
             }
@@ -160,17 +160,17 @@ internal sealed class EntityLoweringPass
         {
             throw new InvalidOperationException(
                 message:
-                $"SF representation-unification invariant violated: return type of routine '{r.Name}' " +
+                $"MI representation-unification invariant violated: return type of routine '{r.Name}' " +
                 $"({file}:{r.Location.Line}) resolved to a BARE entity '{bareReturn.Name}' instead of " +
                 "Roamed[E]. An entity slot slipped TypeResolver.RoamSharedEntitySlot.");
         }
     }
 
-    /// <summary>Whether <paramref name="file"/> is a `.rf` module of the program (not the standard library's).</summary>
-    private bool IsRazorForgeModuleFile(string? file)
+    /// <summary>Whether <paramref name="file"/> is a `.rr` module of the program (not the standard library's).</summary>
+    private bool IsRevareModuleFile(string? file)
     {
         return file != null && Builder.Frontends.Languages.HasSourceExtension(fileName: file) &&
-               Builder.Frontends.Languages.OfFile(fileName: file) == Language.RazorForge && !IsStdlibPath(file: file);
+               Builder.Frontends.Languages.OfFile(fileName: file) == Language.Revare && !IsStdlibPath(file: file);
     }
 
     private bool IsStdlibPath(string file)
@@ -201,9 +201,9 @@ internal sealed class EntityLoweringPass
             r = r with { Body = UsingLoweringPass.LowerBody(body: r.Body, registry: _registry) };
         }
 
-        // A routine of a `.rf` module the program imports is RazorForge code: an entity it makes has one original and
+        // A routine of a `.rr` module the program imports is Revare code: an entity it makes has one original and
         // is handed back as it is (a `List` its `squares` returns), so nothing in it becomes a shared handle.
-        if (IsRazorForgeModuleFile(file: r.Location.FileName))
+        if (IsRevareModuleFile(file: r.Location.FileName))
         {
             return r;
         }
@@ -236,13 +236,13 @@ internal sealed class EntityLoweringPass
     }
 
     /// <summary>
-    /// Lowers the body of a recovery variant of a routine written in Suflae: the builder copied it from the base
+    /// Lowers the body of a recovery variant of a routine written in Mielia: the builder copied it from the base
     /// routine before the base was lowered, so a construction in it still builds a bare entity. A variant is never
     /// a creator, and its parameters that are handles are borrowed as the base's are.
     /// </summary>
     internal Statement LowerVariantBody(Statement body, RoutineInfo routine)
     {
-        if (IsRazorForgeModuleFile(file: routine.Location?.FileName))
+        if (IsRevareModuleFile(file: routine.Location?.FileName))
         {
             return body;
         }
@@ -772,7 +772,7 @@ internal sealed class EntityLoweringPass
         // An entity taken out of a tuple a call gave (`var (tx, rx) = make_channel[S64](capacity: 8)` reads
         // `_ld_tmp.item1`) is moved into a handle here: the routine that made the tuple built it bare, and every
         // slot of the program that names it (a parameter `rx: Receiver[S64]`) holds a handle.
-        // The library's own Suflae code names the RazorForge types it keeps (`RF::System.Transmitter[T]`), so it
+        // The library's own Mielia code names the Revare types it keeps (`RA::System.Transmitter[T]`), so it
         // keeps them bare.
         if (!_inLibraryRoutine &&
             lowered is MemberExpression { Object.ResolvedType: TupleTypeSymbol, ResolvedType: EntityTypeSymbol element } &&
@@ -798,12 +798,12 @@ internal sealed class EntityLoweringPass
     private Statement LowerAssignmentStatement(Statement stmt, AssignmentStatement assign)
     {
         Expression v = LowerExpression(expr: assign.Value);
-        // SF implicit share: a borrowed Roamed RHS bound into a LOCAL slot retains so the slot owns
-        // its own count. FIELD-target writes (`o.inner = x`) are NOT handled here — SF entity field
+        // MI implicit share: a borrowed Roamed RHS bound into a LOCAL slot retains so the slot owns
+        // its own count. FIELD-target writes (`o.inner = x`) are NOT handled here — MI entity field
         // REASSIGNMENT has a separate pre-existing codegen crash (baseline AVs with or without the
         // former RoamBump), so the share placement for that path is deferred until that bug is fixed.
         // The former RcRetainLoweringPass.RoamBump auto-share for field targets is removed (it was the
-        // builder hand-simulating the refcount; RF now spells the co-owner explicitly `x.share()`).
+        // builder hand-simulating the refcount; RA now spells the co-owner explicitly `x.share()`).
         if (assign.Target is IdentifierExpression)
         {
             v = MaybeRoamCopy(expr: v);
@@ -816,12 +816,12 @@ internal sealed class EntityLoweringPass
 
     // A statement-level assignment `target = value` parses as an ExpressionStatement wrapping a
     // BinaryExpression{Assign} (NOT an AssignmentStatement — the parser only emits BinaryExpression
-    // for `=`). SF implicit share: a borrowed Roamed RHS bound into a persistent slot (local var OR a
+    // for `=`). MI implicit share: a borrowed Roamed RHS bound into a persistent slot (local var OR a
     // Roamed entity FIELD) must retain so the slot owns its own count. The former RcRetainLoweringPass
-    // .RoamBump only fired for RF BARE-entity field writes (its `IsRoamedEntityField` requires the
-    // object to be a bare EntityTypeSymbol) — it NEVER fired for SF's `roamed_obj.field = x` (object is
-    // Roamed), so SF field reassignment had NO retain-new: the field aliased the RHS handle without a
-    // count → double-free at teardown. Inserting the share HERE (the SF lowering, the home of implicit
+    // .RoamBump only fired for RA BARE-entity field writes (its `IsRoamedEntityField` requires the
+    // object to be a bare EntityTypeSymbol) — it NEVER fired for MI's `roamed_obj.field = x` (object is
+    // Roamed), so MI field reassignment had NO retain-new: the field aliased the RHS handle without a
+    // count → double-free at teardown. Inserting the share HERE (the MI lowering, the home of implicit
     // sharing) fixes it. MaybeRoamCopy self-gates on a Roamed borrow value; a fresh rvalue / non-Roamed
     // is untouched. The release-old on field overwrite stays in codegen (reassignment ≠ scope exit).
     private Statement LowerBinaryAssignStatement(Statement stmt, ExpressionStatement es,
@@ -945,7 +945,7 @@ internal sealed class EntityLoweringPass
 
         // Returning a BORROW (`me` / a Roamed param) or a Roamed FIELD read hands a fresh
         // reference to the caller; retain so the caller owns its own count. The borrow itself is
-        // not released at scope exit (teardown skips `me` + SF Roamed params), so without the
+        // not released at scope exit (teardown skips `me` + MI Roamed params), so without the
         // retain the caller's binding and the original owner both release one shared count →
         // double free. An owned local returned by MOVE is not a borrow and is left as-is.
         if (v is IdentifierExpression rid && _borrowNames.Contains(item: rid.Name) ||
@@ -965,14 +965,14 @@ internal sealed class EntityLoweringPass
     {
         return expr switch
         {
-            // A creator that yields a bare SF entity -> `.roam()` : Roamed[E].
+            // A creator that yields a bare MI entity -> `.roam()` : Roamed[E].
             // Its member values are lowered first: `Outer(inner: Inner(...))` makes the inner entity's
             // handle for the field, and a handle read from elsewhere gets its own holder there.
             CreatorExpression creator when creator.ResolvedType is EntityTypeSymbol ce => WrapInRoam(
                 inner: LowerCreatorMembers(creator: creator),
                 entity: ce),
             // A collection literal (`[1,2,3]` / `{…}`) is an entity rvalue just like a constructor call —
-            // it resolves to a bare `System.List`/`Set`/`Dict` entity, so an SF entity slot must `.roam()` it
+            // it resolves to a bare `System.List`/`Set`/`Dict` entity, so an MI entity slot must `.roam()` it
             // (else a bare-list pointer is bound to a `Roamed` handle and reinterpreted as a controller →
             // AccessViolation on first access). ExpressionLoweringPass later expands the literal to a
             // `create + add_last` temp; the `.roam()` wraps that temp reference.
@@ -1026,7 +1026,7 @@ internal sealed class EntityLoweringPass
                 Type.Name: "None"
             } => LowerNoneIsPattern(ipe: ipe),
             // A call — INCLUDING a constructor call `E(...)`, which is a CallExpression (not a
-            // CreatorExpression) at this phase — that produces a bare SF entity: recurse into its
+            // CreatorExpression) at this phase — that produces a bare MI entity: recurse into its
             // parts, then `.roam()` the whole value.
             // A handle this pass already made (`Roamed(from: E(...))`) stays as it is, so lowering a routine
             // again changes nothing.
@@ -1039,7 +1039,7 @@ internal sealed class EntityLoweringPass
             CallExpression call => LowerCallExpression(call: call),
             // A generic-instance construction like `List[Node]()` stays a GenericMemberRoutineCallExpression
             // through codegen (the explicit `[T]` args keep it out of CallExpression form), so it must
-            // be promoted here too — else a bare SF container never gets a RoamManager and cycle
+            // be promoted here too — else a bare MI container never gets a RoamManager and cycle
             // collection reads its raw buffer as a controller and crashes. Mirror the CallExpression
             // construction path: recurse args, retain Roamed-field args, then `.roam()` (promote).
             GenericMemberRoutineCallExpression gmce => LowerGenericMemberRoutineCall(gmce: gmce),
@@ -1149,7 +1149,7 @@ internal sealed class EntityLoweringPass
                                   !ReferenceEquals(objA: ii, objB: ix.Index)
             ? ix with { Object = o, Index = ii }
             : ix;
-        return ix.ResolvedType is EntityTypeSymbol made && !IsRazorForgeEntity(entity: made)
+        return ix.ResolvedType is EntityTypeSymbol made && !IsRevareEntity(entity: made)
             ? WrapInRoam(inner: lowered, entity: made)
             : lowered;
     }
@@ -1241,7 +1241,7 @@ internal sealed class EntityLoweringPass
     }
 
     // A call — INCLUDING a constructor call `E(...)`, which is a CallExpression (not a
-    // CreatorExpression) at this phase — that produces a bare SF entity: recurse into its parts, then
+    // CreatorExpression) at this phase — that produces a bare MI entity: recurse into its parts, then
     // `.roam()` the whole value.
     private CallExpression LowerCallExpression(CallExpression call)
     {
@@ -1282,7 +1282,7 @@ internal sealed class EntityLoweringPass
             : call;
 
         // Project each Roamed argument that flows into a BARE-entity parameter through
-        // `.raw_inner()`. SF routine/memberRoutine parameters are NOT Roamed-substituted, so their slot
+        // `.raw_inner()`. MI routine/memberRoutine parameters are NOT Roamed-substituted, so their slot
         // is a bare `E` and must receive the real entity pointer — passing the RoamManager
         // handle makes the callee read the controller as the entity (`x.field` → crash). Borrow
         // semantics: no retain, the caller keeps ownership. Skips construction, whose args are field
@@ -1295,7 +1295,7 @@ internal sealed class EntityLoweringPass
         }
 
         // (The interim receiver `.raw_inner()` projection was removed with representation
-        // unification: an SF entity memberRoutine's `me` now resolves as `Roamed[E]` — SignatureResolver
+        // unification: an MI entity memberRoutine's `me` now resolves as `Roamed[E]` — SignatureResolver
         // sets MeType — so the call passes the Roamed handle directly and `me.field` routes through
         // the Roamed access machinery. No projection needed.)
 
@@ -1304,9 +1304,9 @@ internal sealed class EntityLoweringPass
 
     // Receiver projection: a Roamed handle flowing as the RECEIVER into a BARE-`me` memberRoutine
     // must be projected through `.raw_inner()` to the real entity pointer. Stdlib entities
-    // (analyzed in RF mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
+    // (analyzed in RA mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
     // (MeType is NOT Roamed), so passing the RoamManager handle makes the callee read the
-    // controller as the entity and crash. USER SF entity memberRoutines have MeType=Roamed and
+    // controller as the entity and crash. USER MI entity memberRoutines have MeType=Roamed and
     // correctly take the handle; memberRoutines declared on Roamed/RoamManager itself
     // (roam/raw_inner/is_none) own the handle too. Gate on the resolved routine owning a
     // bare entity with a non-Roamed MeType. Mirrors the argument projection.
@@ -1347,35 +1347,35 @@ internal sealed class EntityLoweringPass
         return callee;
     }
 
-    // Wrap the lowered call's result in `.roam()` where the call produces a bare SF entity or a
-    // parameterized SF constructor whose `create` body returns the bare entity.
+    // Wrap the lowered call's result in `.roam()` where the call produces a bare MI entity or a
+    // parameterized MI constructor whose `create` body returns the bare entity.
     private CallExpression WrapCallResultInRoam(CallExpression call, CallExpression lowered)
     {
         // The routine the call is bound to says what comes back: a concrete routine that returns no entity hands
         // back no entity to wrap, whatever type a by-name lookup left on the call.
-        // A shared routine Suflae shows (`Random.from_entropy()`) is declared to give the handle and gives the
+        // A shared routine Mielia shows (`Random.from_entropy()`) is declared to give the handle and gives the
         // entity itself, so a handle return type counts as an entity here.
         bool returnsNoEntity = call.ResolvedRoutine is { IsCreator: false, ReturnType: { } returned } &&
                                returned is not (EntityTypeSymbol or GenericParameterTypeSymbol) &&
                                RoamedInnerEntity(t: returned) == null;
         if (call.ResolvedType is EntityTypeSymbol callEntity && !returnsNoEntity &&
-            (IsSuflaeRealmEntity(entity: callEntity) || !IsRfRealmRef(callee: call.Callee, routine: call.ResolvedRoutine)) &&
-            !IsRazorForgeEntity(entity: callEntity))
+            (IsMieliaRealmEntity(entity: callEntity) || !IsRaRealmRef(callee: call.Callee, routine: call.ResolvedRoutine)) &&
+            !IsRevareEntity(entity: callEntity))
         {
             return WrapInRoam(inner: lowered, entity: callEntity);
         }
 
-        // A PARAMETERIZED SF constructor call (`Pt(v: x)`) is a CallExpression typed `Roamed[E]`
+        // A PARAMETERIZED MI constructor call (`Pt(v: x)`) is a CallExpression typed `Roamed[E]`
         // (SA roamed `create`'s declared return), but the `create` BODY returns the BARE entity
         // (create-returns-bare convention — see ReturnStatement lowering). So it still must be
         // wrapped once at the call site — otherwise a bare entity binds into a Roamed slot
         // (under-roamed → later destroyed as a controller → AccessViolation). The no-arg form
         // `Box()` is typed bare (handled above); this catches the arg-carrying form. Gated on
         // `create` (returns bare) so an ordinary routine returning a `Roamed[E]` value is NOT
-        // re-wrapped, and on the SF realm (an RF entity stays bare).
+        // re-wrapped, and on the MI realm (an RA entity stays bare).
         if (lowered.ResolvedRoutine is { IsCreator: true } &&
             RoamedInnerEntity(t: call.ResolvedType) is { } createEntity &&
-            !IsRfRealmRef(callee: call.Callee))
+            !IsRaRealmRef(callee: call.Callee))
         {
             lowered.ResolvedType = createEntity;
             return WrapInRoam(inner: lowered, entity: createEntity);
@@ -1386,7 +1386,7 @@ internal sealed class EntityLoweringPass
 
     // A generic-instance construction like `List[Node]()` stays a GenericMemberRoutineCallExpression
     // through codegen (the explicit `[T]` args keep it out of CallExpression form), so it must be
-    // promoted here too — else a bare SF container never gets a RoamManager and cycle collection
+    // promoted here too — else a bare MI container never gets a RoamManager and cycle collection
     // reads its raw buffer as a controller and crashes. Mirror the CallExpression construction path:
     // recurse args, retain Roamed-field args, then `.roam()` (promote).
     private Expression LowerGenericMemberRoutineCall(GenericMemberRoutineCallExpression gmce)
@@ -1445,8 +1445,8 @@ internal sealed class EntityLoweringPass
             ? gmce with { Object = gObject, Arguments = gArgs }
             : gmce;
         if (gmce.ResolvedType is EntityTypeSymbol gEntity &&
-            (IsSuflaeRealmEntity(entity: gEntity) || !IsRfRealmRef(callee: gmce.Object)) &&
-            !IsRazorForgeEntity(entity: gEntity) && !AsksForRazorForgeType(typeArguments: gmce.TypeArguments, entity: gEntity))
+            (IsMieliaRealmEntity(entity: gEntity) || !IsRaRealmRef(callee: gmce.Object)) &&
+            !IsRevareEntity(entity: gEntity) && !AsksForRevareType(typeArguments: gmce.TypeArguments, entity: gEntity))
         {
             return WrapInRoam(inner: loweredG, entity: gEntity);
         }
@@ -1456,7 +1456,7 @@ internal sealed class EntityLoweringPass
         // CallExpression form does (WrapCallResultInRoam).
         if (gmce.ResolvedRoutine is { IsCreator: true } &&
             RoamedInnerEntity(t: gmce.ResolvedType) is { } createEntity &&
-            !IsRfRealmRef(callee: gmce.Object))
+            !IsRaRealmRef(callee: gmce.Object))
         {
             loweredG.ResolvedType = createEntity;
             return WrapInRoam(inner: loweredG, entity: createEntity);
@@ -1466,7 +1466,7 @@ internal sealed class EntityLoweringPass
     }
 
     // An entity handed to a parameter typed by a type parameter (`type_name(of: T)`) binds that parameter to the
-    // handle, not to the bare entity: a Suflae entity is shared, so the routine gets one more holder of it. Bound
+    // handle, not to the bare entity: a Mielia entity is shared, so the routine gets one more holder of it. Bound
     // to the bare entity, the argument would have to give the entity up, which fails while another name holds it.
     // Left alone when the type parameter is also the routine's result (the caller then expects the bare entity).
     private CallExpression HandleBindsTypeParameter(CallExpression call, RoutineInfo routine)
@@ -1542,7 +1542,7 @@ internal sealed class EntityLoweringPass
             ParamInfo? param = ResolveArgParam(a: a, nonMe: nonMe, posIdx: ref posIdx);
             if (BareEntityOf(type: param?.Type) is { } entity)
             {
-                // A bare entity parameter takes the entity over (a RazorForge routine's consuming parameter), so the
+                // A bare entity parameter takes the entity over (a Revare routine's consuming parameter), so the
                 // handle hands it over instead of lending it. A token parameter only borrows it.
                 Expression projected = param!.Type is EntityTypeSymbol
                     ? HandOverInner(arg: a, targetEntity: entity)
@@ -1745,43 +1745,43 @@ internal sealed class EntityLoweringPass
     }
 
     // Wrap a bare-entity-valued expression in `<expr>.roam()`, retyped to Roamed[E].
-    // An `RF::`-qualified construction/call deliberately opts OUT of the Suflae entity->Roamed
-    // lowering: the realm tag reaches the bare RazorForge realm, so its bare-entity result must NOT be
-    // `.roam()`-wrapped. This is what lets an SF wrapper entity hold a bare `RF::System.List` inside
-    // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RF"`
+    // An `RA::`-qualified construction/call deliberately opts OUT of the Mielia entity->Roamed
+    // lowering: the realm tag reaches the bare Revare realm, so its bare-entity result must NOT be
+    // `.roam()`-wrapped. This is what lets an MI wrapper entity hold a bare `RA::System.List` inside
+    // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RA"`
     // gate on the type-annotation side; the realm survives on the construction callee's identifier
-    // (Parser.Expressions parses `RF::System.List` into `IdentifierExpression { Realm = "RF" }`).
-    // A RazorForge library entity (`RF::System.List`) keeps its single original in Suflae code, however it was
-    // reached: by an `RF::` name or as what a routine hands back. An entity of a `.rf` module the program imports is
-    // held in Suflae code like a Suflae entity, by a shared handle.
-    private bool IsRazorForgeEntity(EntityTypeSymbol entity)
+    // (Parser.Expressions parses `RA::System.List` into `IdentifierExpression { Realm = "RA" }`).
+    // A Revare library entity (`RA::System.List`) keeps its single original in Mielia code, however it was
+    // reached: by an `RA::` name or as what a routine hands back. An entity of a `.rr` module the program imports is
+    // held in Mielia code like a Mielia entity, by a shared handle.
+    private bool IsRevareEntity(EntityTypeSymbol entity)
     {
         string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
         return Builder.Frontends.Languages.HasSourceExtension(fileName: declaredIn) &&
-               Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge &&
-               !IsRazorForgeModuleFile(file: declaredIn);
+               Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.Revare &&
+               !IsRevareModuleFile(file: declaredIn);
     }
 
-    /// <summary>Whether a Suflae slot naming <paramref name="entity"/> holds it through a handle: an entity of Suflae's
-    /// realm, of a Suflae file, or of the standard library (a channel end). An entity of a RazorForge module the
+    /// <summary>Whether a Mielia slot naming <paramref name="entity"/> holds it through a handle: an entity of Mielia's
+    /// realm, of a Mielia file, or of the standard library (a channel end). An entity of a Revare module the
     /// program imports keeps its single holder.</summary>
     private bool HeldThroughHandle(EntityTypeSymbol entity)
     {
         string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
-        return IsSuflaeRealmEntity(entity: entity) || !IsRazorForgeEntity(entity: entity) ||
+        return IsMieliaRealmEntity(entity: entity) || !IsRevareEntity(entity: entity) ||
                declaredIn != null && IsStdlibPath(file: declaredIn);
     }
 
-    // An entity of Suflae's own realm (`SF::System.List`) is always held through a handle, whichever world's value the
-    // routine giving it back was called on (a RazorForge list's crossing `rf_list.to[List]()`).
-    private static bool IsSuflaeRealmEntity(EntityTypeSymbol entity)
+    // An entity of Mielia's own realm (`MI::System.List`) is always held through a handle, whichever world's value the
+    // routine giving it back was called on (a Revare list's crossing `rf_list.to[List]()`).
+    private static bool IsMieliaRealmEntity(EntityTypeSymbol entity)
     {
         return ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Realm != TypeModel.Realms.Shared;
     }
 
-    // A call that names the RazorForge type it makes (`xs.to[RF::List]()`) hands back that world's value, which keeps
+    // A call that names the Revare type it makes (`xs.to[RA::List]()`) hands back that world's value, which keeps
     // its single holder: wrapping it would hand a handle to code that expects the entity itself.
-    private static bool AsksForRazorForgeType(List<TypeExpression> typeArguments, EntityTypeSymbol entity)
+    private static bool AsksForRevareType(List<TypeExpression> typeArguments, EntityTypeSymbol entity)
     {
         string bareName = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).BareName;
         return entity.Realm == TypeModel.Realms.Shared && typeArguments.Any(predicate: t =>
@@ -1789,17 +1789,17 @@ internal sealed class EntityLoweringPass
             (t.Name == bareName || t.Name.EndsWith(value: "." + bareName, comparisonType: StringComparison.Ordinal)));
     }
 
-    private static bool IsRfRealmRef(Expression callee, RoutineInfo? routine = null)
+    private static bool IsRaRealmRef(Expression callee, RoutineInfo? routine = null)
     {
         return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared } ||
-               // A common routine called on a type written `RF::Name` hands back that world's value. Called on the
-               // type as Suflae names it (`Random.from_entropy()`), it hands back a value Suflae holds by handle.
+               // A common routine called on a type written `RA::Name` hands back that world's value. Called on the
+               // type as Mielia names it (`Random.from_entropy()`), it hands back a value Mielia holds by handle.
                callee is MemberExpression
                {
                    Object: IdentifierExpression { Realm: TypeModel.Realms.Shared } or
                    TypeExpression { Realm: TypeModel.Realms.Shared }
                } ||
-               // A routine called on a RazorForge entity held as such (`RF::System.List`) hands back that
+               // A routine called on a Revare entity held as such (`RA::System.List`) hands back that
                // world's value too.
                routine is not { Kind: RoutineKind.CommonRoutine } && callee is MemberExpression
                {

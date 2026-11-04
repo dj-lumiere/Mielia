@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -15,7 +15,7 @@ public class FalseBuildErrorRegressionTests
     [Fact]
     public void Analyze_VariantDeclaredAfterHolder_ArmsMatch()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        record Holder
                                            inner: AnyService
 
@@ -41,7 +41,7 @@ public class FalseBuildErrorRegressionTests
     [Fact]
     public void Analyze_WatchedOfEntity_Builds()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        import ObjectHacker
 
                                        entity Session
@@ -62,7 +62,7 @@ public class FalseBuildErrorRegressionTests
     [Fact]
     public void Analyze_WatchedBuiltFromEntity_Errors()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                                         import ObjectHacker
 
                                                         entity Session

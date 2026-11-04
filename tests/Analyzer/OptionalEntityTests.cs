@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -15,7 +15,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_NoneIntoListOfEntities_Fails()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Box
                                            n: Int
 
@@ -31,7 +31,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_NoneIntoListOfOptionalEntities_Builds()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Box
                                            n: Int
 
@@ -48,7 +48,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_OptionalEntityIntoEntityParameter_Fails()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Box
                                            n: Int
 
@@ -67,7 +67,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_WhenNoneArmReturns_NameIsNarrowed()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Box
                                            n: Int
 
@@ -83,11 +83,11 @@ public class OptionalEntityTests
         Assert.Empty(collection: result.Errors);
     }
 
-    /// <summary>Reading through an <c>E?</c> before checking it is SF-S619.</summary>
+    /// <summary>Reading through an <c>E?</c> before checking it is MI-S619.</summary>
     [Fact]
     public void Analyze_ReadThroughUncheckedOptionalEntity_Fails()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Box
                                            n: Int
 
@@ -103,7 +103,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_MemberPathChecked_IsTheEntity()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Cell
                                            next: Cell?
                                            value: Int
@@ -126,7 +126,7 @@ public class OptionalEntityTests
     [Fact]
     public void Analyze_MemberPathAssigned_IsOptionalAgain()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        entity Cell
                                            next: Cell?
                                            value: Int

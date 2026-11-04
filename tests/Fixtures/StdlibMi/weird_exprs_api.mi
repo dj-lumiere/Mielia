@@ -1,0 +1,96 @@
+module Tests/StdlibMi/WeirdExprsApi
+
+import IO/Console
+import EmitterTools
+
+# Mielia's twin of Revare's weird_exprs_api: expressions that are legal but stack features the way a real
+# program does. Each line is a combination that broke once, kept here so it stays fixed.
+
+choice Light
+    RED
+    AMBER
+    GREEN
+
+record Box[T]
+    item: T
+
+routine wrap[T](x: T) -> Box[T]
+    return Box[T](item: x)
+
+routine look(n: Int) -> Int
+    if n < 0
+        throw InvalidValueError(input: "negative", target: "Int")
+    if n == 0
+        throw AbsentValueError()
+    return n
+
+routine three() -> List[Int]
+    return [1, 2, 3]
+
+routine names(lights: List[Light]) -> Text
+    var out = ""
+    for light in lights
+        out = out + f"{light} "
+    return out
+
+routine arm_fstring(m: Int?, other: Int?) -> Text
+    when m
+        is None => return f"none {other is None}"
+        else as v => return f"{v} {other is None} {(v + 1) * 2}"
+
+routine fetch(id: Int) -> Int
+    waitfor(5ms)
+    return id * 10
+
+routine start()
+    # A call on a shared list inside an f-string hole runs once.
+    var xs = [3, 1, 2]
+    show(f"sorted_in_hole: {xs.sorted()} {xs.sorted().count()}")
+
+    # A loop over a list nothing names, built by a call or a method.
+    var total = 0
+    for x in three()
+        total = total + x
+    var words = 0
+    for w in "a b c".words()
+        words = words + 1
+    show(f"each_over_call: {total} {words}")
+
+    # `??` takes the fallback for every arm that is not the value.
+    var a = check "x".to[Int]() ?? 7
+    var b = check look(n: -1) ?? 1
+    var c = check look(n: 0) ?? 2
+    var d = check look(n: 5) ?? 3
+    show(f"fallback_everywhere: {a} {b} {c} {d}")
+
+    # A failable creator with type arguments, recovered.
+    var bad = try "x".serialize().to[List[Int]]()
+    var good = try three().serialize().to[List[Int]]()
+    show(f"generic_ctor_recovered: {bad is None} {good is None}")
+
+    # End-relative positions and slices on Int indices.
+    show(f"slices_from_the_back: {xs[^1]} {xs[1 til ^0].count()} {xs[^2 til ^0][0]}")
+
+    # A `when` inside a `for` that leaves the loop from one arm.
+    var seen = 0
+    for x in three()
+        when x
+            == 3 => break
+            else => seen = seen + x
+    show(f"when_in_each: {seen}")
+
+    # A choice's cases handed to a routine that takes Mielia's own list.
+    show(f"all_cases: {names(lights: Light.all_cases())}{Light.count() * 10}")
+
+    # A type argument that mentions the parameter's own name.
+    var outer = wrap[Box[Int]](x: wrap[Int](x: 7))
+    show(f"box_of_box: {outer.item.item + 1}")
+
+    # jobs gathered from a literal held in a name, inside an f-string hole.
+    var jobs = [fetch.to[Work](id: 1), fetch.to[Work](id: 2)]
+    show(f"gather_in_hole: {jobs.gather()}")
+
+    # An f-string hole inside a `when` arm reads `is` as a test.
+    show(f"arm_fstring: {arm_fstring(m: 4, other: none)} / {arm_fstring(m: none, other: 1)}")
+    show("DONE")
+    return

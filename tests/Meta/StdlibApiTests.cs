@@ -2,10 +2,10 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
-/// Runs each <c>tests/Fixtures/Stdlib/*.rf</c> fixture through <c>buildandrun</c> and
+/// Runs each <c>tests/Fixtures/Stdlib/*.rr</c> fixture through <c>buildandrun</c> and
 /// diffs its stdout against the sibling <c>.expected.txt</c> snapshot. Provides
 /// end-to-end behavior coverage for stdlib types/routines that <c>validate-stdlib</c>
 /// (parse-and-typecheck only) does not catch.
@@ -28,103 +28,103 @@ public sealed partial class StdlibApiTests
 
     private const string HarnessModule = "StdlibHarness";
 
-    // Suflae (.sf) sibling harness. SF fixtures live under a DISTINCT namespace prefix
-    // (Tests/StdlibSf/*) and their own fixtures dir so the SF bundle's prefix import pulls only `.sf`
-    // files — a shared prefix would drag `.rf` fixtures into the SF project and trip BuildDriver's
-    // cross-language import guard. SF reuses the RazorForge stdlib wholesale (SF's System IS RF's System),
+    // Mielia (.mi) sibling harness. MI fixtures live under a DISTINCT namespace prefix
+    // (Tests/StdlibMi/*) and their own fixtures dir so the MI bundle's prefix import pulls only `.mi`
+    // files — a shared prefix would drag `.rr` fixtures into the MI project and trip BuildDriver's
+    // cross-language import guard. MI reuses the Revare stdlib wholesale (MI's System IS RA's System),
     // so the ONLY difference here is the fixtures dir, entry extension, module name, and library path.
-    private static readonly string SuflaeFixturesDir = Path.Combine(path1: RepoRoot,
+    private static readonly string MieliaFixturesDir = Path.Combine(path1: RepoRoot,
         path2: "tests",
         path3: "Fixtures",
-        path4: "StdlibSf");
+        path4: "StdlibMi");
 
-    private static readonly string SuflaeHarnessDir = Path.Combine(path1: RepoRoot,
+    private static readonly string MieliaHarnessDir = Path.Combine(path1: RepoRoot,
         path2: "tests",
         path3: "Fixtures",
-        path4: "SuflaeHarness");
+        path4: "MieliaHarness");
 
-    private const string SuflaeHarnessModule = "SuflaeHarness";
+    private const string MieliaHarnessModule = "MieliaHarness";
 
     [GeneratedRegex(pattern: @"^\s*module\s+(\S+)\s*$")]
     private static partial Regex ModuleRe();
 
     [GeneratedRegex(
         pattern:
-        @"error\[RF-|Warning:|Codegen bug|Synthesized body codegen failed|Unresolved generic|Error type found|undefined symbol|never defined|MARKER-LEAK|Unhandled exception|\bE0\d")]
+        @"error\[RA-|Warning:|Codegen bug|Synthesized body codegen failed|Unresolved generic|Error type found|undefined symbol|never defined|MARKER-LEAK|Unhandled exception|\bE0\d")]
     private static partial Regex StderrDiagnosticRe();
 
     /// <summary>
-    /// Suflae (.sf) sibling of the stdlib harness. Bundles every <c>StdlibSf/*.sf</c> fixture into one
-    /// <c>all_suflae.sf</c> (an SF project — entry extension picks the language), compiles + runs it
-    /// ONCE over the shared RazorForge stdlib, and diffs each fixture's section against its snapshot.
-    /// Proves SF programs behave correctly on the borrowed RF System; where a <c>StdlibSf</c> fixture
+    /// Mielia (.mi) sibling of the stdlib harness. Bundles every <c>StdlibMi/*.mi</c> fixture into one
+    /// <c>all_mielia.mi</c> (an MI project — entry extension picks the language), compiles + runs it
+    /// ONCE over the shared Revare stdlib, and diffs each fixture's section against its snapshot.
+    /// Proves MI programs behave correctly on the borrowed RA System; where a <c>StdlibMi</c> fixture
     /// shares a stem with a <c>Stdlib</c> fixture, the equivalence test below locks their snapshots
     /// identical so the two frontends are held to the same observable behavior.
     /// </summary>
     [Fact]
-    public void SuflaeHarness_AllFixturesOutputMatchExpected()
+    public void MieliaHarness_AllFixturesOutputMatchExpected()
     {
-        if (!Directory.Exists(path: SuflaeFixturesDir) || !Directory
-                                                          .EnumerateFiles(path: SuflaeFixturesDir,
-                                                               searchPattern: "*.sf")
+        if (!Directory.Exists(path: MieliaFixturesDir) || !Directory
+                                                          .EnumerateFiles(path: MieliaFixturesDir,
+                                                               searchPattern: "*.mi")
                                                           .Any())
         {
-            return; // No SF fixtures authored yet — nothing to assert.
+            return; // No MI fixtures authored yet — nothing to assert.
         }
 
-        int fixtureCount = RunFixtureBundle(fixturesDir: SuflaeFixturesDir,
-            glob: "*.sf",
-            harnessDir: SuflaeHarnessDir,
-            harnessModule: SuflaeHarnessModule,
-            bundleFileName: "all_suflae.sf",
-            packageName: "suflae-harness",
-            libraryRel: "../StdlibSf");
-        // The early return above guarantees at least one .sf fixture; confirm the bundle actually ran it.
+        int fixtureCount = RunFixtureBundle(fixturesDir: MieliaFixturesDir,
+            glob: "*.mi",
+            harnessDir: MieliaHarnessDir,
+            harnessModule: MieliaHarnessModule,
+            bundleFileName: "all_mielia.mi",
+            packageName: "mielia-harness",
+            libraryRel: "../StdlibMi");
+        // The early return above guarantees at least one .mi fixture; confirm the bundle actually ran it.
         Assert.True(condition: fixtureCount > 0,
-            userMessage: "SF fixtures exist but the harness discovered none to run.");
+            userMessage: "MI fixtures exist but the harness discovered none to run.");
     }
 
     /// <summary>
-    /// Equivalence lock: every fixture stem present in BOTH <c>Stdlib</c> (.rf) and <c>StdlibSf</c>
-    /// (.sf) must have byte-identical (normalized) expected output. This is what makes the SF fixture
-    /// an equivalence test rather than a standalone one — porting a .rf fixture to .sf and keeping the
+    /// Equivalence lock: every fixture stem present in BOTH <c>Stdlib</c> (.rr) and <c>StdlibMi</c>
+    /// (.mi) must have byte-identical (normalized) expected output. This is what makes the MI fixture
+    /// an equivalence test rather than a standalone one — porting a .rr fixture to .mi and keeping the
     /// same snapshot asserts the two frontends produce the SAME observable behavior over the shared
-    /// stdlib. If the SF output legitimately differs (e.g. a genuinely SF-only surface), give that
-    /// fixture a stem with no .rf counterpart so it is exempt.
+    /// stdlib. If the MI output legitimately differs (e.g. a genuinely MI-only surface), give that
+    /// fixture a stem with no .rr counterpart so it is exempt.
     /// </summary>
     [Fact]
-    public void SuflaeAndRazorForge_SharedFixtures_HaveIdenticalExpected()
+    public void MieliaAndRevare_SharedFixtures_HaveIdenticalExpected()
     {
-        if (!Directory.Exists(path: SuflaeFixturesDir))
+        if (!Directory.Exists(path: MieliaFixturesDir))
         {
             return;
         }
 
         var mismatches = new List<string>();
-        foreach (string sfExpected in Directory.EnumerateFiles(path: SuflaeFixturesDir,
+        foreach (string miExpected in Directory.EnumerateFiles(path: MieliaFixturesDir,
                      searchPattern: "*.expected.txt"))
         {
-            string stem = Path.GetFileName(path: sfExpected);
-            string rfExpected = Path.Combine(path1: FixturesDir, path2: stem);
-            if (!File.Exists(path: rfExpected))
+            string stem = Path.GetFileName(path: miExpected);
+            string raExpected = Path.Combine(path1: FixturesDir, path2: stem);
+            if (!File.Exists(path: raExpected))
             {
-                continue; // SF-only fixture — exempt.
+                continue; // MI-only fixture — exempt.
             }
 
-            // Canonicalize the namespace before comparing. SF fixtures live under `Tests/StdlibSf/*`
-            // (their own namespace so the SF bundle's prefix import pulls only `.sf` files), so any
+            // Canonicalize the namespace before comparing. MI fixtures live under `Tests/StdlibMi/*`
+            // (their own namespace so the MI bundle's prefix import pulls only `.mi` files), so any
             // fixture that prints its own fully-qualified type name (via `diagnose` / `:?`) emits
-            // `Tests/StdlibSf/...` where its `.rf` twin emits `Tests/Stdlib/...`. That's a naming
+            // `Tests/StdlibMi/...` where its `.rr` twin emits `Tests/Stdlib/...`. That's a naming
             // artifact of the split, NOT a behavioral difference — fold it out so equivalence tracks
             // real observable behavior only.
             static string Canon(string s)
             {
                 return NormalizeForCompare(s: s)
-                   .Replace(oldValue: "Tests/StdlibSf", newValue: "Tests/Stdlib");
+                   .Replace(oldValue: "Tests/StdlibMi", newValue: "Tests/Stdlib");
             }
 
-            if (Canon(s: File.ReadAllText(path: rfExpected)) !=
-                Canon(s: File.ReadAllText(path: sfExpected)))
+            if (Canon(s: File.ReadAllText(path: raExpected)) !=
+                Canon(s: File.ReadAllText(path: miExpected)))
             {
                 mismatches.Add(item: stem);
             }
@@ -132,9 +132,9 @@ public sealed partial class StdlibApiTests
 
         Assert.True(condition: mismatches.Count == 0,
             userMessage:
-            "Guarded RF/SF fixtures have divergent expected output (equivalence broken): " +
+            "Guarded RA/MI fixtures have divergent expected output (equivalence broken): " +
             string.Join(separator: ", ", values: mismatches) +
-            ". Reconcile the snapshots, or rename the SF fixture stem to exempt it.");
+            ". Reconcile the snapshots, or rename the MI fixture stem to exempt it.");
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public sealed partial class StdlibApiTests
     /// <paramref name="glob"/> (importing each by its declared module, calling its <c>start()</c> via the
     /// module leaf), compiles + runs the ONE program, splits combined stdout on the
     /// <c>##### stem #####</c> delimiters, and diffs each section against its <c>.expected.txt</c>. Guarded
-    /// by the RazorForge (.rf) and Suflae (.sf) harnesses — the language is selected by the entry file's
+    /// by the Revare (.rr) and Mielia (.mi) harnesses — the language is selected by the entry file's
     /// extension, so the only per-language inputs are the fixtures dir, glob, module name, and paths.
     /// Returns the number of fixtures discovered and bundled (0 = nothing ran).
     /// </summary>
@@ -161,7 +161,7 @@ public sealed partial class StdlibApiTests
                 libraryRel: libraryRel);
 
         // 2) Compile + run the ONE program (cwd = repo root so relative resource paths resolve).
-        FixtureRun run = RunHarness(harnessRf: harnessSrc);
+        FixtureRun run = RunHarness(harnessRa: harnessSrc);
         Assert.True(condition: run is { ExitCode: 0, TimedOut: false },
             userMessage:
             $"Harness buildandrun failed (exit={run.ExitCode}, timedOut={run.TimedOut}).\n" +
@@ -221,20 +221,20 @@ public sealed partial class StdlibApiTests
         return entries.Count;
     }
 
-    /// <summary>Suflae in-process compile twin — see <see cref="StdlibHarness_InProcessCompileSucceeds"/>.</summary>
+    /// <summary>Mielia in-process compile twin — see <see cref="StdlibHarness_InProcessCompileSucceeds"/>.</summary>
     [Fact]
-    public void SuflaeHarness_InProcessCompileSucceeds()
+    public void MieliaHarness_InProcessCompileSucceeds()
     {
-        AssertBundleCompilesInProcess(fixturesDir: SuflaeFixturesDir,
-            glob: "*.sf",
+        AssertBundleCompilesInProcess(fixturesDir: MieliaFixturesDir,
+            glob: "*.mi",
             harnessDir: Path.Combine(path1: RepoRoot,
                 path2: "tests",
                 path3: "Fixtures",
-                path4: "SuflaeHarnessInProc"),
-            harnessModule: "SuflaeHarnessInProc",
-            bundleFileName: "all_suflae_inproc.sf",
-            packageName: "suflae-harness-inproc",
-            libraryRel: "../StdlibSf");
+                path4: "MieliaHarnessInProc"),
+            harnessModule: "MieliaHarnessInProc",
+            bundleFileName: "all_mielia_inproc.mi",
+            packageName: "mielia-harness-inproc",
+            libraryRel: "../StdlibMi");
     }
 
     /// <summary>
@@ -253,7 +253,7 @@ public sealed partial class StdlibApiTests
                                         .OrderBy(keySelector: p => p,
                                              comparer: StringComparer.Ordinal))
         {
-            string? module = ReadDeclaredModule(rfPath: src);
+            string? module = ReadDeclaredModule(raPath: src);
             if (module == null)
             {
                 continue;
@@ -267,7 +267,7 @@ public sealed partial class StdlibApiTests
                 throw new Xunit.Sdk.XunitException(
                     userMessage:
                     $"Harness leaf collision '{leaf}': {other} vs {module} — module-qualified leaf calls " +
-                    "would be ambiguous (RF-S513). Rename one fixture's module leaf.");
+                    "would be ambiguous (RA-S513). Rename one fixture's module leaf.");
             }
 
             leaves[key: leaf] = module;
@@ -292,7 +292,7 @@ public sealed partial class StdlibApiTests
         File.WriteAllText(path: harnessSrc, contents: string.Join(separator: "\n", values: lines));
 
         string manifest =
-            $"[package]\nname = \"{packageName}\"\nversion = \"0.0.1\"\nrazorforge-version = \"0.1.0\"\n\n" +
+            $"[package]\nname = \"{packageName}\"\nversion = \"0.0.1\"\nrevare-version = \"0.1.0\"\n\n" +
             $"[target]\nexecutable = \"{harnessModule}\"\nmode = \"debug\"\nmodule_paths = [\"{libraryRel}\"]\n";
         File.WriteAllText(path: Path.Combine(path1: harnessDir, path2: "config.toml"),
             contents: manifest);
@@ -332,9 +332,9 @@ public sealed partial class StdlibApiTests
     }
 
     /// <summary>Reads the declared <c>module</c> path of a fixture (utf-8-sig for BOM), or null.</summary>
-    private static string? ReadDeclaredModule(string rfPath)
+    private static string? ReadDeclaredModule(string raPath)
     {
-        foreach (string line in File.ReadLines(path: rfPath))
+        foreach (string line in File.ReadLines(path: raPath))
         {
             Match m = ModuleRe()
                .Match(input: line);
@@ -392,12 +392,12 @@ public sealed partial class StdlibApiTests
     }
 
     /// <summary>Runs <c>buildandrun</c> on the harness program with the harness dir as cwd.</summary>
-    private static FixtureRun RunHarness(string harnessRf)
+    private static FixtureRun RunHarness(string harnessRa)
     {
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: harnessRf), "buildandrun", harnessRf },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: harnessRa), "buildandrun", harnessRa },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             // The compiled program writes UTF-8 (e.g. an em-dash in a fixture string). Without pinning
@@ -416,7 +416,7 @@ public sealed partial class StdlibApiTests
                 [key: "DOTNET_gcServer"] = "0", [key: "DOTNET_GCConserveMemory"] = "9",
                 // The compiled program flushes every line, so output written before a hang or a
                 // crash (the last ##### fixture ##### marker) reaches the failure message.
-                [key: "RF_FLUSH_STDOUT"] = "1"
+                [key: "RA_FLUSH_STDOUT"] = "1"
             }
         };
         using var p = Process.Start(startInfo: psi)!;
@@ -506,14 +506,14 @@ public sealed partial class StdlibApiTests
     /// </summary>
     private const int MaxRunAttempts = 2;
 
-    private static string RunFixture(string rfPath)
+    private static string RunFixture(string raPath)
     {
-        string fixture = Path.GetFileName(path: rfPath);
+        string fixture = Path.GetFileName(path: raPath);
         FixtureRun last = default;
 
         for (int attempt = 1; attempt <= MaxRunAttempts; attempt++)
         {
-            last = RunFixtureOnce(rfPath: rfPath);
+            last = RunFixtureOnce(raPath: raPath);
 
             if (last.TimedOut)
             {
@@ -571,7 +571,7 @@ public sealed partial class StdlibApiTests
         bool TimedOut,
         int TimeoutMs);
 
-    private static FixtureRun RunFixtureOnce(string rfPath)
+    private static FixtureRun RunFixtureOnce(string raPath)
     {
         // Invoke the already-built builder assembly directly. Using
         // `dotnet run --project …` here would re-evaluate the project file on
@@ -580,7 +580,7 @@ public sealed partial class StdlibApiTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rfPath), "buildandrun", rfPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: raPath), "buildandrun", raPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -597,7 +597,7 @@ public sealed partial class StdlibApiTests
                 [key: "DOTNET_gcServer"] = "0", [key: "DOTNET_GCConserveMemory"] = "9",
                 // The compiled program flushes every line, so output written before a hang or a
                 // crash (the last ##### fixture ##### marker) reaches the failure message.
-                [key: "RF_FLUSH_STDOUT"] = "1"
+                [key: "RA_FLUSH_STDOUT"] = "1"
             }
         };
         using var p = Process.Start(startInfo: psi)!;
@@ -649,11 +649,11 @@ public sealed partial class StdlibApiTests
 
     private static string LocateRepoRoot()
     {
-        // Walk up from the test assembly until we find Suflae.csproj (the project folder holding tests/).
+        // Walk up from the test assembly until we find Mielia.csproj (the project folder holding tests/).
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -669,6 +669,6 @@ public sealed partial class StdlibApiTests
 
         throw new InvalidOperationException(
             message:
-            "Could not locate Suflae.csproj walking up from test assembly directory.");
+            "Could not locate Mielia.csproj walking up from test assembly directory.");
     }
 }

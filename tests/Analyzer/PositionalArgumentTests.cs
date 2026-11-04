@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -15,7 +15,7 @@ public class PositionalArgumentTests
     [Fact]
     public void Analyze_ThreeUnlabeledArguments_FillInOrder()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        routine volume(width: Int, height: Int, depth: Int) -> Int
                                            return width * height * depth
 
@@ -31,7 +31,7 @@ public class PositionalArgumentTests
     [Fact]
     public void Analyze_NameOfAnotherParameterInTheWrongPlace_NeedsLabel()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                        routine move(count: Int, from: Int, tmp: Int, to: Int) -> Int
                                            return count
 

@@ -1,14 +1,14 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
 /// The declaration states what a routine gives back. A routine without <c>-&gt; T</c> gives nothing back, so a
-/// <c>return</c> with a value in it is SF-S301, and a bare <c>return</c> in a routine that gives back a value is
-/// SF-S301 too. The value never sets the result type.
+/// <c>return</c> with a value in it is MI-S301, and a bare <c>return</c> in a routine that gives back a value is
+/// MI-S301 too. The value never sets the result type.
 /// </summary>
 public class ReturnValueTests
 {
@@ -25,7 +25,7 @@ public class ReturnValueTests
                         show(is_big(p: Point(x: 5)))
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: "value_without_arrow.sf");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "value_without_arrow.mi");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                          e.Message.Contains(value: "'is_big' gives nothing back") &&
@@ -42,7 +42,7 @@ public class ReturnValueTests
                             return false
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: "bare_in_value.sf");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "bare_in_value.mi");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                          e.Message.Contains(value: "'is_big' gives back a 'Bool'"));
@@ -58,13 +58,13 @@ public class ReturnValueTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: "mixed_returns.sf");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "mixed_returns.mi");
         Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.ReturnTypeMismatch &&
                             e.Message.Contains(value: "'mixed' gives nothing back"));
     }
 
-    /// <summary>A Suflae routine that gives nothing back ends without <c>return</c>, and an early bare
+    /// <summary>A Mielia routine that gives nothing back ends without <c>return</c>, and an early bare
     /// <c>return</c> in it is fine.</summary>
     [Fact]
     public void Analyze_NoneRoutineEndsWithoutReturn_NoError()
@@ -78,12 +78,12 @@ public class ReturnValueTests
                         greet(x: 5)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: "none_without_return.sf");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "none_without_return.mi");
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code is SemanticDiagnosticCode.ReturnTypeMismatch or SemanticDiagnosticCode.MissingReturn);
     }
 
-    /// <summary>A lambda's value that does not fit the <c>Callable</c> it goes to is SF-S502.</summary>
+    /// <summary>A lambda's value that does not fit the <c>Callable</c> it goes to is MI-S502.</summary>
     [Fact]
     public void Analyze_LambdaValueIntoNoneCallable_ReportsError()
     {
@@ -94,7 +94,7 @@ public class ReturnValueTests
                         run(f: x => x > 3)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source, fileName: "lambda_into_none.sf");
+        AnalysisResult result = AnalyzeSaMielia(source: source, fileName: "lambda_into_none.mi");
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch);
     }

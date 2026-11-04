@@ -1,0 +1,18 @@
+module Tests/StdlibMi/ForTypedRangeMi
+
+# A type after the loop's name gives the bounds of the range written in the loop their type: S64 instead of Int,
+# and a U8 range that ends at 255 stops there. A bound made of bare numbers takes the other bound's type.
+
+routine start()
+    var total: S64 = 0
+    for i: S64 in 1 to 10 ** 10 by 10 ** 9
+        total += i
+    show(total)
+    var count = 0
+    for k: U8 in 250 to 255
+        count += 1
+    show(count)
+    var sum: S64 = 0
+    for j in S64(1) to 10 ** 3
+        sum += j
+    show(sum)

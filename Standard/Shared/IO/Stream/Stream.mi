@@ -1,0 +1,36 @@
+module IO/Stream
+
+# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A one-way byte flow read from the front only: a socket, pipe, or console end, or a {File} opened for
+### sequential reading. Bytes go in at one end and come out at the other in the order they went in, so a stream
+### has no length, no index and no seek. `pull` takes the next bytes and moves past them, and an empty result
+### means end-of-stream (EOF). A source is the end you pull from, a {Sink} the end you push into. Places
+### (memory, a box, an atomic) use `load` / `store` instead: reading a place again gives the same value.
+###
+### `Enterable` is ORTHOGONAL: a source that owns a closable OS resource (a file descriptor, a socket)
+### additionally obeys {Enterable} so `using` closes it deterministically ({FileSource}); a source over
+### a never-closed process-global stream (stdin) does not, and is used directly.
+@ra("Source")
+protocol Source
+    ### Pulls up to `max` bytes from the source and moves past them. May return fewer than `max` bytes
+    ### (a short read is normal); an empty `Bytes` (count 0) signals EOF. There is no length to query
+    ### first — a stream's extent is unknown until it ends.
+    ### :param max: The maximum number of bytes to pull.
+    ### :returns: The bytes pulled, or an empty `Bytes` at EOF.
+    routine Me.pull(max: U64) -> Bytes
+
+### A byte sink you can only push into — a socket, pipe, or console end, or a {File} opened for
+### sequential writing or appending. Like {Source} it has no length and no position; you just `push`
+### bytes into the flow. As with `Source`, {Enterable} is orthogonal: a resource-owning sink ({FileSink})
+### also obeys it so `using` flushes and closes; a process-global sink (stdout/stderr) does not.
+@ra("Sink")
+protocol Sink
+    ### Pushes `data` into the sink, returning the number of bytes accepted (may be fewer than
+    ### `data.count()` — a short push is normal; retry the remainder).
+    ### :param data: The bytes to push.
+    ### :returns: The number of bytes accepted.
+    routine Me.push(data: Bytes) -> U64
+    ### Pushes any buffered bytes to the underlying medium.
+    routine Me.flush()

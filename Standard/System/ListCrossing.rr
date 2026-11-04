@@ -1,0 +1,13 @@
+module System
+
+# The crossing from Revare's list to Mielia's, written in Revare because its receiver is Revare's list.
+# The other direction, `xs.to[RA::List]()`, is in List.mi.
+
+### Makes a Mielia list of the elements of a list from Revare code (a Revare library routine's result):
+### `rf_list.to[List]()`.
+### :returns: A new Mielia list of copies of the elements.
+routine List[T].to[MI::System.List[T]]() -> MI::System.List[T]
+    var result = MI::System.List[T](capacity: me.count.to[Int]())
+    for element in me
+        result.add_last(value: element)
+    return steal result

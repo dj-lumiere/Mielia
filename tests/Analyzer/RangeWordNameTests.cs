@@ -1,6 +1,6 @@
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -13,7 +13,7 @@ public class RangeWordNameTests
     [Fact]
     public void Analyze_RangeWordsAsNames_Build()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: """
+        AnalysisResult result = AnalyzeSaMielia(source: """
                                                 record Step
                                                     from: Int
                                                     to: Int

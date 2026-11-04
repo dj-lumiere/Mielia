@@ -1,27 +1,27 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
-/// A Suflae result left unused is a notice: the line builds as written, and check, lint and the language server ask
+/// A Mielia result left unused is a notice: the line builds as written, and check, lint and the language server ask
 /// whether the result was meant.
 /// </summary>
 public class NoticeTests
 {
     [Fact]
-    public void Analyze_SuflaeUnusedResult_IsANoticeNotAWarning()
+    public void Analyze_MieliaUnusedResult_IsANoticeNotAWarning()
     {
-        AnalysisResult result = AnalyzeSuflae(source: """
+        AnalysisResult result = AnalyzeMielia(source: """
                                                         routine get_value() -> Text
                                                             return "x"
 
                                                         routine test()
                                                             get_value()
                                                             return
-                                                        """, fileName: "unused_result.sf");
+                                                        """, fileName: "unused_result.mi");
         Assert.Empty(collection: result.Errors);
         Assert.DoesNotContain(collection: result.Warnings,
             filter: w => w.Code == SemanticWarningCode.UnusedRoutineReturnValue);
@@ -39,7 +39,7 @@ public class NoticeTests
     [Fact]
     public void DocNotes_WrongParamLines_AreNotesEverywhere_NoDocOnlyWhenImported()
     {
-        List<SemanticWarning> alone = DocNotes(notices: AnalyzeSuflae(source: """
+        List<SemanticWarning> alone = DocNotes(notices: AnalyzeMielia(source: """
                                                                               routine bare(x: Int) -> Int
                                                                                   return x
 
@@ -49,11 +49,11 @@ public class NoticeTests
                                                                               routine add(a: Int, b: Int) -> Int
                                                                                   return a + b
                                                                               """,
-            fileName: "/virtual/docs/doc_notes.sf").Notices);
+            fileName: "/virtual/docs/doc_notes.mi").Notices);
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment);
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksReturns);
         Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksParam &&
-                                                       n.Message.Contains(value: "'b'") && n.CodeString == "SF-W306");
+                                                       n.Message.Contains(value: "'b'") && n.CodeString == "MI-W306");
         Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentNamesUnknownParam &&
                                                        n.Message.Contains(value: "'c'"));
     }
@@ -61,15 +61,15 @@ public class NoticeTests
     [Fact]
     public void DocNotes_RoutineOfAnImportedModule_NeedsADocComment()
     {
-        const string lib = "/virtual/docs/doclib.sf";
-        const string entry = "/virtual/docs/docuse.sf";
-        var libProgram = ParseSuflae(source: "module DocLib\n\nroutine bare(x: Int) -> Int\n    return x\n", fileName: lib);
-        var entryProgram = ParseSuflae(source: "import DocLib\n\nroutine start()\n    return\n", fileName: entry);
-        var analyzer = new Builder.Verification.SemanticVerifier(language: TypeModel.Enums.Language.Suflae);
+        const string lib = "/virtual/docs/doclib.mi";
+        const string entry = "/virtual/docs/docuse.mi";
+        var libProgram = ParseMielia(source: "module DocLib\n\nroutine bare(x: Int) -> Int\n    return x\n", fileName: lib);
+        var entryProgram = ParseMielia(source: "import DocLib\n\nroutine start()\n    return\n", fileName: entry);
+        var analyzer = new Builder.Verification.SemanticVerifier(language: TypeModel.Enums.Language.Mielia);
         AnalysisResult result = analyzer.AnalyzeMultiple(files: [(libProgram, lib), (entryProgram, entry)]);
         List<SemanticWarning> notes = DocNotes(notices: result.Notices);
         Assert.Contains(collection: notes, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment &&
-                                                       n.Location.FileName == lib && n.CodeString == "SF-W305");
+                                                       n.Location.FileName == lib && n.CodeString == "MI-W305");
         Assert.DoesNotContain(collection: notes, filter: n => n.Location.FileName == entry);
     }
 }

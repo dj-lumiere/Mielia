@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// End-to-end check of <c>set_exit_code</c>: a program that returns from <c>start</c> normally ends with the status
 /// it set last, which the builder's <c>main</c> returns after <c>start</c>. Builds and runs
-/// <c>tests/Fixtures/ExitCode/set_exit_code.sf</c> through <c>buildandrun</c>.
+/// <c>tests/Fixtures/ExitCode/set_exit_code.mi</c> through <c>buildandrun</c>.
 /// </summary>
 public sealed class ExitCodeTests
 {
@@ -17,7 +17,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void AlertBytes_WritesTheBytesRaw()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "alert_bytes.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "alert_bytes.mi");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -29,7 +29,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void SetExitCode_LastCallIsTheExitStatus()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "set_exit_code.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "set_exit_code.mi");
 
         Assert.True(condition: exit == 42,
             userMessage: $"expected exit 42, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -42,7 +42,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void ThrowInPlainRoutineUnderTry_CrashesWithItsMessage()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "throw_in_plain_under_try.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "throw_in_plain_under_try.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -59,7 +59,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void BareFailureAfterKeptCheck_CrashesWithItsOwnMessage()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "mold_bare_crash.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "mold_bare_crash.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -74,7 +74,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void LambdaFailureWithoutKeyword_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "lambda_bare_crash.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "lambda_bare_crash.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -91,7 +91,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void FailureInsidePlainHelperUnderTry_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "wall_under_try.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "wall_under_try.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -109,7 +109,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void RangeStepZero_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "range_step_zero.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "range_step_zero.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -124,7 +124,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void DeepCalls_CrashLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "deep_calls.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "deep_calls.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -140,7 +140,7 @@ public sealed class ExitCodeTests
     [Fact]
     public void SharedEntityDeadlock_CrashesLoudly()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "shared_entity_deadlock.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "shared_entity_deadlock.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -164,16 +164,16 @@ public sealed class ExitCodeTests
         try
         {
             foreach (string file in Directory.GetFiles(
-                         path: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "GlobalDeadlock"]), searchPattern: "*.sf"))
+                         path: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "GlobalDeadlock"]), searchPattern: "*.mi"))
             {
                 File.Copy(sourceFileName: file, destFileName: Path.Combine(path1: dir, path2: Path.GetFileName(path: file)));
             }
 
             File.WriteAllText(path: Path.Combine(path1: dir, path2: "config.toml"),
-                contents: "[package]\nname = \"global-deadlock\"\nversion = \"0.0.1\"\nsuflae-version = \"0.5.0\"\n\n" +
+                contents: "[package]\nname = \"global-deadlock\"\nversion = \"0.0.1\"\nmielia-version = \"0.5.0\"\n\n" +
                           $"[target]\nmode = \"{mode}\"\n");
             // A build and a run take well under a minute: a hang fails in 2 minutes (scaled on CI), not 5.
-            (int exit, string stdout, string stderr) = RunSource(sfPath: Path.Combine(path1: dir, path2: "main.sf"),
+            (int exit, string stdout, string stderr) = RunSource(miPath: Path.Combine(path1: dir, path2: "main.mi"),
                 name: $"global deadlock ({mode})", timeoutBaseMs: 120_000);
 
             Assert.True(condition: exit == 82,
@@ -192,95 +192,95 @@ public sealed class ExitCodeTests
         }
     }
 
-    /// <summary>An entity from an imported `.rf` module works as a local and as a member variable of a Suflae entity:
-    /// its routines are built as RazorForge code and it is released once.</summary>
+    /// <summary>An entity from an imported `.rr` module works as a local and as a member variable of a Mielia entity:
+    /// its routines are built as Revare code and it is released once.</summary>
     [Fact]
-    public void RazorForgeEntity_UsedFromSuflae_RunsAndIsReleasedOnce()
+    public void RevareEntity_UsedFromMielia_RunsAndIsReleasedOnce()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.sf", folder: "RfInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.mi", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "2\n12\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A List a `.rf` routine makes and returns stays that module's list: the routine's body is RazorForge
-    /// code, so its construction is not made a shared handle, and the Suflae side reads and converts the list.</summary>
+    /// <summary>A List a `.rr` routine makes and returns stays that module's list: the routine's body is Revare
+    /// code, so its construction is not made a shared handle, and the Mielia side reads and converts the list.</summary>
     [Fact]
-    public void RazorForgeRoutine_ReturnsList_ReadsInSuflae()
+    public void RevareRoutine_ReturnsList_ReadsInMielia()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.sf", folder: "RfInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.mi", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "[1, 4, 9, 16]\n130\n14", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A `.rf` entity is a parameter like a Suflae entity: the routine works on the same object.</summary>
+    /// <summary>A `.rr` entity is a parameter like a Mielia entity: the routine works on the same object.</summary>
     [Fact]
-    public void RazorForgeEntity_Parameter_IsShared()
+    public void RevareEntity_Parameter_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.sf", folder: "RfInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.mi", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A second name for a `.rf` entity reaches the same object, as for a Suflae entity.</summary>
+    /// <summary>A second name for a `.rr` entity reaches the same object, as for a Mielia entity.</summary>
     [Fact]
-    public void RazorForgeEntity_SecondName_IsShared()
+    public void RevareEntity_SecondName_IsShared()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.sf", folder: "RfInterop");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.mi", folder: "RaInterop");
 
         Assert.True(condition: exit == 0,
             userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Equal(expected: "2\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary><c>Int(n)</c> builds an <c>Int</c> from a variable that is one already: SF-S646, which says to use the
+    /// <summary><c>Int(n)</c> builds an <c>Int</c> from a variable that is one already: MI-S646, which says to use the
     /// value as it is, where the LLVM emitter used to stop.</summary>
     [Fact]
     public void IntBuiltFromAnInt_IsS646()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.sf", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.mi", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "SF-S646", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "MI-S646", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "from a value that is an 'Int' already", actualString: stdout + stderr);
     }
 
     /// <summary><c>U8(x)</c> with an <c>S64</c> <c>x</c> would read the bits of <c>x</c> and change the number:
-    /// SF-S655, which points to <c>x.to[U8]()</c>.</summary>
+    /// MI-S655, which points to <c>x.to[U8]()</c>.</summary>
     [Fact]
     public void NumberBuiltFromBits_IsS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.sf", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.mi", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "SF-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'x.to[U8]()'", actualString: stdout + stderr);
     }
 
-    /// <summary><c>T(x)</c> in a generic routine reads bits once <c>make[U8]</c> makes <c>T</c> a <c>U8</c>: SF-S655
+    /// <summary><c>T(x)</c> in a generic routine reads bits once <c>make[U8]</c> makes <c>T</c> a <c>U8</c>: MI-S655
     /// names the instance and points to <c>x.to[T]()</c>.</summary>
     [Fact]
     public void GenericNumberBuiltFromBits_IsS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.sf", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.mi", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "SF-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'T(x)' in 'make[U8]'", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'x.to[T]()'", actualString: stdout + stderr);
     }
 
-    /// <summary><c>Char(n)</c> and <c>Bool(x)</c> read bits too: SF-S655, pointing to <c>Char.from_codepoint</c>
+    /// <summary><c>Char(n)</c> and <c>Bool(x)</c> read bits too: MI-S655, pointing to <c>Char.from_codepoint</c>
     /// and to a comparison.</summary>
     [Fact]
     public void CharAndBoolBuiltFromBits_AreS655()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "char_bool_from_bits.sf", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "char_bool_from_bits.mi", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
         Assert.Contains(expectedSubstring: "'Char.from_codepoint(n: n.to[Int]())'", actualString: stdout + stderr);
@@ -290,20 +290,20 @@ public sealed class ExitCodeTests
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
         string verb = "buildandrun")
     {
-        return RunSource(sfPath: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]), name: fixture,
+        return RunSource(miPath: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]), name: fixture,
             verb: verb);
     }
 
-    /// <summary>Builds and runs (or checks) <paramref name="sfPath"/>, failing the test when it doesn't finish in
+    /// <summary>Builds and runs (or checks) <paramref name="miPath"/>, failing the test when it doesn't finish in
     /// time (a hang) with what the build and the program wrote until then.</summary>
     /// <param name="timeoutBaseMs">The time limit before <see cref="TestHelpers.ChildTimeoutMs"/> scales it.</param>
-    private static (int Exit, string Stdout, string Stderr) RunSource(string sfPath, string name,
+    private static (int Exit, string Stdout, string Stderr) RunSource(string miPath, string name,
         string verb = "buildandrun", int timeoutBaseMs = 300_000)
     {
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: sfPath), verb, sfPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: miPath), verb, miPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -342,7 +342,7 @@ public sealed class ExitCodeTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -357,6 +357,6 @@ public sealed class ExitCodeTests
         }
 
         throw new InvalidOperationException(
-            message: "Could not locate Suflae.csproj walking up from test assembly directory.");
+            message: "Could not locate Mielia.csproj walking up from test assembly directory.");
     }
 }

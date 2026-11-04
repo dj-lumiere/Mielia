@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the Suflae sharing combination programs (C175 step 3).
+"""Generates the Mielia sharing combination programs (C175 step 3).
 
 Each program has a Work and the main task update a count through a handle that was stored into something
 the Work already shares, and print the count. The axes:
@@ -10,7 +10,7 @@ the Work already shares, and print the count. The axes:
   wait   none, or a wait that sits in the same statement as an entity access (see WAITS)
 
 usage: generate.py OUTDIR [--site S] [--dest D] [--value V] [--rounds N] [--only substring]
-Every case is a folder OUTDIR/<name>/ with main.sf and config.toml (debug mode, ThreadSanitizer on).
+Every case is a folder OUTDIR/<name>/ with main.mi and config.toml (debug mode, ThreadSanitizer on).
 """
 import argparse
 import os
@@ -295,7 +295,7 @@ def main():
             for value in a.value or VALUES:
                 if value in ("variant", "nested") and dest in ORDERED_ELEMENTS:
                     # A variant has no hash and no order, and a record with a tuple member variable has none either
-                    # (SF-S150), so a Set or Sorted container refuses them.
+                    # (MI-S150), so a Set or Sorted container refuses them.
                     continue
                 cases.append((f"{site}_{dest}_{value}", program(site, dest, value, a.rounds)))
     if a.wait is not None or not (a.site or a.dest or a.value):
@@ -306,7 +306,7 @@ def main():
             continue
         folder = os.path.join(a.outdir, name)
         os.makedirs(folder, exist_ok=True)
-        with open(os.path.join(folder, "main.sf"), "w") as f:
+        with open(os.path.join(folder, "main.mi"), "w") as f:
             f.write(text)
         cfg = CONFIG.format(name=name)
         if a.no_sanitize:

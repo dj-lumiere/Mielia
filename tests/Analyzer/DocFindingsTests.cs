@@ -1,12 +1,12 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
-/// Forms found while verifying the Suflae documentation that once passed analysis and then failed in the LLVM
+/// Forms found while verifying the Mielia documentation that once passed analysis and then failed in the LLVM
 /// emitter or at link time. Each is a build error now, reported where it is written.
 /// </summary>
 public class DocFindingsTests
@@ -23,7 +23,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.BinaryOperatorNotFound &&
                          e.Message.Contains(value: "'/'"));
@@ -41,7 +41,7 @@ public class DocFindingsTests
                             show(a / b)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.BinaryOperatorNotFound &&
                          e.Message.Contains(value: "a // b") && e.Message.Contains(value: "to[Decimal]()"));
@@ -59,7 +59,7 @@ public class DocFindingsTests
                             show(xs)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch &&
                          e.Message.Contains(value: "'capacity'"));
@@ -84,7 +84,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Equal(expected: 2,
             actual: result.Errors.Count(predicate: e => e.Code == SemanticDiagnosticCode.MemberVariableTypeMismatch));
     }
@@ -103,7 +103,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.RoutineParameterWithoutType);
     }
@@ -133,7 +133,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.CrashOnlyRecovered);
     }
@@ -158,7 +158,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch &&
                             e.Message.Contains(value: "'??'"));
@@ -181,13 +181,13 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
                          e.Message.Contains(value: "creator"));
     }
 
-    /// <summary>A missing protocol routine is named in the types a Suflae program writes: the record itself, no token
+    /// <summary>A missing protocol routine is named in the types a Mielia program writes: the record itself, no token
     /// and no module.</summary>
     [Fact]
     public void Analyze_MissingProtocolRoutine_NamesTheWrittenType()
@@ -206,7 +206,7 @@ public class DocFindingsTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
                          e.Message.Contains(value: "`routine Team.compare(you: Team) -> ComparisonSign`"));
@@ -216,7 +216,7 @@ public class DocFindingsTests
 
     /// <summary>The builder writes a record's `compare` and `hash` only when every member variable has them: an entity
     /// whose declaration doesn't ask for `Comparable` or `Hashable` has neither, so the record's `obeys` line is
-    /// SF-S702 for each.</summary>
+    /// MI-S702 for each.</summary>
     [Fact]
     public void Analyze_RecordHoldingEntity_ComparableAndHashableNeedTheEntitysOwn()
     {
@@ -238,7 +238,7 @@ public class DocFindingsTests
                             show(Keyed(lead: Player(name: "Ada")).lead.name)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
                          e.Message.Contains(value: "`routine Ranked.compare(you: Ranked) -> ComparisonSign`"));
@@ -260,7 +260,7 @@ public class DocFindingsTests
                                 xs.add_last(value: 9)
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ReshapingDuringIteration);
     }

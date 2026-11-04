@@ -1,13 +1,13 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
 /// An emitter hands out each item once, so a <c>for</c> over a named emitter that has certainly run out would run zero
-/// times: SF-S517. That is a second <c>for</c> after one that ended by itself on every path, or a <c>for</c> inside a
+/// times: MI-S517. That is a second <c>for</c> after one that ended by itself on every path, or a <c>for</c> inside a
 /// loop over an emitter made outside it. An emitter left with <c>break</c> goes on where it stopped, and anything that
 /// may refill the name (a new value, a line naming it or its collection) makes it usable again.
 /// </summary>
@@ -16,7 +16,7 @@ public sealed class EmitterReuseTests
     [Fact]
     public void Analyze_SecondForAfterFullWalk_ReportsError()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Routine(body: """
+        AnalysisResult result = AnalyzeSaMielia(source: Routine(body: """
                                                                     var it = xs.emitter()
                                                                     for x in it
                                                                         nothing
@@ -33,7 +33,7 @@ public sealed class EmitterReuseTests
     [Fact]
     public void Analyze_ForInLoopOverEmitterMadeOutside_ReportsError()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Routine(body: """
+        AnalysisResult result = AnalyzeSaMielia(source: Routine(body: """
                                                                     var points = xs.emitter()
                                                                     for q in 0 til 3
                                                                         for point in points
@@ -48,7 +48,7 @@ public sealed class EmitterReuseTests
     [Fact]
     public void Analyze_ForInUntilLoopOverEmitterMadeOutside_ReportsError()
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Routine(body: """
+        AnalysisResult result = AnalyzeSaMielia(source: Routine(body: """
                                                                     var steps = xs.emitter()
                                                                     var n: S64 = 0
                                                                     until n == 2
@@ -120,7 +120,7 @@ public sealed class EmitterReuseTests
                 """)]
     public void Analyze_EmitterUsableAgain_NoError(string body)
     {
-        AnalysisResult result = AnalyzeSaSuflae(source: Routine(body: body));
+        AnalysisResult result = AnalyzeSaMielia(source: Routine(body: body));
         Assert.DoesNotContain(collection: result.Errors, filter: e => e.Code == SemanticDiagnosticCode.EmitterRunOut);
     }
 

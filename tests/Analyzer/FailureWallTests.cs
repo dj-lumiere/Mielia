@@ -1,21 +1,21 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
 /// Failures rise only through failable routines: a <c>throw</c> in a routine that is not failable crashes where it
-/// stands, <c>try</c>/<c>check</c> over an expression that reaches no failable call is SF-S760, a routine value that
-/// may fail goes only to a <c>Callable[...]</c> (SF-S761), and <c>pierce</c> is an ordinary name.
+/// stands, <c>try</c>/<c>check</c> over an expression that reaches no failable call is MI-S760, a routine value that
+/// may fail goes only to a <c>Callable[...]</c> (MI-S761), and <c>pierce</c> is an ordinary name.
 /// </summary>
 public sealed class FailureWallTests
 {
     [Fact]
     public void Throw_InPlainRoutine_Builds()
     {
-        AssertAnalyzesSaSuflae(source: """
+        AssertAnalyzesSaMielia(source: """
                                        routine require_positive(n: S64) -> S64
                                            if n <= 0
                                                throw LogicBreachedError()
@@ -30,7 +30,7 @@ public sealed class FailureWallTests
     [Fact]
     public void Try_OverCallThatCannotFail_Builds()
     {
-        AssertAnalyzesSaSuflae(source: """
+        AssertAnalyzesSaMielia(source: """
                                        routine name_of(n: S64) -> Text
                                            return f"{n}"
                                        routine start()
@@ -42,7 +42,7 @@ public sealed class FailureWallTests
     [Fact]
     public void FailableLambda_ToFailableParameter_IsRecoverable()
     {
-        AssertAnalyzesSaSuflae(source: """
+        AssertAnalyzesSaMielia(source: """
                                        routine apply(f: Callable[(S64,), S64], x: S64) -> S64
                                            return f(x)
                                        routine start()
@@ -55,7 +55,7 @@ public sealed class FailureWallTests
     [Fact]
     public void LambdaThatCanFail_ToCallableParameter_Builds()
     {
-        AssertAnalyzesSaSuflae(source: """
+        AssertAnalyzesSaMielia(source: """
                                        routine apply(f: Callable[(S64,), S64], x: S64) -> S64
                                            return f(x)
                                        routine start()
@@ -69,7 +69,7 @@ public sealed class FailureWallTests
     [Fact]
     public void Pierce_IsAnOrdinaryName()
     {
-        AssertAnalyzesSaSuflae(source: """
+        AssertAnalyzesSaMielia(source: """
                                        record Arrow
                                            pierce: S64
                                        routine pierce(n: S64) -> S64

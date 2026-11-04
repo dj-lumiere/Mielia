@@ -1,10 +1,10 @@
 using System.Text.Json;
 
-namespace Suflae.Tests.Execution;
+namespace Mielia.Tests.Execution;
 
 /// <summary>
 /// End-to-end coverage for the LSP server (<c>src/Execution/LspServer.cs</c>): every request handler
-/// is driven in-process over real, analyzed RazorForge/Suflae documents via <see cref="LspTestHarness"/>.
+/// is driven in-process over real, analyzed Revare/Mielia documents via <see cref="LspTestHarness"/>.
 /// Positions are computed from the source text so the tests stay robust to edits.
 ///
 /// All tests live in one class so they share xUnit's per-class sequential execution — the server keeps
@@ -13,9 +13,9 @@ namespace Suflae.Tests.Execution;
 /// </summary>
 public sealed class LspServerTests
 {
-    private const string Uri = "file:///test/Sample.rf";
+    private const string Uri = "file:///test/Sample.rr";
 
-    // A symbol-rich RazorForge document: free routines, a record with a member routine, a generic
+    // A symbol-rich Revare document: free routines, a record with a member routine, a generic
     // container use, variables, calls, an f-string, and control flow — enough surface to exercise
     // hover / definition / references / completion / signature-help / symbols / semantic tokens.
     private const string Source =
@@ -78,42 +78,42 @@ public sealed class LspServerTests
     }
 
     [Fact]
-    public void Initialize_NamesTheSuflaeServer()
+    public void Initialize_NamesTheMieliaServer()
     {
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(Initialize(id: 1), Shutdown, Exit);
 
-        Assert.Equal(expected: "suflae-lsp", actual: ServerName(reply: LspTestHarness.ReplyWithId(replies: replies, id: 1)));
+        Assert.Equal(expected: "mielia-lsp", actual: ServerName(reply: LspTestHarness.ReplyWithId(replies: replies, id: 1)));
     }
 
     [Fact]
-    public void RazorForgeDocument_IsLeftToTheRazorForgeServer()
+    public void RevareDocument_IsLeftToTheRevareServer()
     {
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
             LspTestHarness.DidOpen(uri: Uri, text: Source),
             Exit);
 
-        // A .rf file is the RazorForge server's: this one publishes nothing for it.
+        // A .rr file is the Revare server's: this one publishes nothing for it.
         Assert.Null(@object: LspTestHarness.Diagnostics(replies: replies, uri: Uri));
     }
 
     [Fact]
-    public void Completion_OffersOnlySuflaeKeywords()
+    public void Completion_OffersOnlyMieliaKeywords()
     {
-        const string sfUri = "file:///test/Keywords.sf";
+        const string miUri = "file:///test/Keywords.mi";
         const string sf =
             "routine start()\n" +
             "    var total = 1\n" +
             "    return\n";
         (int line, int character) = LspTestHarness.PositionOf(text: sf, needle: "total");
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
-            LspTestHarness.DidOpen(uri: sfUri, text: sf, languageId: "suflae"),
-            LspTestHarness.Positional(id: 40, method: "textDocument/completion", uri: sfUri, line: line,
+            LspTestHarness.DidOpen(uri: miUri, text: sf, languageId: "mielia"),
+            LspTestHarness.Positional(id: 40, method: "textDocument/completion", uri: miUri, line: line,
                 character: character + 1),
             Exit);
 
         List<string> labels = CompletionLabels(reply: LspTestHarness.ReplyWithId(replies: replies, id: 40));
         Assert.Contains(expected: "routine", collection: labels);
-        // RazorForge-only keywords are not Suflae's.
+        // Revare-only keywords are not Mielia's.
         Assert.DoesNotContain(expected: "steal", collection: labels);
     }
 
@@ -123,14 +123,14 @@ public sealed class LspServerTests
     [InlineData("### Two numbers side by side.\nrecord Pair\n    a: S64\n    b: S64\n\nroutine start()\n    var p = Pair(a: 1, b: 2)\n    return\n", "Pair(", "side by side")]
     public void Hover_OverType_ShowsItsDocComment(string source, string needle, string doc)
     {
-        // A Suflae standard library type is shown with `@rf(...)` between its doc comment and its header.
+        // A Mielia standard library type is shown with `@ra(...)` between its doc comment and its header.
         string dir = Directory.CreateTempSubdirectory(prefix: "lsp_hover_").FullName;
-        string path = Path.Combine(path1: dir, path2: "main.sf");
+        string path = Path.Combine(path1: dir, path2: "main.mi");
         File.WriteAllText(path: path, contents: source);
         string uri = new System.Uri(uriString: path).AbsoluteUri;
         (int line, int character) = LspTestHarness.PositionOf(text: source, needle: needle);
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
-            LspTestHarness.DidOpen(uri: uri, text: source, languageId: "suflae"),
+            LspTestHarness.DidOpen(uri: uri, text: source, languageId: "mielia"),
             LspTestHarness.Positional(id: 9, method: "textDocument/hover", uri: uri, line: line, character: character),
             Exit);
 
@@ -141,10 +141,10 @@ public sealed class LspServerTests
     }
 
     [Fact]
-    public void SuflaeDocument_Analyzes()
+    public void MieliaDocument_Analyzes()
     {
         const string sf =
-            "module Test/LspSf\n" +
+            "module Test/LspMi\n" +
             "import IO/Console\n" +
             "\n" +
             "routine start()\n" +
@@ -154,8 +154,8 @@ public sealed class LspServerTests
             "    return\n";
 
         IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
-            LspTestHarness.DidOpen(uri: "file:///test/Sample.sf", text: sf, languageId: "suflae"),
-            LspTestHarness.DocRequest(id: 21, method: "textDocument/documentSymbol", uri: "file:///test/Sample.sf"),
+            LspTestHarness.DidOpen(uri: "file:///test/Sample.mi", text: sf, languageId: "mielia"),
+            LspTestHarness.DocRequest(id: 21, method: "textDocument/documentSymbol", uri: "file:///test/Sample.mi"),
             Exit);
 
         Assert.NotNull(@object: LspTestHarness.ReplyWithId(replies: replies, id: 21));

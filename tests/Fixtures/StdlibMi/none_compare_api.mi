@@ -1,0 +1,23 @@
+module Tests/StdlibMi/NoneCompareApi
+
+import IO/Console
+
+# `x == none` and `x != none` ask whether any `T?` is absent: a tuple, a text, an entity.
+
+entity Box
+    n: S64
+
+routine pick(flag: Bool) -> (Text, Text)?
+    if flag
+        return ("a", "b")
+    return none
+
+routine start()
+    var pair: (Text, Text)? = pick(flag: true)
+    var missing: (Text, Text)? = pick(flag: false)
+    show(f"pair != none: {pair != none}")
+    show(f"missing == none: {missing == none}")
+    var box: Box? = Box(n: 3)
+    var empty: Box? = none
+    show(f"{box == none} {empty == none} {box != none}")
+    return

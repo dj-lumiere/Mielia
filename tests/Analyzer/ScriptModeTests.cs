@@ -2,12 +2,12 @@ using Builder.Diagnostics;
 using Builder.Verification.Results;
 using SyntaxTree;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
 /// <summary>
-/// Script mode (RazorForge and Suflae): a file with loose top-level STATEMENTS needs no explicit entry point —
+/// Script mode (Revare and Mielia): a file with loose top-level STATEMENTS needs no explicit entry point —
 /// the parser folds those statements (and any top-level runtime <c>var</c> declarations) into an implicit
 /// <c>routine start()</c>, in source order. These lock the AST transform: synthesis, var-sweeping, the
 /// no-op on a normal module file, and the explicit-start conflict.
@@ -24,7 +24,7 @@ public sealed class ScriptModeTests
     [Fact]
     public void Parse_ScriptStatements_SynthesizesStart()
     {
-        Program program = ParseSuflae(source: """
+        Program program = ParseMielia(source: """
                                               show("a")
                                               show("b")
                                               """);
@@ -46,7 +46,7 @@ public sealed class ScriptModeTests
     [Fact]
     public void Parse_ScriptVarDecl_SweptIntoStart()
     {
-        Program program = ParseSuflae(source: """
+        Program program = ParseMielia(source: """
                                               var x = 5
                                               show(x)
                                               """);
@@ -65,9 +65,9 @@ public sealed class ScriptModeTests
     }
 
     [Fact]
-    public void Analyze_SuflaeScriptVariableInRoutine_SuggestsGlobal()
+    public void Analyze_MieliaScriptVariableInRoutine_SuggestsGlobal()
     {
-        AssertHasErrorSuflae(source: """
+        AssertHasErrorMielia(source: """
                                      var total = 0
                                      routine bump(n: Int)
                                          total = total + n
@@ -80,7 +80,7 @@ public sealed class ScriptModeTests
     [Fact]
     public void Parse_ScriptGlobal_StaysModuleLevel()
     {
-        Program program = ParseSuflae(source: """
+        Program program = ParseMielia(source: """
                                               global counter: S64 = 0
                                               counter = counter + 1
                                               """);
@@ -103,7 +103,7 @@ public sealed class ScriptModeTests
     {
         // A file with an explicit start and NO loose statements is untouched — its start is the one the
         // user wrote, and no statements are swept.
-        Program program = ParseSuflae(source: """
+        Program program = ParseMielia(source: """
                                               module Test/Mod
                                               routine start()
                                                   show("hi")
@@ -121,7 +121,7 @@ public sealed class ScriptModeTests
     [Fact]
     public void Parse_LooseStatementWithExplicitStart_ReportsError()
     {
-        (Program _, Builder.Parser.Parser parser) = ParseSuflaeWithErrors(source: """
+        (Program _, Builder.Parser.Parser parser) = ParseMieliaWithErrors(source: """
             show("loose")
             routine start()
                 return

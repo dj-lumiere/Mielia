@@ -1,11 +1,11 @@
 <idea-plugin>
-    <id>com.suflae.rider</id>
-    <name>Suflae</name>
-    <vendor email="djminstar573@gmail.com">suflae</vendor>
+    <id>com.mielia.rider</id>
+    <name>Mielia</name>
+    <vendor email="djminstar573@gmail.com">mielia</vendor>
 
     <description><![CDATA[
-        Suflae (<code>.sf</code>) in Rider: syntax highlighting, comment and bracket handling, and the Suflae
-        language server (<code>Suflae lsp</code>) for diagnostics, completion, hover, navigation, rename, inlay hints
+        Mielia (<code>.mi</code>) in Rider: syntax highlighting, comment and bracket handling, and the Mielia
+        language server (<code>Mielia lsp</code>) for diagnostics, completion, hover, navigation, rename, inlay hints
         and formatting.
     ]]></description>
 
@@ -14,25 +14,25 @@
     <depends>org.jetbrains.plugins.textmate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <editorFactoryListener implementation="com.suflae.rider.SuflaeEditorListener"/>
-        <textmate.bundleProvider implementation="com.suflae.rider.SuflaeBundleProvider"/>
-        <lang.syntaxHighlighterFactory language="suflae" implementationClass="com.suflae.rider.SuflaeSyntaxHighlighterFactory"/>
-        <fileIconProvider implementation="com.suflae.rider.SuflaeIconProvider"/>
-        <platform.lsp.integrationProvider implementation="com.suflae.rider.SuflaeLanguageServer"/>
-        <actionConfigurationCustomizer order="last" implementation="com.suflae.rider.SuflaeCleanupActions"/>
-        <colorSettingsPage implementation="com.suflae.rider.SuflaeColorSettingsPage"/>
-        <additionalTextAttributes scheme="Darcula" file="colorSchemes/SuflaeDarcula.xml"/>
-        <additionalTextAttributes scheme="Default" file="colorSchemes/SuflaeDefault.xml"/>
+        <editorFactoryListener implementation="com.mielia.rider.MieliaEditorListener"/>
+        <textmate.bundleProvider implementation="com.mielia.rider.MieliaBundleProvider"/>
+        <lang.syntaxHighlighterFactory language="mielia" implementationClass="com.mielia.rider.MieliaSyntaxHighlighterFactory"/>
+        <fileIconProvider implementation="com.mielia.rider.MieliaIconProvider"/>
+        <platform.lsp.integrationProvider implementation="com.mielia.rider.MieliaLanguageServer"/>
+        <actionConfigurationCustomizer order="last" implementation="com.mielia.rider.MieliaCleanupActions"/>
+        <colorSettingsPage implementation="com.mielia.rider.MieliaColorSettingsPage"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/MieliaDarcula.xml"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/MieliaDefault.xml"/>
         <applicationConfigurable
             parentId="language"
-            id="com.suflae.rider.settings"
-            displayName="Suflae"
-            instance="com.suflae.rider.SuflaeConfigurable"/>
+            id="com.mielia.rider.settings"
+            displayName="Mielia"
+            instance="com.mielia.rider.MieliaConfigurable"/>
     </extensions>
 
     <projectListeners>
         <listener
-            class="com.suflae.rider.SuflaeFileOpenListener"
+            class="com.mielia.rider.MieliaFileOpenListener"
             topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
 </idea-plugin>

@@ -1,0 +1,147 @@
+module ObjectHacker
+
+import BuilderQuery
+
+# The pieces of the change hooks that work on addresses. The hooks themselves, and the registry that finds an
+# object's hooks, are in Hooks.mi. In a program that imports ObjectHacker the builder writes, around every change of
+# a member variable, `changing_member` before it and `changed_member` after it, both behind `hooks_on()`, so a
+# program with no hooks pays one load and one branch per change.
+
+### Takes the lock of the hook registry, which every look at it and change of it is made under: one thread at a time,
+### and again by the thread that holds it (a hook's change of a hooked object). A thread that finds it taken waits.
+secret routine hooks_enter()
+    danger
+        C::ingrid_hooks_enter()
+    return
+
+### Leaves the lock `hooks_enter` took, once for each time it was taken.
+secret routine hooks_leave()
+    danger
+        C::ingrid_hooks_leave()
+    return
+
+### The flow a change of a hooked object runs on: the coroutine when inside one (the same wherever it runs), else
+### the thread. Each flow keeps its own values from before its changes under way.
+### :returns: The flow's id.
+secret routine hook_flow_id() -> U64
+    danger
+        return C::rf_current_task_id()
+
+### Makes a value the registry keeps safe to hold and let go on any thread: its handle counts with unbroken
+### arithmetic from now on. Called before the value is stored, while only the storing thread has it.
+### :param value: The value.
+secret routine share_across_threads(value: Unknown)
+    danger
+        C::ingrid_roam_promote(header: value.cell.controller_address())
+    return
+
+### The object's replacement for a member routine, or none: the test the builder writes at the top of every member
+### routine of an entity, behind `hooks_on()`. One look under the lock, so a replacement another thread removes
+### meanwhile is either found whole or not at all. The replacement was shared across threads when it was stored.
+### :param key: The object's key.
+### :param routine_key: The member routine's key.
+### :returns: An `Unknown` keeping the replacement, or none.
+secret routine implant_for(key: U64, routine_key: Text) -> Unknown?
+    hooks_enter()
+    if not has_implant_held(key: key, routine_key: routine_key)
+        hooks_leave()
+        return none
+    var found = implant_of_held(key: key, routine_key: routine_key)
+    hooks_leave()
+    return found
+
+### Whether any object has change hooks. The builder tests it before every change of a member variable.
+### :returns: True when at least one object does.
+@inline
+secret routine hooks_on() -> Bool
+    danger
+        return C::ingrid_hooks_any()
+
+### Sets how many objects have change hooks.
+### :param count: The new count.
+secret routine set_hooked_count(count: U64)
+    danger
+        C::ingrid_hooks_set_count(count: count)
+    return
+
+### The key an object's hooks are found by: where its member variables are.
+### :param target: The entity.
+### :returns: The key.
+secret routine hook_key(target: Roamed[E]) -> U64
+needs EntityType E
+    danger
+        return target.raw_inner().get_address().to[U64]()
+
+### The key of the entity a member routine works on (`me`).
+### :returns: The key.
+secret routine T.own_hook_key() -> U64
+needs EntityType T
+    return me.get_address().to[U64]()
+
+### The registry of the program's hooks, or none before the first hook.
+### :returns: An `Unknown` keeping the registry.
+secret routine stored_registry() -> Unknown?
+    danger
+        var address = C::ingrid_hooks_registry()
+        if address.is_hollow()
+            return none
+        C::ingrid_roam_hold(header: address)
+        return Unknown(cell: roamed_from_addr[UnknownCell](addr: address))
+
+### Keeps the registry of the program's hooks for the rest of the run.
+### :param registry: An `Unknown` keeping the registry.
+secret routine store_registry(registry: Unknown)
+    danger
+        var address = registry.cell.controller_address()
+        C::ingrid_roam_hold(header: address)
+        C::ingrid_hooks_set_registry(registry: address)
+    return
+
+### What the builder writes before a member variable of a value changes: nothing for a value that is not an entity.
+### :param memvar: The member variable.
+@overridable
+secret routine T.changing_member(memvar: Text)
+needs AnyType T
+    return
+
+### What the builder writes before a member variable of an entity changes: keeps the old value for the hooks.
+### :param memvar: The member variable.
+@override
+secret routine T.changing_member(memvar: Text)
+needs EntityType T
+    hooks_before(key: me.own_hook_key(), memvar: memvar)
+    return
+
+### What the builder writes after a member variable of a value changed: nothing for a value that is not an entity.
+### :param memvar: The member variable.
+@overridable
+secret routine T.changed_member(memvar: Text)
+needs AnyType T
+    return
+
+### What the builder writes after a member variable of an entity changed: runs the hooks.
+### :param memvar: The member variable.
+@override
+secret routine T.changed_member(memvar: Text)
+needs EntityType T
+    hooks_after(key: me.own_hook_key(), memvar: memvar)
+    return
+
+### Calls `handler` after every change of a member variable of `target`, made by the program or by `poke`, with the
+### member variable's name, the value it had and the value it has now. An object can have several hooks, each called
+### in the order they were added. A hook keeps its object alive until it is removed with `remove_hook`.
+### :param target: The entity.
+### :param handler: Called with the member variable's name, the old value and the new one.
+### :returns: The hook's id, for `remove_hook`.
+routine when_changed(target: Roamed[E], handler: Callable[(Text, Unknown, Unknown), None]) -> U64
+needs EntityType E
+    return add_change_hook(key: hook_key(target: target), target: Unknown(from: target), handler: handler)
+
+### Removes a hook `when_changed` added to `target`.
+### :param target: The entity.
+### :param hook: The hook's id.
+### :returns: Whether `target` had that hook.
+@discardable
+routine remove_hook(target: Roamed[E], hook: U64) -> Bool
+needs EntityType E
+    return drop_change_hook(key: hook_key(target: target), hook: hook)

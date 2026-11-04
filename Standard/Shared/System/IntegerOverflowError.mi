@@ -1,0 +1,15 @@
+module System
+
+# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when an integer value cannot be represented
+### in the requested destination type.
+@ra("IntegerOverflowError")
+crashable IntegerOverflowError
+    nothing
+
+### Returns the default message for integer conversion overflow.
+### :returns: The resulting `Text` value.
+@ra("IntegerOverflowError.crash_message")
+routine IntegerOverflowError.crash_message() -> Text

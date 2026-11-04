@@ -1,0 +1,23 @@
+module Tests/StdlibMi/OwnPositionsApi
+
+import IO/Console
+import EmitterTools
+
+# Positions count with Int in Mielia: end-relative `^n`, slices, Text search, and the Revare
+# list crossing.
+routine find(items: List[Text], name: Text) -> Int
+    for i in 0 til items.count()
+        if items[i] == name
+            return i
+    throw AbsentValueError()
+
+routine start()
+    var xs = ["a", "b", "c"]
+    show(f"find={find(items: xs, name: "c")} last={xs[^1]} second_last={xs[^2]} tail={xs[1 til ^0].count()}")
+    show(f"text_last={"hello"[^1]} text_find={"hello".find(other: "l")}")
+    var rf = xs.to[RA::List]()
+    var back = rf.to[List]()
+    var unique = xs.to[Set]().to[List]()
+    show(f"rf={rf.count()} back={back.count() + 1} unique={unique.count()}")
+    show("DONE")
+    return

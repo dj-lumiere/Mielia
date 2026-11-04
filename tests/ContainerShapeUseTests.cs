@@ -1,15 +1,15 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
-/// End-to-end check of Suflae container shape use (the runtime IterGuard): a `for` loop marks its list's
-/// shape as in use, and a change hidden behind a call (which Suflae cannot trace at build time, its list
+/// End-to-end check of Mielia container shape use (the runtime IterGuard): a `for` loop marks its list's
+/// shape as in use, and a change hidden behind a call (which Mielia cannot trace at build time, its list
 /// being a shared <c>Roamed</c> handle) crashes with ReshapingWhileInUseError instead of leaving the loop
-/// reading moved memory. RazorForge rejects the same program at build time (ShapeEffectTests). Builds and
-/// runs <c>tests/Fixtures/ShapeUse/*.sf</c> through <c>buildandrun</c>. The paths that must NOT crash are
-/// covered by the StdlibSf fixture <c>shape_use_sf.sf</c>.
+/// reading moved memory. Revare rejects the same program at build time (ShapeEffectTests). Builds and
+/// runs <c>tests/Fixtures/ShapeUse/*.mi</c> through <c>buildandrun</c>. The paths that must NOT crash are
+/// covered by the StdlibMi fixture <c>shape_use_sf.mi</c>.
 /// </summary>
 public sealed class ContainerShapeUseTests
 {
@@ -18,7 +18,7 @@ public sealed class ContainerShapeUseTests
     [Fact]
     public void IndirectReshapeDuringFor_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_for.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_for.mi");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -34,7 +34,7 @@ public sealed class ContainerShapeUseTests
     [Fact]
     public void IndirectReshapeDuringForOverAField_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_for.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_for.mi");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -49,10 +49,10 @@ public sealed class ContainerShapeUseTests
     /// run on silently (safety matrix C45, cells sf-shape-lambda, -global, -adapter, -nested).
     /// </summary>
     [Theory]
-    [InlineData("reshape_lambda_capture_for.sf")]
-    [InlineData("reshape_global_for.sf")]
-    [InlineData("reshape_adapter_for.sf")]
-    [InlineData("reshape_element_list_for.sf")]
+    [InlineData("reshape_lambda_capture_for.mi")]
+    [InlineData("reshape_global_for.mi")]
+    [InlineData("reshape_adapter_for.mi")]
+    [InlineData("reshape_element_list_for.mi")]
     public void ReshapeThroughOtherPaths_CrashesWithReshapingWhileInUse(string fixture)
     {
         (int exit, string stdout, string stderr) = RunFixture(fixture: fixture);
@@ -66,11 +66,11 @@ public sealed class ContainerShapeUseTests
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
     {
-        string rfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ShapeUse", fixture]);
+        string raPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ShapeUse", fixture]);
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rfPath), "buildandrun", rfPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: raPath), "buildandrun", raPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -104,7 +104,7 @@ public sealed class ContainerShapeUseTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -119,6 +119,6 @@ public sealed class ContainerShapeUseTests
         }
 
         throw new InvalidOperationException(
-            message: "Could not locate Suflae.csproj walking up from test assembly directory.");
+            message: "Could not locate Mielia.csproj walking up from test assembly directory.");
     }
 }

@@ -5,7 +5,7 @@ using SyntaxTree;
 using TypeModel.Symbols;
 using TypeModel.Types;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
 /// Opens a SHAPE USE of a container while its element positions are in use, so a change that could move the
@@ -23,8 +23,8 @@ namespace Suflae.Passes;
 /// The count lives on the entity's <c>Roamed</c> controller, which every name of the entity shares. Every call
 /// through a handle to a <c>@reshaping</c> routine (one that can add, remove or move elements) is preceded by
 /// <c>handle.require_shape_free()</c>, which crashes with ReshapingWhileInUseError while a use is open. A
-/// Suflae entity is reached only through handles, so this catches the change even when it is hidden behind
-/// other calls, where the build-time checks (RF-S625, RF-S639) cannot see it. Uses are counted, so nested
+/// Mielia entity is reached only through handles, so this catches the change even when it is hidden behind
+/// other calls, where the build-time checks (RA-S625, RA-S639) cannot see it. Uses are counted, so nested
 /// loops and element calls on one entity stack. A failure inside an open use ends the program, so that use
 /// never needs closing.
 /// <para>Runs on user programs after OperatorLoweringPass. The begin/end calls are spliced into the
@@ -484,7 +484,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         };
     }
 
-    /// <summary>Whether <paramref name="container"/> is a handle whose controller counts shape uses (a Suflae
+    /// <summary>Whether <paramref name="container"/> is a handle whose controller counts shape uses (a Mielia
     /// <c>Roamed</c>).</summary>
     private bool HasShapeUse(Expression container)
     {
@@ -603,7 +603,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     private Dictionary<(string File, int Line), RoutineDeclaration>? _libraryRoutines;
 
     /// <summary>
-    /// Whether a call of <paramref name="routine"/> can change the shape of its receiver: a RazorForge
+    /// Whether a call of <paramref name="routine"/> can change the shape of its receiver: a Revare
     /// <c>@reshaping</c> routine, or a library routine whose body writes a member variable of <c>me</c> (a
     /// container's count, capacity or buffer), directly or through another routine it calls on <c>me</c>. Writing
     /// an element's value goes into the container's buffer and leaves its member variables alone. A routine of the

@@ -1,0 +1,306 @@
+module Collections
+
+import BuilderQuery
+
+### A sorted dictionary that maintains keys in ascending order, backed by a B-tree.
+###
+### `SortedDict[TKey, TValue]` maps comparable keys to values and always keeps those keys sorted.
+### Unlike {Dict[TKey, TValue]}, which keeps insertion order, `SortedDict` lets you iterate in
+### key order, efficiently find the minimum or maximum entry, and retrieve entries by sorted rank.
+### Each key is unique — adding an existing key replaces its value.
+###
+### **When to use**
+### - You need to iterate over entries in key order.
+### - You need `min!` / `max!` or want the smallest/largest key at any time.
+### - You need rank-based access: the N-th smallest entry.
+###
+### **Complexity**
+### | Operation | Time |
+### |---|---|
+### | `add` | O(log n) |
+### | `remove` | O(log n) |
+### | `contains` / `[]` / `get_or` | O(log n) |
+### | `get_by_rank!` | O(log n) |
+### | `min!` / `max!` | O(log n) |
+### | `keys()` / `values()` / Iteration | O(n log n) |
+###
+### :typeparam TKey: The key type. Must obey {Comparable}.
+### :typeparam TValue: The value type.
+### :see: {Dict[TKey, TValue]} for a hashed dictionary with O(1) average lookup.
+### :see: {SortedList[T]} for a sorted sequence that allows duplicates.
+entity SortedDict[TKey, TValue]
+relates SortedDictEmitter[TKey, TValue] as Emitter, TKey as Key, TValue as Value
+obeys Emittable[(TKey, TValue)], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
+needs TKey obeys Comparable
+    ### The tree holding the entries.
+    secret tree: SortedTree[TKey, TValue]
+
+### Walks the entries of a {SortedDict[TKey, TValue]} in ascending key order.
+### :typeparam TKey: The key type.
+### :typeparam TValue: The value type.
+entity SortedDictEmitter[TKey, TValue]
+obeys Emitter[(TKey, TValue)]
+needs TKey obeys Comparable
+    ### The tree being walked, shared with the dictionary.
+    secret tree: SortedTree[TKey, TValue]
+    ### The rank of the next entry.
+    secret index: U64
+
+# ============================================================================
+# Creators
+# ============================================================================
+
+### Creates an empty sorted dictionary.
+routine SortedDict[TKey, TValue]() -> SortedDict[TKey, TValue]
+    return SortedDict[TKey, TValue](tree: SortedTree[TKey, TValue]())
+
+### Creates a sorted dict containing the given key-value `pairs` (stored in sorted key order). Variadic
+### constructor behind the `{k: v, …}` dict-literal syntax (the `DictLiteral` opt-in).
+### :param pairs: The key-value pairs as `(TKey, TValue)` values; a later duplicate key overwrites.
+### :returns: A sorted dict of the given pairs.
+common routine SortedDict[TKey, TValue].from_literal(pairs...: (TKey, TValue)) -> SortedDict[TKey, TValue]
+needs TKey obeys Comparable
+    var result = SortedDict[TKey, TValue]()
+    var i: U64 = 0
+    # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
+    # literal's own afterwards.
+    until i >= pairs.count()
+        result[pairs.get_raw(index: i).item0] = pairs.get_raw(index: i).item1
+        i = i +% 1
+    return result
+
+# ============================================================================
+# Core
+# ============================================================================
+
+### Returns the number of key-value pairs in this dictionary.
+routine SortedDict[TKey, TValue].count() -> Int
+    return me.tree.count().to[Int]()
+
+### Returns true if this dictionary contains no entries.
+routine SortedDict[TKey, TValue].is_empty() -> Bool
+    return me.tree.count() == 0
+
+### Removes all entries.
+routine SortedDict[TKey, TValue].clear()
+    me.tree.clear()
+    return
+
+### Returns true if `key` has an entry (`d have k`).
+### :param key: The key to look up.
+routine SortedDict[TKey, TValue].has_key(key: TKey) -> Bool
+    return me.tree.has_key(key: key)
+
+### Returns whether `key` has no entry (`d lack k`).
+### :param key: The key to look for.
+routine SortedDict[TKey, TValue].lacks_key(key: TKey) -> Bool
+    return not me.has_key(key: key)
+
+### Returns the value of `key` (`d[k]`).
+### :param key: The key to look up.
+### :throws: {AbsentValueError} The key has no entry.
+routine SortedDict[TKey, TValue].getitem(key: TKey) -> TValue
+    if not me.tree.has_key(key: key)
+        throw KeyNotFoundError(key: key.represent())
+    return me.tree.value_of(key: key)
+
+### Puts `value` at `key` (`d[k] = v`): replaces the value of a key that is there, and adds the key otherwise.
+### :param key: The key.
+### :param value: The value.
+routine SortedDict[TKey, TValue].setitem(key: TKey, value: TValue)
+    me.put(key: key, value: value)
+    return
+
+### Returns the value for `key`, or `default` if the key is not present.
+### :param key: The key to look up.
+### :param default: The value returned when `key` has no entry.
+routine SortedDict[TKey, TValue].get_or(key: TKey, default: TValue) -> TValue
+    if me.tree.has_key(key: key)
+        return me.tree.value_of(key: key)
+    return default
+
+### Adds an entry for `key`, or replaces the value of the one it has.
+### :param key: The key.
+### :param value: The value for `key`.
+### :returns: `true` if a new key was added; `false` if an existing key's value was replaced.
+secret routine SortedDict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
+    if me.tree.has_key(key: key)
+        me.tree.replace(key: key, value: value)
+        return false
+    me.tree.insert(key: key, value: value)
+    return true
+
+### Removes the entry for `key`.
+### :param key: The key to remove.
+### :returns: `true` if the key had an entry.
+@discardable
+routine SortedDict[TKey, TValue].remove(key: TKey) -> Bool
+    return me.tree.remove(key: key)
+
+# ============================================================================
+# Rank-based access
+# ============================================================================
+
+### Returns the entry at the given zero-based sorted rank.
+### Rank 0 is the entry with the smallest key; rank `count()-1` is the largest.
+### :param i: The zero-based sorted rank to read.
+### :returns: The `(TKey, TValue)` tuple at that sorted position.
+### :throws: {IndexOutOfBoundsError} if `i >= count()`.
+routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> (TKey, TValue)
+    var position = position_of(value: i)
+    var count = me.tree.count()
+    if position >= count
+        throw IndexOutOfBoundsError(index: position, count: count)
+    return me.entry_at(rank: position)
+
+# ============================================================================
+# Min/Max
+# ============================================================================
+
+### Returns the entry with the smallest key.
+### :throws: {AbsentValueError} The dictionary is empty.
+routine SortedDict[TKey, TValue].min() -> (TKey, TValue)
+    if me.is_empty()
+        throw AbsentValueError()
+    return me.entry_at(rank: 0)
+
+### Returns the entry with the largest key.
+### :throws: {AbsentValueError} The dictionary is empty.
+routine SortedDict[TKey, TValue].max() -> (TKey, TValue)
+    if me.is_empty()
+        throw AbsentValueError()
+    return me.entry_at(rank: me.tree.count() - 1)
+
+### Returns the entry with the smallest key. Alias for {SortedDict[TKey, TValue].min()}.
+### :throws: {AbsentValueError} The dictionary is empty.
+routine SortedDict[TKey, TValue].first() -> (TKey, TValue)
+    return me.min()
+
+### Returns the entry with the largest key. Alias for {SortedDict[TKey, TValue].max()}.
+### :throws: {AbsentValueError} The dictionary is empty.
+routine SortedDict[TKey, TValue].last() -> (TKey, TValue)
+    return me.max()
+
+# ============================================================================
+# Keys / Values
+# ============================================================================
+
+### Returns all keys in ascending order.
+routine SortedDict[TKey, TValue].keys() -> List[TKey]
+    var count = me.tree.count()
+    var result = List[TKey](capacity: count.to[Int]())
+    var i: U64 = 0
+    until i >= count
+        result.add_last(value: me.tree.key_at(rank: i))
+        i = i + 1
+    return result
+
+### Returns all values in key-ascending order.
+routine SortedDict[TKey, TValue].values() -> List[TValue]
+    var count = me.tree.count()
+    var result = List[TValue](capacity: count.to[Int]())
+    var i: U64 = 0
+    until i >= count
+        result.add_last(value: me.tree.value_at(rank: i))
+        i = i + 1
+    return result
+
+# ============================================================================
+# Iteration
+# ============================================================================
+
+### Returns a walk over the entries in ascending key order.
+routine SortedDict[TKey, TValue].emitter() -> SortedDictEmitter[TKey, TValue]
+    return SortedDictEmitter[TKey, TValue](tree: me.tree, index: 0)
+
+### Returns the next entry.
+### :throws: {AbsentValueError} The walk is over.
+routine SortedDictEmitter[TKey, TValue].emit() -> (TKey, TValue)
+    if me.index >= me.tree.count()
+        throw AbsentValueError()
+    var rank = me.index
+    me.index = me.index + 1
+    return (me.tree.key_at(rank: rank), me.tree.value_at(rank: rank))
+
+### Creates a `List[(TKey, TValue)]` from all entries of `from` in ascending key order.
+### :returns: A new list of all entries in key-ascending order.
+routine SortedDict[TKey, TValue].to[List[(TKey, TValue)]]() -> List[(TKey, TValue)]
+    var result = List[(TKey, TValue)](capacity: me.count())
+    for entry in me
+        result.add_last(value: entry)
+    return result
+
+# ============================================================================
+# Display
+# ============================================================================
+
+### Returns the text form of `me`: the entries in ascending key order as `key: value` pairs in braces, or `{:}` when empty.
+### :returns: The text form of `me`.
+@override
+routine SortedDict[TKey, TValue].represent() -> Text
+    if me.is_empty()
+        return "{:}"
+    return f"{{{me.entries_text(diagnosing: false)}}}"
+
+### Returns the diagnostic text of `me`: its type, count and entries.
+### :returns: The diagnostic text of `me`.
+@override
+routine SortedDict[TKey, TValue].diagnose() -> Text
+    if me.is_empty()
+        return me.full_type_name() + "(count: 0, {:})"
+    return f"{me.full_type_name()}(count: {me.count()}, {{{me.entries_text(diagnosing: true)}}})"
+
+### Serializes this dictionary to a `SerialValue.Dict`; keys render via `represent`, values serialize.
+### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
+@override
+routine SortedDict[TKey, TValue].serialize() -> SerialValue
+    var result = RA::System.Dict[Text, SerialValue]()
+    for entry in me
+        result[entry.item0.represent()] = entry.item1.serialize()
+    return SerialValue(result.duplicate())
+
+### Builds the dictionary from its serialized entry table.
+### :param value: The serialized value to read.
+### :returns: The SortedDict value stored in `value`.
+### :throws: {SerialShapeError} when the value is not a table or an entry does not fit, or a parse error when a key
+### does not read as a `TKey`.
+common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
+    var result = SortedDict[TKey, TValue]()
+    when value
+        is RA::System.Dict[Text, SerialValue] as entries =>
+            for entry in entries
+                result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
+        else =>
+            throw SerialShapeError(detail: "expected an entry table")
+    return result
+
+# ============================================================================
+# Inside the dictionary
+# ============================================================================
+
+### The entry at `rank`, which must be below the count.
+### :param rank: The position of the entry in key order, counted from 0.
+### :returns: The key and the value.
+secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> (TKey, TValue)
+    return (me.tree.key_at(rank: rank), me.tree.value_at(rank: rank))
+
+### The entries as text: `"a": 1, "b": 2`.
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine SortedDict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
+    var result = ""
+    var first = true
+    for entry in me
+        if not first
+            result = f"{result}, "
+        result = f"{result}{nested_form(value: entry.item0, diagnosing: diagnosing)}: {nested_form(value: entry.item1, diagnosing: diagnosing)}"
+        first = false
+    return result
+
+### Collects `(key, value)` pairs into a sorted dict: a later pair whose key is there already replaces its value.
+routine Emittable[Tuple[TKey, TValue]].to[SortedDict[TKey, TValue]]() -> SortedDict[TKey, TValue]
+needs TKey obeys Comparable
+    var result = SortedDict[TKey, TValue]()
+    for item in me
+        var pair: Tuple[TKey, TValue] = item
+        result[pair.item0] = pair.item1
+    return result

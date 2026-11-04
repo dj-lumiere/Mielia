@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Mielia: the Mielia front end (its lexer) and the `mielia` command line, over the Anvila builder core.
+       A Mielia build analyzes the Revare standard library as well, so this references the Revare
+       front end (its lexer and standard library) until the shared library moves to Ingrid. -->
+  <PropertyGroup>
+    <SonarQubeTestProject>false</SonarQubeTestProject>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Version>0.5.0</Version>
+    <AssemblyName>Mielia</AssemblyName>
+    <RootNamespace>Mielia</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>mielia</ToolCommandName>
+    <PackageId>Mielia</PackageId>
+    <Description>The Mielia toolchain.</Description>
+    <!-- The builder runs optimized in every configuration: bin/Debug is what daily builds, the test suites and
+         the editors' language servers run. Build with -p:Optimize=false to step through it in a debugger. -->
+    <Optimize>true</Optimize>
+    <!-- Most builds are one process from start to finish, too short for the profile tiered PGO collects to pay
+         for itself. -->
+    <TieredPGO>false</TieredPGO>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Anvila\Anvila.csproj"/>
+    <ProjectReference Include="..\Revare\Revare.csproj"/>
+  </ItemGroup>
+
+  <!-- A NativeAOT build keeps reflection data only for what it can see used. The standard library snapshot, the language
+       server and the syntax tree walks read the builder's model types by reflection (fields and properties of whatever
+       object they hold), so the builder's assemblies are rooted whole. -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Anvila"/>
+    <TrimmerRootAssembly Include="Revare"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mielia.Tests"/>
+  </ItemGroup>
+
+  <!-- The Mielia standard library, laid out as Standard\Mielia next to the executable. -->
+  <ItemGroup>
+    <Content Include="Standard\**\*" Link="Standard\Mielia\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" PackageCopyToOutput="true"/>
+    <None Remove="Standard\**\*"/>
+  </ItemGroup>
+
+  <Import Project="..\Ingrid\StageIngridRuntime.targets"/>
+  <Import Project="..\Anvila\PatchMacLibLlvm.targets"/>
+
+  <!-- rider-plugin\ is the Rider plugin, a Gradle project of its own. -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);rider-plugin\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- tests\ is its own project. -->
+  <ItemGroup>
+    <Compile Remove="tests\**"/>
+    <None Remove="tests\**"/>
+    <Content Remove="tests\**"/>
+    <EmbeddedResource Remove="tests\**"/>
+  </ItemGroup>
+
+  <!-- A file moved or deleted in the library's sources leaves its old copy in the output, where the builder would read
+       it as part of the library: every copy under Standard/Revare whose source is gone is taken out before the copy. -->
+  <Target Name="RemoveStaleRevareLibrary" BeforeTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <_RemoveStaleRevareLibrarySource Include="$(MSBuildProjectDirectory)/../Revare/Standard/**/*"/>
+      <_RemoveStaleRevareLibraryKept Include="@(_RemoveStaleRevareLibrarySource->'$(OutDir)Standard/Revare/%(RecursiveDir)%(Filename)%(Extension)')"/>
+      <_RemoveStaleRevareLibraryCopy Include="$(OutDir)Standard/Revare/**/*"/>
+      <_RemoveStaleRevareLibraryStale Include="@(_RemoveStaleRevareLibraryCopy)" Exclude="@(_RemoveStaleRevareLibraryKept)"/>
+    </ItemGroup>
+    <Delete Files="@(_RemoveStaleRevareLibraryStale)"/>
+  </Target>
+
+  <!-- A file moved or deleted in the library's sources leaves its old copy in the output, where the builder would read
+       it as part of the library: every copy under Standard/Mielia whose source is gone is taken out before the copy. -->
+  <Target Name="RemoveStaleMieliaLibrary" BeforeTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <_RemoveStaleMieliaLibrarySource Include="$(MSBuildProjectDirectory)/Standard/**/*"/>
+      <_RemoveStaleMieliaLibraryKept Include="@(_RemoveStaleMieliaLibrarySource->'$(OutDir)Standard/Mielia/%(RecursiveDir)%(Filename)%(Extension)')"/>
+      <_RemoveStaleMieliaLibraryCopy Include="$(OutDir)Standard/Mielia/**/*"/>
+      <_RemoveStaleMieliaLibraryStale Include="@(_RemoveStaleMieliaLibraryCopy)" Exclude="@(_RemoveStaleMieliaLibraryKept)"/>
+    </ItemGroup>
+    <Delete Files="@(_RemoveStaleMieliaLibraryStale)"/>
+  </Target>
+</Project>

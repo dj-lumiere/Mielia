@@ -2,7 +2,7 @@ using Builder.Serialization;
 using Builder.Verification;
 using TypeModel.Enums;
 
-namespace Suflae.Tests.Serialization;
+namespace Mielia.Tests.Serialization;
 
 /// <summary>
 /// Exercises the on-disk stdlib snapshot cache (<c>src/Serialization/StdlibSnapshotCache.cs</c>) — the
@@ -16,8 +16,8 @@ public sealed class StdlibSnapshotCacheTests
     [Fact]
     public void ComputeStdlibHash_DiffersByLanguageRealm()
     {
-        string? rf = StdlibSnapshotCache.ComputeStdlibHash(language: Language.RazorForge);
-        string? sf = StdlibSnapshotCache.ComputeStdlibHash(language: Language.Suflae);
+        string? rf = StdlibSnapshotCache.ComputeStdlibHash(language: Language.Revare);
+        string? sf = StdlibSnapshotCache.ComputeStdlibHash(language: Language.Mielia);
 
         Assert.False(condition: string.IsNullOrWhiteSpace(value: rf));
         Assert.False(condition: string.IsNullOrWhiteSpace(value: sf));

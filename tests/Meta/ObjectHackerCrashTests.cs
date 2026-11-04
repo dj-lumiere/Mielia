@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Suflae.Tests.Meta;
+namespace Mielia.Tests.Meta;
 
 /// <summary>
 /// ObjectHacker's loud failures, each a program that ends with status 82 and the message of the failure: what an
@@ -15,7 +15,7 @@ public sealed class ObjectHackerCrashTests
     [Fact]
     public void UnknownEquality_WithoutEq_CrashesNamingTheType()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "unknown_no_equality.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "unknown_no_equality.mi");
 
         Assert.True(condition: exit == 82,
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -26,11 +26,11 @@ public sealed class ObjectHackerCrashTests
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
     {
-        string sfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ExitCode", fixture]);
+        string miPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ExitCode", fixture]);
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: sfPath), "buildandrun", sfPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: miPath), "buildandrun", miPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -64,7 +64,7 @@ public sealed class ObjectHackerCrashTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Mielia.csproj")))
             {
                 return dir;
             }
@@ -79,6 +79,6 @@ public sealed class ObjectHackerCrashTests
         }
 
         throw new InvalidOperationException(
-            message: "Could not locate Suflae.csproj walking up from test assembly directory.");
+            message: "Could not locate Mielia.csproj walking up from test assembly directory.");
     }
 }

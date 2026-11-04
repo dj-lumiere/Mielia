@@ -1,6 +1,6 @@
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -29,7 +29,7 @@ public class ValueEqualityTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Message.Contains(value: "'Button' has no '=='") &&
                          e.Message.Contains(value: "member variable 'on_click'"));
@@ -64,7 +64,7 @@ public class ValueEqualityTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Message.Contains(value: "'Point'") || e.Message.Contains(value: "'Player'"));
         Assert.Contains(collection: result.Errors,
@@ -94,7 +94,7 @@ public class ValueEqualityTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Message.Contains(value: "'Player' is an entity without 'obeys Hashable'"));
         Assert.Contains(collection: result.Errors,
@@ -126,7 +126,7 @@ public class ValueEqualityTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Message.Contains(value: "Hashable") || e.Message.Contains(value: "hash"));
     }

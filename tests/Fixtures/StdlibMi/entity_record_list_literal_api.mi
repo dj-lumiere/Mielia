@@ -1,0 +1,38 @@
+module Tests/StdlibMi/EntityRecordListLiteralApi
+
+# A list literal of values built in place from an entity (a record holding one, a tuple holding one) shares the entity,
+# and every share is given back at the end. Run in a loop, a missing share would free the Counter twice.
+
+entity Counter
+    n: Int
+
+record Link
+    keep: Counter
+    weight: Int
+
+routine literal_record(c: Counter)
+    var links = [Link(keep: c, weight: 1000)]
+    show(f"record literal, count {links.count()}")
+    return
+
+routine literal_tuple(c: Counter)
+    var pairs = [(c, 7)]
+    show(f"tuple literal, count {pairs.count()}")
+    return
+
+routine added(c: Counter)
+    var links = List[Link]()
+    links.add_last(value: Link(keep: c, weight: 1000))
+    show(f"add_last, count {links.count()}")
+    return
+
+routine start()
+    var c = Counter(n: 100)
+    for round in 0 til 4
+        literal_record(c: c)
+        literal_tuple(c: c)
+        added(c: c)
+        show(f"after round {round}")
+    c.n = c.n + 1
+    show(c.n)
+    return

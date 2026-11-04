@@ -5,7 +5,7 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-lan
 import { registerRun } from "./run";
 
 /**
- * Suflae in VS Code: the TextMate grammar colors the text, and the language server (`Suflae lsp`) brings the errors,
+ * Mielia in VS Code: the TextMate grammar colors the text, and the language server (`Mielia lsp`) brings the errors,
  * semantic colors, hover, completion, go to definition, rename and formatting. The server runs from a copy of its
  * build folder, so it never holds the files a rebuild overwrites, and a rebuild restarts it.
  */
@@ -14,11 +14,11 @@ let watcher: fs.FSWatcher | undefined;
 let restartTimer: NodeJS.Timeout | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-    registerRun(context, { id: "suflae", name: "Suflae" }, locateServer);
+    registerRun(context, { id: "mielia", name: "Mielia" }, locateServer);
     context.subscriptions.push(
-        vscode.commands.registerCommand("suflae.restartServer", () => restart(context)),
+        vscode.commands.registerCommand("mielia.restartServer", () => restart(context)),
         vscode.workspace.onDidChangeConfiguration(e => {
-            if (e.affectsConfiguration("suflae.serverPath")) void restart(context);
+            if (e.affectsConfiguration("mielia.serverPath")) void restart(context);
         }),
     );
     await start(context);
@@ -41,8 +41,8 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
     if (!server) {
         void vscode.window.showErrorMessage(
             vscode.env.language.startsWith("ko")
-                ? "Suflae 언어 서버를 찾지 못했습니다. 설정의 suflae.serverPath에 지정하거나 Suflae를 빌드하세요."
-                : "The Suflae language server isn't built or set. Set suflae.serverPath, or build Suflae.");
+                ? "Mielia 언어 서버를 찾지 못했습니다. 설정의 mielia.serverPath에 지정하거나 Mielia를 빌드하세요."
+                : "The Mielia language server isn't built or set. Set mielia.serverPath, or build Mielia.");
         return;
     }
     watchBuild(context, path.dirname(server));
@@ -70,25 +70,25 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
         },
     };
     const clientOptions: LanguageClientOptions = {
-        documentSelector: [{ scheme: "file", language: "suflae" }, { scheme: "untitled", language: "suflae" }],
+        documentSelector: [{ scheme: "file", language: "mielia" }, { scheme: "untitled", language: "mielia" }],
     };
-    client = new LanguageClient("suflae", "Suflae", serverOptions, clientOptions);
+    client = new LanguageClient("mielia", "Mielia", serverOptions, clientOptions);
     await client.start();
 }
 
-/** The server the setting names, else the dev build in a workspace folder, else `Suflae` on the PATH. */
+/** The server the setting names, else the dev build in a workspace folder, else `Mielia` on the PATH. */
 function locateServer(): string | undefined {
-    const set = vscode.workspace.getConfiguration("suflae").get<string>("serverPath")?.trim();
+    const set = vscode.workspace.getConfiguration("mielia").get<string>("serverPath")?.trim();
     if (set) return fs.existsSync(set) ? set : undefined;
     for (const folder of vscode.workspace.workspaceFolders ?? []) {
         for (const candidate of [
-            path.join(folder.uri.fsPath, "Suflae", "bin", "Debug", "net10.0", "Suflae.dll"),
-            path.join(folder.uri.fsPath, "bin", "Debug", "net10.0", "Suflae.dll"),
+            path.join(folder.uri.fsPath, "Mielia", "bin", "Debug", "net10.0", "Mielia.dll"),
+            path.join(folder.uri.fsPath, "bin", "Debug", "net10.0", "Mielia.dll"),
         ]) {
             if (fs.existsSync(candidate)) return candidate;
         }
     }
-    return onPath("Suflae");
+    return onPath("Mielia");
 }
 
 function onPath(name: string): string | undefined {
@@ -106,7 +106,7 @@ function onPath(name: string): string | undefined {
 function stage(context: vscode.ExtensionContext, server: string): string {
     const folder = path.dirname(server);
     const stamp = String(newest(folder));
-    const root = path.join(context.globalStorageUri.fsPath, "suflae-lsp");
+    const root = path.join(context.globalStorageUri.fsPath, "mielia-lsp");
     const target = path.join(root, stamp);
     if (!fs.existsSync(path.join(target, path.basename(server)))) {
         fs.mkdirSync(root, { recursive: true });

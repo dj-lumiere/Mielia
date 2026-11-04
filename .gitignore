@@ -1,4 +1,4 @@
-# Suflae — front end, command line and standard library
+# Mielia — front end, command line and standard library
 # Build outputs
 bin/
 obj/
@@ -40,10 +40,11 @@ tmp/
 *.dylib
 
 # Generated test artifacts (in-process compile bundles, harness inputs, coverage output)
-tests/Fixtures/SuflaeHarnessInProc/
-tests/Fixtures/SuflaeHarness/all_suflae.sf
-tests/Fixtures/SuflaeHarness/razorforge.toml
+tests/Fixtures/MieliaHarnessInProc/
+tests/Fixtures/MieliaHarness/all_mielia.mi
+tests/Fixtures/MieliaHarness/all_mielia.ingrid.bc
+tests/Fixtures/MieliaHarness/razorforge.toml
 tests/TestResults/
 
 # Wiki (managed in its own repository)
-Suflae-Wiki/
+Mielia-Wiki/

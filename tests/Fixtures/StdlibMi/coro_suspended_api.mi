@@ -1,0 +1,26 @@
+module Tests/StdlibMi/CoroSuspendedApi
+
+import IO/Console
+# MI twin of Stdlib/coro_suspended_api.rr. `f.to[Work](...)` over a plain routine yields a Work[T]
+# handle, and `retrieve()` starts it, drives it to completion (through every yield) and returns its
+# value. MI spells the yield through the `yield_now()` surface (RA's fixture uses the raw
+# `C::rf_coro_yield()`, which MI hides); the driven result is identical, so the expected output matches.
+
+routine compute(x: S64) -> S64
+    return x * 2
+
+routine counter() -> S64
+    var n: S64 = 10
+    yield_now()
+    n = n + 5
+    yield_now()
+    n = n + 5
+    return n
+
+routine start()
+    var c = compute.to[Work](x: 21)
+    show(f"compute => {c.retrieve()}")
+
+    var k = counter.to[Work]()
+    show(f"counter => {k.retrieve()}")
+    return

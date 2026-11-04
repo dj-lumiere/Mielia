@@ -1,0 +1,36 @@
+module Tests/StdlibMi/WorksSharedListApi
+
+# jobs and recovery over lists: two jobs changing one element of a shared list keep every update, a job
+# can give back a list it built, `check` recovers a routine that builds a list, `for` walks the list a call gives
+# back, and two Bytes join with `+`.
+
+import IO/Console
+
+routine bump(xs: List[S64], times: S64) -> S64
+    for i in 0 til times
+        xs[0] = xs[0] + 1
+    return xs[0]
+
+routine filled(n: S64) -> List[S64]
+    if n < 0
+        throw InvalidValueError(input: f"{n}", target: "a count")
+    return List[S64](count: 2, fill_value: n)
+
+routine rows() -> List[List[S64]]
+    return [[1], [2]]
+
+routine start()
+    var data = List[S64](count: 4, fill_value: 0)
+    var jobs = [bump.to[Work](xs: data, times: 1000), bump.to[Work](xs: data, times: 1000)]
+    jobs.gather()
+    show(data[0])
+    var built = [filled.to[Work](n: 1), filled.to[Work](n: 2)]
+    for (i, xs) in built.gather().enumerate()
+        show(f"{i} {xs}")
+    when check filled(n: 3)
+        is List[S64] as v => show(v)
+        is Crashables as e => show("failed")
+    for (i, row) in rows().enumerate()
+        show(f"{i} {row}")
+    var a = b"ab"
+    show((a + a).count())

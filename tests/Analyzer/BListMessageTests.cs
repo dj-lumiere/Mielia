@@ -1,7 +1,7 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
@@ -25,7 +25,7 @@ public class BListMessageTests
                             return
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Single(collection: result.Errors.Where(predicate: e =>
             e.Code == SemanticDiagnosticCode.ModuleLevelVarNotAllowed));
         Assert.DoesNotContain(collection: result.Errors,

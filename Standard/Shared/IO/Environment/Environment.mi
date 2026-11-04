@@ -1,0 +1,46 @@
+module IO/Environment
+
+# Each declaration below creates nothing: `@ra` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The operating system's environment of this program: its arguments, its environment variables, and its working,
+### home and temporary directories. Its routines are called on the type (`Environment.arguments()`), and they only
+### read.
+@ra("Environment")
+record Environment
+    nothing
+
+### The arguments the program was started with, its own name left out.
+### :returns: The arguments, in order.
+@ra("Environment.arguments")
+common routine Environment.arguments() -> List[Text]
+
+### The value of the environment variable `name`, asked of the operating system now (on Windows the name's case
+### doesn't matter).
+### :param name: The variable's name.
+### :returns: Its value, or `none` when it isn't set.
+@ra("Environment.variable")
+common routine Environment.variable(name: Text) -> Text?
+
+### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
+### when it changes.
+### :returns: The variables by name.
+@ra("Environment.to")
+common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
+
+### The program's working directory, which relative paths start from.
+### :returns: The resulting `Directory`.
+### :throws: {IOError} when the working directory cannot be read.
+@ra("Environment.working_directory")
+common routine Environment.working_directory() -> Directory
+
+### The current user's home directory.
+### :returns: The resulting `Directory`.
+### :throws: {NotFoundError} when the home directory cannot be told.
+@ra("Environment.home_directory")
+common routine Environment.home_directory() -> Directory
+
+### The platform's temporary directory. Honors the usual environment variables, never fails.
+### :returns: The resulting `Directory`.
+@ra("Environment.temp_directory")
+common routine Environment.temp_directory() -> Directory

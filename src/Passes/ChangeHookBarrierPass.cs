@@ -1,7 +1,7 @@
 using SyntaxTree;
 using TypeModel.Enums;
 
-namespace Suflae.Passes;
+namespace Mielia.Passes;
 
 /// <summary>
 /// Lets ObjectHacker's <c>when_changed</c> hooks see every change of a member variable, on the user programs before
@@ -100,8 +100,8 @@ internal static class ChangeHookBarrierPass
                 $"        {TargetPlaceholder}.changed_member(memvar: \"{memvar}\")\n";
             string text = new string(c: '\n', count: Math.Max(val1: 0, val2: s.Location.Line - 2)) + source;
             List<Builder.Tokenizer.Token> tokens =
-                Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Suflae);
-            var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Suflae, fileName: filePath)
+                Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Mielia);
+            var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Mielia, fileName: filePath)
             {
                 PrintsErrors = false
             };

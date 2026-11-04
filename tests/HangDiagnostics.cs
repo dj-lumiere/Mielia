@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Suflae.Tests;
+namespace Mielia.Tests;
 
 /// <summary>
 /// What a hung child process was doing when a test gave up on it: the process tree under it (the builder,

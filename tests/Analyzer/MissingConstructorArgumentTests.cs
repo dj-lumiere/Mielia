@@ -1,11 +1,11 @@
 using Builder.Diagnostics;
 using Builder.Verification.Results;
 
-namespace Suflae.Tests.Analyzer;
+namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
-/// <summary>A construction with no arguments of a type whose member variables have no defaults names them (SF-S455).</summary>
+/// <summary>A construction with no arguments of a type whose member variables have no defaults names them (MI-S455).</summary>
 public class MissingConstructorArgumentTests
 {
     /// <summary><c>throw IndexOutOfBoundsError()</c> names <c>index</c> and <c>count</c> and the whole call.</summary>
@@ -22,7 +22,7 @@ public class MissingConstructorArgumentTests
                             show(pick(k: 3))
                         """;
 
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        AnalysisResult result = AnalyzeSaMielia(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.MissingRequiredMemberVariable &&
                          e.Message.Contains(value: "'IndexOutOfBoundsError(index: ..., count: ...)'"));
