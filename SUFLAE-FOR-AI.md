@@ -75,7 +75,7 @@ through a `.rf` module the program imports (section 18).
    on purpose takes a `RoundingRule` (`HALF_UP`, `HALF_EVEN`, `HALF_AWAY`, `FLOOR`, `CEIL`, `TRUNC`; left out, the
    type's own rule: `HALF_UP` for `Decimal`, `HALF_EVEN` for the D types): `x.round(places: 2, rule: RoundingRule.FLOOR)`,
    `x.fixed(places: 2, rule: ...)`, `a.divide(by: b, places: 2)`, `a.add(you: b, places: 2)`, `a.subtract(you: b,
-   places: 2)`, `a.multiply(by: b, places: 10)` (exact, then rounded once: they round where `+ - *` crash). The
+   places: 2)`, `a.multiply(by: b, places: 10)` (exact, then rounded once: they round where `+ - *` crash). Without `places:` they round the exact result once to the nearest 34-significant-digit value under `rule:` (`HALF_UP` when left out): `a.subtract(you: b)`, `a.multiply(by: b)`, `a.divide(by: b, rule: RoundingRule.FLOOR)`, `a.add(you: b, rule: RoundingRule.HALF_UP)`; a result past the range (about `1e6144`) still crashes with `NumericOverflowError`. `add` needs `rule:` or `places:` because a bare `a.add(you: b)` is the exact `+`. The
    operators never take a rule, and there is no global rounding state.
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
