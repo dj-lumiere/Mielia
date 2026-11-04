@@ -1,0 +1,82 @@
+module Tests/StdlibSf/WorksLateStoreRecordApi
+
+# A record or tuple holding an entity, put into something a job already shares, shares the entity with the job too:
+# both sides keep every update. The values go into a list, a member variable holding a record and a member variable
+# holding a tuple after the job started.
+
+import IO/Console
+
+entity Box
+    n: S64
+
+record Slot
+    box: Box
+    tag: S64
+
+entity SlotHolder
+    ready: Bool
+    slot: Slot
+
+entity PairHolder
+    ready: Bool
+    pair: (Box, S64)
+
+routine bump_list(slots: List[Slot], rounds: S64) -> S64
+    until slots.count() > 0
+        waitfor(1ms)
+    var slot = slots[0]
+    for i in 0 til rounds
+        slot.box.n += 1
+    return rounds
+
+routine bump_slot(holder: SlotHolder, rounds: S64) -> S64
+    until holder.ready
+        waitfor(1ms)
+    var slot = holder.slot
+    for i in 0 til rounds
+        slot.box.n += 1
+    return rounds
+
+routine bump_pair(holder: PairHolder, rounds: S64) -> S64
+    until holder.ready
+        waitfor(1ms)
+    var pair = holder.pair
+    for i in 0 til rounds
+        pair.item0.n += 1
+    return rounds
+
+routine start()
+    var rounds: S64 = 300000
+
+    var list = List[Slot]()
+    var in_list = bump_list.to[Work](slots: list, rounds: rounds)
+    in_list.start_now()
+    var first = Box(n: 0)
+    list.add_last(Slot(box: first, tag: 1))
+    for i in 0 til rounds
+        first.n += 1
+    in_list.retrieve()
+    show(f"list {first.n}")
+
+    var slot_holder = SlotHolder(ready: false, slot: Slot(box: Box(n: -1), tag: 0))
+    var in_slot = bump_slot.to[Work](holder: slot_holder, rounds: rounds)
+    in_slot.start_now()
+    var second = Box(n: 0)
+    slot_holder.slot = Slot(box: second, tag: 2)
+    slot_holder.ready = true
+    for i in 0 til rounds
+        second.n += 1
+    in_slot.retrieve()
+    show(f"record member {second.n}")
+
+    var pair_holder = PairHolder(ready: false, pair: (Box(n: -1), 0))
+    var in_pair = bump_pair.to[Work](holder: pair_holder, rounds: rounds)
+    in_pair.start_now()
+    var third = Box(n: 0)
+    pair_holder.pair = (third, 3)
+    pair_holder.ready = true
+    for i in 0 til rounds
+        third.n += 1
+    in_pair.retrieve()
+    show(f"tuple member {third.n}")
+    return
