@@ -28,4 +28,48 @@ public class NoticeTests
         Assert.Contains(collection: result.Notices,
             filter: n => n.Code == SemanticWarningCode.UnusedRoutineReturnValue && n.IsNotice);
     }
+
+    private static List<SemanticWarning> DocNotes(IEnumerable<SemanticWarning> notices)
+    {
+        return notices.Where(predicate: n => n.Code is >= SemanticWarningCode.RoutineHasNoDocComment
+                                                 and <= SemanticWarningCode.DocCommentLacksReturns)
+                      .ToList();
+    }
+
+    [Fact]
+    public void DocNotes_WrongParamLines_AreNotesEverywhere_NoDocOnlyWhenImported()
+    {
+        List<SemanticWarning> alone = DocNotes(notices: AnalyzeSuflae(source: """
+                                                                              routine bare(x: Int) -> Int
+                                                                                  return x
+
+                                                                              ### Adds.
+                                                                              ### :param a: the first
+                                                                              ### :param c: not a parameter
+                                                                              routine add(a: Int, b: Int) -> Int
+                                                                                  return a + b
+                                                                              """,
+            fileName: "/virtual/docs/doc_notes.sf").Notices);
+        Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment);
+        Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksReturns);
+        Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksParam &&
+                                                       n.Message.Contains(value: "'b'") && n.CodeString == "SF-W306");
+        Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentNamesUnknownParam &&
+                                                       n.Message.Contains(value: "'c'"));
+    }
+
+    [Fact]
+    public void DocNotes_RoutineOfAnImportedModule_NeedsADocComment()
+    {
+        const string lib = "/virtual/docs/doclib.sf";
+        const string entry = "/virtual/docs/docuse.sf";
+        var libProgram = ParseSuflae(source: "module DocLib\n\nroutine bare(x: Int) -> Int\n    return x\n", fileName: lib);
+        var entryProgram = ParseSuflae(source: "import DocLib\n\nroutine start()\n    return\n", fileName: entry);
+        var analyzer = new Builder.Verification.SemanticVerifier(language: TypeModel.Enums.Language.Suflae);
+        AnalysisResult result = analyzer.AnalyzeMultiple(files: [(libProgram, lib), (entryProgram, entry)]);
+        List<SemanticWarning> notes = DocNotes(notices: result.Notices);
+        Assert.Contains(collection: notes, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment &&
+                                                       n.Location.FileName == lib && n.CodeString == "SF-W305");
+        Assert.DoesNotContain(collection: notes, filter: n => n.Location.FileName == entry);
+    }
 }
