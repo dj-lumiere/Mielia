@@ -858,7 +858,7 @@ routine B16.fixed(places: Int) -> Text
     return me.fixed(places: places.to[U64]())
 
 ### Renders this value to `sig_digits` significant decimal digits with C `%g`
-### layout (pure-RF exact-rational conversion; widens to B64 exactly first).
+### layout (an exact rational conversion that widens to B64 exactly first).
 ### :param sig_digits: The number of significant decimal digits (>= 1).
 ### :returns: The resulting `Text` value.
 routine B16.to_text(sig_digits: Int) -> Text
@@ -891,7 +891,7 @@ routine B32.fixed(places: Int) -> Text
     return me.fixed(places: places.to[U64]())
 
 ### Renders this value to `sig_digits` significant decimal digits with C `%g`
-### layout (pure-RF exact-rational conversion; widens to B64 exactly first).
+### layout (an exact rational conversion that widens to B64 exactly first).
 ### :param sig_digits: The number of significant decimal digits (>= 1).
 ### :returns: The resulting `Text` value.
 routine B32.to_text(sig_digits: Int) -> Text
@@ -924,7 +924,7 @@ routine B64.fixed(places: Int) -> Text
     return me.fixed(places: places.to[U64]())
 
 ### Renders this value to `sig_digits` significant decimal digits with C `%g`
-### layout (pure-RF exact-rational conversion).
+### layout (an exact rational conversion).
 ### :param sig_digits: The number of significant decimal digits (>= 1).
 ### :returns: The resulting `Text` value.
 routine B64.to_text(sig_digits: Int) -> Text
