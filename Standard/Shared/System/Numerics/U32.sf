@@ -300,10 +300,14 @@ routine U32.to_bytes_le() -> Items[Byte, 4]
 routine U32.to_bytes_be() -> Items[Byte, 4]
 
 ### Builds a `U32` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The U32 value stored in `bytes`.
 @rf("U32.from_bytes_le")
 common routine U32.from_bytes_le(bytes: Items[Byte, 4]) -> U32
 
 ### Builds a `U32` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The U32 value stored in `bytes`.
 @rf("U32.from_bytes_be")
 common routine U32.from_bytes_be(bytes: Items[Byte, 4]) -> U32
 

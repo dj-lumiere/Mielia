@@ -83,6 +83,9 @@ routine memvars(of: T) -> List[MemberVariableInfo]
 needs AnyType T
     return type_info(of: of).memvars
 
+### The type kind that a kind name from the builder's tables stands for.
+### :param name: The kind name, such as `ENTITY`.
+### :returns: The kind (a record for an unknown name).
 secret routine kind_from(name: Text) -> TypeKind
     if name == "ENTITY"
         return TypeKind.ENTITY
@@ -99,11 +102,19 @@ secret routine kind_from(name: Text) -> TypeKind
     return TypeKind.RECORD
 
 # A description already made in this walk is handed out again, so a type that holds itself ends.
+### The description of a type, made once for each type in a walk.
+### :param fact: The builder's facts about the type.
+### :param seen: The types already described, by type id, so a type that holds itself is described once.
+### :returns: The description.
 secret routine info_from(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
     when try seen[fact.type_id]
         is None => return new_info(fact: fact, seen: seen)
         else as known => return known
 
+### Makes the description of a type, with its member variables, routines and cases.
+### :param fact: The builder's facts about the type.
+### :param seen: The types already described, by type id, so a type that holds itself is described once.
+### :returns: The description.
 secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
     var info = TypeInfo(
         name: fact.name,
@@ -189,6 +200,9 @@ entity RoutineInfo
     secret index: U64
     secret owner: TypeHandle
 
+### The routine kind that a kind name from the builder's tables stands for.
+### :param name: The kind name, such as `MEMBER`.
+### :returns: The kind.
 secret routine routine_kind_from(name: Text) -> RoutineKind
     if name == "MEMBER"
         return RoutineKind.MEMBER
@@ -198,11 +212,20 @@ secret routine routine_kind_from(name: Text) -> RoutineKind
         return RoutineKind.CREATOR
     return RoutineKind.FREE
 
+### The description of the type a routine returns.
+### :param fact: The builder's facts about the routine.
+### :param seen: The types already described, by type id, so a type that holds itself is described once.
+### :returns: The description, or none when the routine returns nothing.
 secret routine returns_from(fact: RoutineFact, seen: Dict[U64, TypeInfo]) -> TypeInfo?
     if fact.has_returns
         return info_from(fact: fact.make_returns(), seen: seen)
     return none
 
+### The description of a routine, with its parameters.
+### :param fact: The builder's facts about the routine.
+### :param owner: The handle of the type the routine belongs to.
+### :param seen: The types already described, by type id, so a type that holds itself is described once.
+### :returns: The description.
 secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dict[U64, TypeInfo]) -> RoutineInfo
     var parameters = List[ParameterInfo]()
     for parameter in fact.parameters
@@ -349,11 +372,21 @@ entity Invocation
 routine Invocation.proceed() -> Unknown
     return me.run()
 
+### Makes a ready call of a routine.
+### :param routine_info: The description of the routine.
+### :param args: The arguments, in parameter order.
+### :param run: Runs the routine with the arguments.
+### :returns: The invocation.
 secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], run: Callable[(), Unknown]) -> Invocation
     return Invocation(routine_info: routine_info, args: args, run: run)
 
 # The description of a routine of the program's modules that carries an annotation. An empty module name matches
 # any module.
+### The description of a routine of the program's modules that carries an annotation.
+### :param module_name: The module to look in, or empty text for any module.
+### :param name: The name of the routine.
+### :param count: How many parameters it has.
+### :returns: The description. Crashes when no routine has that name and parameter count.
 secret routine annotated_routine(module_name: Text, name: Text, count: Int) -> RoutineInfo
     for fact in reached_routines()
         if fact.name == name and fact.parameters.count() == count and (module_name == "" or fact.module_name == module_name)
@@ -361,6 +394,11 @@ secret routine annotated_routine(module_name: Text, name: Text, count: Int) -> R
     throw NoSuchRoutineError(owner: module_name, routine_name: name)
 
 # The description of a member routine or a common routine that carries an annotation.
+### The description of a member routine or common routine that carries an annotation.
+### :param maker: Makes the facts of the type.
+### :param name: The name of the routine.
+### :param count: How many parameters it has.
+### :returns: The description. Crashes when the type has no routine with that name and parameter count.
 secret routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Int) -> RoutineInfo
     var fact = maker()
     for listed in fact.handle.make_routines()
@@ -369,5 +407,8 @@ secret routine annotated_member(maker: Callable[(), TypeFact], name: Text, count
     throw NoSuchRoutineError(owner: fact.name, routine_name: name)
 
 # The description of a type that carries an annotation.
+### The description of a type that carries an annotation.
+### :param maker: Makes the facts of the type.
+### :returns: The description.
 secret routine annotated_type(maker: Callable[(), TypeFact]) -> TypeInfo
     return info_from(fact: maker(), seen: Dict[U64, TypeInfo]())

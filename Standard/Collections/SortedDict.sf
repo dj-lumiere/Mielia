@@ -234,12 +234,16 @@ routine SortedDict[TKey, TValue].to[List[(TKey, TValue)]]() -> List[(TKey, TValu
 # Display
 # ============================================================================
 
+### Returns the text form of `me`: the entries in ascending key order as `key: value` pairs in braces, or `{:}` when empty.
+### :returns: The text form of `me`.
 @override
 routine SortedDict[TKey, TValue].represent() -> Text
     if me.is_empty()
         return "{:}"
     return f"{{{me.entries_text(diagnosing: false)}}}"
 
+### Returns the diagnostic text of `me`: its type, count and entries.
+### :returns: The diagnostic text of `me`.
 @override
 routine SortedDict[TKey, TValue].diagnose() -> Text
     if me.is_empty()
@@ -256,6 +260,8 @@ routine SortedDict[TKey, TValue].serialize() -> SerialValue
     return SerialValue(result.duplicate())
 
 ### Builds the dictionary from its serialized entry table.
+### :param value: The serialized value to read.
+### :returns: The SortedDict value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a table or an entry does not fit, or a parse error when a key
 ### does not read as a `TKey`.
 common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
@@ -273,6 +279,8 @@ common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> Sorte
 # ============================================================================
 
 ### The entry at `rank`, which must be below the count.
+### :param rank: The position of the entry in key order, counted from 0.
+### :returns: The key and the value.
 secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> (TKey, TValue)
     return (me.tree.key_at(rank: rank), me.tree.value_at(rank: rank))
 

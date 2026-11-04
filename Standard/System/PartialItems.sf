@@ -190,6 +190,8 @@ routine PartialItems[T, COUNT].diagnose() -> Text
     return f"{me.full_type_name()}({me.elements_text(diagnosing: true)})"
 
 ### The position `index` names, crashing unless it is the position of an element held.
+### :param index: The index given, counted from 0 (a negative one counts from the end).
+### :returns: The index as a position.
 secret routine PartialItems[T, COUNT].checked_position(index: Int) -> U64
     var at = position_of(value: index)
     if at >= me.used
@@ -197,6 +199,7 @@ secret routine PartialItems[T, COUNT].checked_position(index: Int) -> U64
     return at
 
 ### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count held).
+### :param kept: How many leading elements stay.
 secret routine PartialItems[T, COUNT].cut(kept: U64)
     var i = kept
     until i >= me.used

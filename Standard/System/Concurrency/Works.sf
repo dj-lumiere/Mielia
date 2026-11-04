@@ -21,6 +21,9 @@ entity Work[T]
 # ============================================================================
 
 ### Builds the Work of a `to[Work]` conversion: the work that will run `entry(recipe)`, not started.
+### :param entry: The routine that runs the recipe.
+### :param recipe: The recipe that holds the arguments.
+### :returns: The Work for the recipe.
 routine work_recipe[T](entry: Addr, recipe: Addr) -> Work[T]
     danger
         return Work[T](state: work_state[T](entry: entry, recipe: recipe),
@@ -90,6 +93,7 @@ secret routine Work[T].wind_down()
     return
 
 ### Enters the work in a race.
+### :param race: The address of the race to enter.
 secret routine Work[T].join_race(race: Addr)
     danger
         if me.state.is_coro()

@@ -57,6 +57,9 @@ routine U128.mul(you: U128) -> U128
 ### step — avoiding the slow soft `__udivti3`/inline-expansion at every divisor size.
 ### The `i128` storage is reinterpreted in place as two little-endian U64 limbs.
 ### PRECONDITION: `b != 0`.
+### :param a: The dividend.
+### :param b: The divisor.
+### :returns: The quotient `a // b`.
 @rf("u128_floordiv")
 routine u128_floordiv(a: U128, b: U128) -> U128
 
@@ -68,7 +71,8 @@ routine u128_floordiv(a: U128, b: U128) -> U128
 routine U128.floordiv(you: U128) -> U128
 
 ### Returns `me % you` (integer remainder).
-### :param you: The divisor.
+### :param a: The dividend.
+### :param b: The divisor.
 ### :returns: The remainder `me % you`. Behavior is undefined if `you == 0`.
 ### Unsigned 128-bit remainder via the Knuth-D kernel. PRECONDITION: `b != 0`.
 @rf("u128_mod")
@@ -82,6 +86,9 @@ routine u128_mod(a: U128, b: U128) -> U128
 routine U128.mod(you: U128) -> U128
 
 ### (quotient, remainder) of `a // b` and `a % b` from ONE `knuth_divide[2]` pass. PRECONDITION: `b != 0`.
+### :param a: The dividend.
+### :param b: The divisor.
+### :returns: The quotient and the remainder, in that order.
 @rf("u128_divmod")
 routine u128_divmod(a: U128, b: U128) -> (U128, U128)
 
@@ -328,10 +335,14 @@ routine U128.to_bytes_le() -> Items[Byte, 16]
 routine U128.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds a `U128` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The U128 value stored in `bytes`.
 @rf("U128.from_bytes_le")
 common routine U128.from_bytes_le(bytes: Items[Byte, 16]) -> U128
 
 ### Builds a `U128` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The U128 value stored in `bytes`.
 @rf("U128.from_bytes_be")
 common routine U128.from_bytes_be(bytes: Items[Byte, 16]) -> U128
 

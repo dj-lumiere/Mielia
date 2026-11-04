@@ -20,6 +20,7 @@ secret record MemberFact
     secret make_fact: Callable[(), TypeFact]
 
 ### The description of the member variable's type.
+### :returns: The type description.
 @readonly
 secret routine MemberFact.fact() -> TypeFact
     return me.make_fact()
@@ -102,16 +103,26 @@ obeys Equatable, Hashable
 # of its own (a load through `Hijacked`), so the cell keeps the only one.
 # ============================================================================
 
+### The text of the kept value.
+### :param data: The address of the kept value.
+### :returns: The text.
 secret routine unknown_show[T](data: Addr) -> Text
 needs RecordType T
     danger
         return Hijacked[T](data).peek().represent()
 
+### The serial form of the kept value.
+### :param data: The address of the kept value.
+### :returns: The serial value.
 secret routine unknown_serialize[T](data: Addr) -> SerialValue
 needs RecordType T
     danger
         return Hijacked[T](data).peek().serialize()
 
+### One member variable of the kept record.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :returns: The member variable's value, or none when there is no such one.
 secret routine unknown_peek[T](data: Addr, memvar: Text) -> Unknown?
 needs RecordType T
     danger
@@ -120,6 +131,10 @@ needs RecordType T
                 return Unknown(from: Hijacked[T](data).peek().$nameof(m))
     return none
 
+### One member variable of the kept entity, read under the entity's lock.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :returns: The member variable's value, or none when there is no such one.
 secret routine unknown_peek_entity[E](data: Addr, memvar: Text) -> Unknown?
 needs EntityType E
     danger
@@ -133,6 +148,11 @@ needs EntityType E
 
 # Changes one member variable of the kept entity under its lock, the way `List.setitem` changes an element: the
 # old value is let go in its place and the new one stored there.
+### Changes one member variable of the kept entity under its lock, running its change hooks.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: true when changed, false when there is no such member variable or the value has another type.
 secret routine unknown_poke_entity[E](data: Addr, memvar: Text, value: Unknown) -> Bool
 needs EntityType E
     danger
@@ -156,9 +176,19 @@ needs EntityType E
     return false
 
 # A record changes only as a copy (`unknown_poked`): the builder never reaches this.
+### A record is never changed in place, so this does nothing.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: Always false.
 secret routine unknown_poke_record(data: Addr, memvar: Text, value: Unknown) -> Bool
     return false
 
+### A copy of the kept record with one member variable changed.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: The copy, or none when there is no such member variable or the value has another type.
 secret routine unknown_poked[T](data: Addr, memvar: Text, value: Unknown) -> Unknown?
 needs RecordType T
     danger
@@ -172,40 +202,55 @@ needs RecordType T
                         return Unknown(from: changed)
     return none
 
+### Compares two kept values of the same type.
+### :param data: The address of the first kept value.
+### :param other: The address of the other kept value.
+### :returns: true when they are equal.
 secret routine unknown_equal[T](data: Addr, other: Addr) -> Bool
 needs RecordType T
     danger
         return Hijacked[T](data).peek().kept_equal(you: Hijacked[T](other).peek())
 
+### The hash of the kept value.
+### :param data: The address of the kept value.
+### :returns: The hash.
 secret routine unknown_hash[T](data: Addr) -> U64
 needs RecordType T
     danger
         return Hijacked[T](data).peek().kept_hash()
 
 ### `==` on two values an `Unknown` keeps, for a type that has none: a loud failure naming the type.
+### :param you: The other kept value.
+### :returns: true when the values are equal.
 @overridable
 secret routine T.kept_equal(you: T) -> Bool
 needs AnyType T
     throw UnknownOperationError(type_name: me.type_name(), operation: "==")
 
 ### `==` on two values an `Unknown` keeps: the type's own.
+### :param you: The other kept value.
+### :returns: true when the values are equal.
 @override
 secret routine T.kept_equal(you: T) -> Bool
 needs T obeys Equatable
     return me == you
 
 ### `hash()` on a value an `Unknown` keeps, for a type that has none: a loud failure naming the type.
+### :returns: The hash.
 @overridable
 secret routine T.kept_hash() -> U64
 needs AnyType T
     throw UnknownOperationError(type_name: me.type_name(), operation: "hash()")
 
 ### `hash()` on a value an `Unknown` keeps: the type's own keyed hash with both keys zero.
+### :returns: The hash.
 @override
 secret routine T.kept_hash() -> U64
 needs T obeys Hashable
     return me.hash(k0: 0, k1: 0)
 
+### Lets go of the kept value.
+### :param data: The address of the kept value.
 secret routine unknown_release[T](data: Addr)
 needs RecordType T
     danger
@@ -219,12 +264,14 @@ needs RecordType T
 
 ### A routine value that describes `T` when called. A description of a member type is made this way, so a
 ### type that holds itself does not describe itself forever.
+### :returns: The routine value.
 secret common routine T.type_fact_maker() -> Callable[(), TypeFact]
 needs AnyType T
     return () => type_fact_of[T]()
 
 ### The description of `T`. A source that does not apply to `T`'s kind unrolls zero times, so one body serves
 ### records, entities, choices, flags types and variants.
+### :returns: The description.
 secret routine type_fact_of[T]() -> TypeFact
     var memvars = SF::System.List[MemberFact]()
     expand m in allmemvarof(T)
@@ -271,6 +318,13 @@ secret routine type_fact_of[T]() -> TypeFact
 # Making an Unknown
 # ============================================================================
 
+### Keeps a value in an `Unknown`, with the tables for its type.
+### :param value: The value to keep.
+### :param type_id: The id of the value's type.
+### :param is_entity: Whether the value is an entity.
+### :param do_peek: Reads a member variable of the kept value.
+### :param do_poke: Changes a member variable of the kept value.
+### :returns: The `Unknown` keeping the value.
 secret routine unknown_wrap[T](
     value: T,
     type_id: U64,
@@ -299,27 +353,47 @@ needs RecordType T
 
 # A routine value has no member variables, no `==` and no hash, and its bound payload needs no teardown: its table
 # says so. It is kept like a record otherwise.
+### The text of the kept routine value.
+### :param data: The address of the kept value.
+### :returns: The text.
 secret routine unknown_show_routine[T](data: Addr) -> Text
 needs RoutineType T
     danger
         return Hijacked[T](data).peek().represent()
 
+### The serial form of the kept routine value.
+### :param data: The address of the kept value.
+### :returns: The serial value.
 secret routine unknown_serialize_routine[T](data: Addr) -> SerialValue
 needs RoutineType T
     danger
         return Hijacked[T](data).peek().serialize()
 
+### A routine value has no member variables.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :returns: Always none.
 secret routine unknown_no_memvar(data: Addr, memvar: Text) -> Unknown?
     return none
 
+### A routine value has no member variables to change.
+### :param data: The address of the kept value.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: Always none.
 secret routine unknown_no_poked(data: Addr, memvar: Text, value: Unknown) -> Unknown?
     return none
 
+### Lets go of a kept routine value.
+### :param data: The address of the kept value.
 secret routine unknown_release_routine(data: Addr)
     danger
         Hijacked[Addr](data).invalidate()
     return
 
+### Keeps a record in an `Unknown`.
+### :param value: The record to keep.
+### :returns: The `Unknown` keeping a copy of the value.
 secret routine unknown_wrap_record(value: T) -> Unknown
 needs RecordType T
     return unknown_wrap[T](
@@ -330,6 +404,9 @@ needs RecordType T
         do_poke: unknown_poke_record,
     )
 
+### Keeps a routine value in an `Unknown`.
+### :param value: The routine value to keep.
+### :returns: The `Unknown` keeping the value.
 secret routine unknown_wrap_routine(value: T) -> Unknown
 needs RoutineType T
     danger
@@ -351,20 +428,30 @@ needs RoutineType T
         return Unknown(cell: Roamed[UnknownCell](from: UnknownCell(data: cell.get_address(), kind: kind)))
 
 ### A value kept in an `Unknown`, by its kind: a record (any value that is not an entity) as a copy.
+### :param value: The value to keep.
+### :returns: The `Unknown` keeping the value.
 @overridable
 secret common routine T.kept_unknown(value: T) -> Unknown
 needs RecordType T
     return unknown_wrap_record(value: value)
 
 ### A routine value kept in an `Unknown`: it has no member variables, no `==` and no hash.
+### :param value: The value to keep.
+### :returns: The `Unknown` keeping the value.
 @override
 secret common routine T.kept_unknown(value: T) -> Unknown
 needs RoutineType T
     return unknown_wrap_routine(value: value)
 
+### Fails, since a routine value has no `==`.
+### :param type_name: The name of the type, for the error.
+### :returns: Never returns.
 secret routine unknown_cannot_compare(type_name: Text) -> Bool
     throw UnknownOperationError(type_name: type_name, operation: "==")
 
+### Fails, since a routine value has no hash.
+### :param type_name: The name of the type, for the error.
+### :returns: Never returns.
 secret routine unknown_cannot_hash(type_name: Text) -> U64
     throw UnknownOperationError(type_name: type_name, operation: "hash()")
 
@@ -399,12 +486,14 @@ needs AnyType T
 # ============================================================================
 
 ### The routines for the kept value's type.
+### :returns: The table of routines.
 @readonly
 secret routine Unknown.kind() -> UnknownKind
     danger
         return me.cell.view().kind
 
 ### The address of the kept value.
+### :returns: The address.
 @readonly
 secret routine Unknown.data() -> Addr
     danger
@@ -429,6 +518,8 @@ routine Unknown.hash() -> U64
     return me.kind().do_hash(me.data())
 
 ### The kept value's hash, keyed: its hash mixed with the two keys.
+### :param k0: The first half of the secret key.
+### :param k1: The second half of the secret key.
 ### :returns: The hash.
 @readonly
 @override
@@ -452,6 +543,7 @@ needs RecordType T
 ### `to[T]()` under a name of its own, for the library's member walks: a call spliced from a member's type is
 ### bound after the walk is unrolled, where `to` would also match the conversions every type has.
 ### Asked for an `Unknown` (a verb made concrete for an `Unknown` target), it gives this `Unknown` itself.
+### :returns: The kept value, or none when it is of another type.
 @readonly
 secret routine Unknown.kept_as[T]() -> T
 needs RecordType T
@@ -485,30 +577,42 @@ routine Unknown.serialize() -> SerialValue
     return me.kind().do_serialize(me.data())
 
 ### Whether the kept value is an entity.
+### :returns: true for an entity.
 @readonly
 secret routine Unknown.is_entity() -> Bool
     return me.kind().is_entity
 
 ### The description of the kept value's type.
+### :returns: The type description.
 @readonly
 secret routine Unknown.type_fact() -> TypeFact
     return me.kind().make_fact()
 
 ### One member variable of the kept value, or none.
+### :param memvar: The name of the member variable.
+### :returns: The member variable's value, or none when there is no such one.
 @readonly
 secret routine Unknown.peek_memvar(memvar: Text) -> Unknown?
     return me.kind().do_peek(me.data(), memvar)
 
 ### Changes one member variable of the kept entity. `false` when the value is of another type.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: true when changed.
 secret routine Unknown.poke_memvar(memvar: Text, value: Unknown) -> Bool
     return me.kind().do_poke(me.data(), memvar, value)
 
 ### A copy of the kept record with one member variable changed, or none when the value is of another type.
+### :param memvar: The name of the member variable.
+### :param value: The new value.
+### :returns: The copy, or none.
 @readonly
 secret routine Unknown.poked_memvar(memvar: Text, value: Unknown) -> Unknown?
     return me.kind().do_poked(me.data(), memvar, value)
 
 ### The description of `T`, for `type_info(of:)`.
+### :param of: The value whose type is described.
+### :returns: The description.
 secret routine type_fact(of: T) -> TypeFact
 needs AnyType T
     return type_fact_of[T]()

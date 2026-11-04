@@ -73,10 +73,14 @@ routine S8.logical_shift_right(bits: Int) -> S8
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine S8.rotate_left(bits: Int) -> S8
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine S8.rotate_right(bits: Int) -> S8
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -156,10 +160,14 @@ routine S16.logical_shift_right(bits: Int) -> S16
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine S16.rotate_left(bits: Int) -> S16
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine S16.rotate_right(bits: Int) -> S16
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -239,10 +247,14 @@ routine S32.logical_shift_right(bits: Int) -> S32
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine S32.rotate_left(bits: Int) -> S32
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine S32.rotate_right(bits: Int) -> S32
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -322,10 +334,14 @@ routine S64.logical_shift_right(bits: Int) -> S64
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine S64.rotate_left(bits: Int) -> S64
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine S64.rotate_right(bits: Int) -> S64
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -405,10 +421,14 @@ routine S128.logical_shift_right(bits: Int) -> S128
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine S128.rotate_left(bits: Int) -> S128
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine S128.rotate_right(bits: Int) -> S128
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -483,10 +503,14 @@ routine U8.logical_shift_right(bits: Int) -> U8
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine U8.rotate_left(bits: Int) -> U8
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine U8.rotate_right(bits: Int) -> U8
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -561,10 +585,14 @@ routine U16.logical_shift_right(bits: Int) -> U16
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine U16.rotate_left(bits: Int) -> U16
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine U16.rotate_right(bits: Int) -> U16
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -639,10 +667,14 @@ routine U32.logical_shift_right(bits: Int) -> U32
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine U32.rotate_left(bits: Int) -> U32
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine U32.rotate_right(bits: Int) -> U32
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -799,10 +831,14 @@ routine U128.logical_shift_right(bits: Int) -> U128
     return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 routine U128.rotate_left(bits: Int) -> U128
     return me.rotate_left(bits: bits.to_shift_amount())
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 routine U128.rotate_right(bits: Int) -> U128
     return me.rotate_right(bits: bits.to_shift_amount())
 
@@ -829,10 +865,14 @@ routine B16.to_text(sig_digits: Int) -> Text
     return me.to_text(sig_digits: sig_digits.to[U64]())
 
 ### me * 2^n (C scalbn).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B16.scalbn(n: Int) -> B16
     return me.scalbn(n: n.to[S64]())
 
 ### Alias of scalbn (C ldexp).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B16.ldexp(n: Int) -> B16
     return me.ldexp(n: n.to[S64]())
 
@@ -858,10 +898,14 @@ routine B32.to_text(sig_digits: Int) -> Text
     return me.to_text(sig_digits: sig_digits.to[U64]())
 
 ### me * 2^n (C scalbn).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B32.scalbn(n: Int) -> B32
     return me.scalbn(n: n.to[S64]())
 
 ### Alias of scalbn (C ldexp).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B32.ldexp(n: Int) -> B32
     return me.ldexp(n: n.to[S64]())
 
@@ -887,10 +931,14 @@ routine B64.to_text(sig_digits: Int) -> Text
     return me.to_text(sig_digits: sig_digits.to[U64]())
 
 ### me * 2^n (C scalbn).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B64.scalbn(n: Int) -> B64
     return me.scalbn(n: n.to[S64]())
 
 ### Alias of scalbn (C ldexp).
+### :param n: The exponent to apply.
+### :returns: `me` times the radix to the power `n`.
 routine B64.ldexp(n: Int) -> B64
     return me.ldexp(n: n.to[S64]())
 

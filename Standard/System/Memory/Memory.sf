@@ -114,6 +114,8 @@ routine Places[T](count: Int, fill: T) -> Places[T]
     return result
 
 ### A block of `room` places, all zero.
+### :param room: How many places the row has.
+### :returns: The new block.
 ### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
 secret routine new_memory_block[T](room: U64) -> MemoryBlock[T]
     danger
@@ -313,6 +315,9 @@ routine Span[T].getitem(range: Range[Int]) -> Span[T]
 
 ### The place after the last one `range` covers among `room` places, once the range is checked: it runs forward one
 ### position at a time, from a position that is not negative, and stays inside the `room` places.
+### :param range: The range of positions.
+### :param room: How many places the row has.
+### :returns: The end position.
 secret routine span_end(range: Range[Int], room: U64) -> U64
     if range.step != 1 or not range.is_ascending()
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
@@ -547,10 +552,16 @@ routine Places[T].walk_at(first: U64, count: U64) -> MemoryEmitter[T]
     return me.walking(first: places_checked(room: me.block.room, position: first), count: count)
 
 ### A walk over `count` places from `first`, both already checked.
+### :param first: The first position.
+### :param count: How many places or elements.
+### :returns: The walk.
 secret routine Places[T].walking(first: U64, count: U64) -> MemoryEmitter[T]
     return MemoryEmitter[T](block: me.block, base: 0, room: me.block.room, first: first, index: 0, count: count)
 
 ### A walk over `count` places of the span from `first`, both already checked.
+### :param first: The first position.
+### :param count: How many places or elements.
+### :returns: The walk.
 secret routine Span[T].walking(first: U64, count: U64) -> MemoryEmitter[T]
     return MemoryEmitter[T](block: me.block, base: me.start, room: me.room, first: first, index: 0, count: count)
 
@@ -879,11 +890,17 @@ secret routine Span[T].base() -> Hijacked[T]
 
 ### The place at `position` of the places from `base`. Every position given is inside a row whose byte size was
 ### checked when the row was allocated, so the byte offset cannot pass what a `U64` counts.
+### :param base: The first place of the row.
+### :param position: The zero-based position of the place.
+### :returns: The memory of the place.
 @inline
 secret routine place_at[T](base: Hijacked[T], position: U64) -> Hijacked[T]
     return base.offset(ByteSize(bytes: T.data_size().byte_size() *% position))
 
 ### `position` checked against `room` places.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
+### :returns: The same position.
 @inline
 secret routine places_checked(room: U64, position: U64) -> U64
     if position >= room
@@ -891,12 +908,19 @@ secret routine places_checked(room: U64, position: U64) -> U64
     return position
 
 ### `position` checked against `room` places and, for places of entities, against a place that holds no entity yet.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
+### :returns: The same position.
 @inline
 secret routine places_filled[T](base: Hijacked[T], room: U64, position: U64) -> U64
     return places_present[T](base: base, position: places_checked(room: room, position: position))
 
 ### `position`, already checked against the room, checked for places of entities against a place that holds no
 ### entity yet.
+### :param base: The first place of the row.
+### :param position: The zero-based position of the place.
+### :returns: The same position.
 @inline
 secret routine places_present[T](base: Hijacked[T], position: U64) -> U64
     if T.type_kind() == TypeKind.ENTITY
@@ -906,28 +930,45 @@ secret routine places_present[T](base: Hijacked[T], position: U64) -> U64
     return position
 
 ### What a place already checked holds, as it sits in memory (no holder of its own).
+### :param base: The first place of the row.
+### :param position: The zero-based position of the place.
+### :returns: The value in the place.
 @inline
 secret routine places_read[T](base: Hijacked[T], position: U64) -> T
     danger
         return place_at[T](base: base, position: position).peek()
 
 ### What the place at `position` holds, a value of its own.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
+### :returns: A copy of the value in the place.
 @inline
 secret routine places_at[T](base: Hijacked[T], room: U64, position: U64) -> T
     return places_read[T](base: base, position: places_filled[T](base: base, room: room, position: position)).share()
 
 ### What the place at `position`, already checked against the room, holds, a value of its own.
+### :param base: The first place of the row.
+### :param position: The zero-based position of the place.
+### :returns: A copy of the value in the place.
 @inline
 secret routine places_held[T](base: Hijacked[T], position: U64) -> T
     return places_read[T](base: base, position: places_present[T](base: base, position: position)).share()
 
 ### Replaces what the place at `position` holds.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
+### :param value: The value to store.
 @inline
 secret routine places_put[T](base: Hijacked[T], room: U64, position: U64, value: T)
     places_write[T](base: base, position: places_checked(room: room, position: position), value: value)
     return
 
 ### Replaces what the place at `position`, already checked against the room, holds.
+### :param base: The first place of the row.
+### :param position: The zero-based position of the place.
+### :param value: The value to store.
 @inline
 secret routine places_write[T](base: Hijacked[T], position: U64, value: T)
     danger
@@ -937,6 +978,10 @@ secret routine places_write[T](base: Hijacked[T], position: U64, value: T)
     return
 
 ### Hands out what the place at `position` holds and leaves the place zero.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
+### :returns: The value that was in the place.
 secret routine places_take[T](base: Hijacked[T], room: U64, position: U64) -> T
     var place = places_filled[T](base: base, room: room, position: position)
     var value = places_read[T](base: base, position: place)
@@ -944,6 +989,9 @@ secret routine places_take[T](base: Hijacked[T], room: U64, position: U64) -> T
     return value
 
 ### Tears down what the place at `position` holds and leaves the place zero.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param position: The zero-based position of the place.
 secret routine places_erase[T](base: Hijacked[T], room: U64, position: U64)
     var place = places_checked(room: room, position: position)
     danger
@@ -953,6 +1001,11 @@ secret routine places_erase[T](base: Hijacked[T], room: U64, position: U64)
 
 ### Carries what `count` places from `source` hold into the places from `target`, tearing down what the destination
 ### held and zeroing the source places nothing was carried into.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param source: The first position to carry from.
+### :param target: The first position to carry into.
+### :param count: How many places to carry.
 secret routine places_carry[T](base: Hijacked[T], room: U64, source: U64, target: U64, count: U64)
     var n = count
     if n == 0
@@ -976,6 +1029,9 @@ secret routine places_carry[T](base: Hijacked[T], room: U64, source: U64, target
     return
 
 ### Sets every place to `value`.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param value: The value every place is set to.
 secret routine places_fill[T](base: Hijacked[T], room: U64, value: T)
     var i: U64 = 0
     until i >= room
@@ -987,6 +1043,9 @@ secret routine places_fill[T](base: Hijacked[T], room: U64, value: T)
     return
 
 ### Moves every place `count` positions toward the front, the first ones going round to the back.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param count: How many positions the places move toward the front.
 secret routine places_turn[T](base: Hijacked[T], room: U64, count: U64)
     if room == 0
         return
@@ -1012,6 +1071,8 @@ secret routine places_turn[T](base: Hijacked[T], room: U64, count: U64)
     return
 
 ### Reverses the order of the places.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
 secret routine places_reverse[T](base: Hijacked[T], room: U64)
     if room <= 1
         return
@@ -1024,6 +1085,10 @@ secret routine places_reverse[T](base: Hijacked[T], room: U64)
     return
 
 ### Whether some place holds a value equal to `value`.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param value: The value to look for.
+### :returns: true when some place holds an equal value.
 secret routine places_have[T](base: Hijacked[T], room: U64, value: T) -> Bool
 needs T obeys Equatable
     var i: U64 = 0
@@ -1034,6 +1099,9 @@ needs T obeys Equatable
     return false
 
 ### What the places hold, as text (`[1, 2, 3]`).
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :returns: The text of the places.
 secret routine places_text[T](base: Hijacked[T], room: U64) -> Text
     var result = "["
     var i: U64 = 0
@@ -1046,6 +1114,10 @@ secret routine places_text[T](base: Hijacked[T], room: U64) -> Text
 
 ### Moves the bits of `count` places from `source` to `target` (the ranges may overlap). The places left behind still
 ### hold the same bits: the caller overwrites or clears them.
+### :param base: The first place of the row.
+### :param target: The first position to move to.
+### :param source: The first position to move from.
+### :param count: How many places to move.
 secret routine places_move[T](base: Hijacked[T], target: U64, source: U64, count: U64)
     if count == 0
         return
@@ -1058,6 +1130,9 @@ secret routine places_move[T](base: Hijacked[T], target: U64, source: U64, count
     return
 
 ### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
+### :param base: The first place of the row.
+### :param from: The first position to zero.
+### :param count: How many places to zero.
 secret routine places_clear[T](base: Hijacked[T], from: U64, count: U64)
     if count == 0
         return
@@ -1070,6 +1145,9 @@ secret routine places_clear[T](base: Hijacked[T], from: U64, count: U64)
     return
 
 ### Swaps the bits of the places at `a` and `b`.
+### :param base: The first place of the row.
+### :param a: The position of the first place.
+### :param b: The position of the second place.
 @inline
 secret routine places_swap[T](base: Hijacked[T], a: U64, b: U64)
     danger
@@ -1084,6 +1162,9 @@ secret routine places_swap[T](base: Hijacked[T], a: U64, b: U64)
 secret preset BUFFER_SORT_MIN_RUN: U64 = 32
 
 ### Sorts what `room` places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
+### :param compare: Tells whether the first element goes before the second.
 secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compare: Callable[(T, T), Bool])
     var n = room
     if n <= 1
@@ -1127,6 +1208,11 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
 
 ### Insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
 ### element being placed.
+### :param base: The first place of the row.
+### :param start: The first position of the range.
+### :param end: The position after the last one of the range.
+### :param held: The place that keeps the element being placed.
+### :param compare: Tells whether the first element goes before the second.
 secret routine MemoryBlock[T].places_insertion_sort(
     base: Hijacked[T],
     start: U64,
@@ -1157,6 +1243,11 @@ secret routine MemoryBlock[T].places_insertion_sort(
     return
 
 ### Whether the element kept in `held` goes before the element at `position`.
+### :param base: The first place of the row.
+### :param held: The place that keeps the element being placed.
+### :param position: The position of the element to compare with.
+### :param compare: Tells whether the first element goes before the second.
+### :returns: true when the kept element goes first.
 secret routine MemoryBlock[T].places_go_before(
     base: Hijacked[T],
     held: Hijacked[T],
@@ -1167,6 +1258,12 @@ secret routine MemoryBlock[T].places_go_before(
         return compare(held.peek(), place_at[T](base: base, position: position).peek())
 
 ### Merges the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
+### :param base: The first place of the row.
+### :param left: The first position of the left run.
+### :param mid: The position where the left run ends and the right run begins.
+### :param right: The position after the last one of the right run.
+### :param scratch: A row of places to merge through.
+### :param compare: Tells whether the first element goes before the second.
 secret routine MemoryBlock[T].places_merge(
     base: Hijacked[T],
     left: U64,
@@ -1218,6 +1315,8 @@ secret routine MemoryBlock[T].places_merge(
     return
 
 ### Sorts what `room` places hold in ascending order. Stable.
+### :param base: The first place of the row.
+### :param room: How many places the row has.
 secret routine places_sort[T](base: Hijacked[T], room: U64)
 needs T obeys Comparable
     var n = room
@@ -1262,6 +1361,10 @@ needs T obeys Comparable
 
 ### The `<` insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
 ### element being placed.
+### :param base: The first place of the row.
+### :param start: The first position of the range.
+### :param end: The position after the last one of the range.
+### :param held: The place that keeps the element being placed.
 secret routine places_insertion_sort_less[T](base: Hijacked[T], start: U64, end: U64, held: Hijacked[T])
 needs T obeys Comparable
     var size = T.data_size()
@@ -1287,12 +1390,21 @@ needs T obeys Comparable
     return
 
 ### Whether the element kept in `held` is less than the element at `position`.
+### :param base: The first place of the row.
+### :param held: The place that keeps the element being placed.
+### :param position: The position of the element to compare with.
+### :returns: true when the kept element is less.
 secret routine places_less_than[T](base: Hijacked[T], held: Hijacked[T], position: U64) -> Bool
 needs T obeys Comparable
     danger
         return held.peek() < place_at[T](base: base, position: position).peek()
 
 ### The `<` merge of the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
+### :param base: The first place of the row.
+### :param left: The first position of the left run.
+### :param mid: The position where the left run ends and the right run begins.
+### :param right: The position after the last one of the right run.
+### :param scratch: A row of places to merge through.
 secret routine places_merge_less[T](base: Hijacked[T], left: U64, mid: U64, right: U64, scratch: Hijacked[T])
 needs T obeys Comparable
     var size = T.data_size()

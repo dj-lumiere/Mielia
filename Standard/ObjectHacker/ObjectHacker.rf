@@ -78,6 +78,9 @@ needs AnyType T
     return Unknown(from: of).type_fact().name
 
 ### Finds the member variable a verb names, with the type it holds.
+### :param fact: The description of the type that has the member variable.
+### :param memvar: The name of the member variable.
+### :returns: The description of the member variable's type.
 secret routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
     for member in fact.memvars
         if member.name == memvar
@@ -133,6 +136,11 @@ needs AnyType V
     var changed = poked_unknown(held: held, memvar: memvar, value: Unknown(from: value))
     return changed.kept_as[T]()
 
+### A copy of a kept record with one member variable changed.
+### :param held: The kept record.
+### :param memvar: The name of the member variable.
+### :param value: The new value of the member variable.
+### :returns: The changed copy. Crashes when the value is an entity, or when the new value is not of the member variable's type.
 secret routine poked_unknown(held: Unknown, memvar: Text, value: Unknown) -> Unknown
     var fact = held.type_fact()
     if held.is_entity()

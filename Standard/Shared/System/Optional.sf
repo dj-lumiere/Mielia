@@ -37,12 +37,16 @@ needs VariantType T
 needs T obeys Copyable
 
 ### `unwrap_or` for a single-owner entity: the present value comes back as a duplicate (see `unwrap`).
+### :param fallback: The value to give when nothing is present.
+### :returns: The present value, or `fallback` if the optional is empty.
 @rf("Optional.unwrap_or")
 routine Optional[T].unwrap_or(fallback: T) -> T
 needs EntityType T
 needs T obeys Copyable
 
 ### `unwrap_or` for a variant: the present value comes back as a duplicate (see `unwrap`).
+### :param fallback: The value to give when nothing is present.
+### :returns: The present value, or `fallback` if the optional is empty.
 @rf("Optional.unwrap_or")
 routine Optional[T].unwrap_or(fallback: T) -> T
 needs VariantType T
@@ -59,6 +63,8 @@ needs T obeys Copyable
 @rf("Optional.strip_out")
 routine Optional[T].strip_out() -> T
 
+### Whether a value is present.
+### :returns: `true` if `me` holds a value.
 @rf("Optional.is_present")
 routine Optional[T].is_present() -> Bool
 

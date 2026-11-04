@@ -63,6 +63,8 @@ routine RotatableList[T](count: Int, fill_value: T) -> RotatableList[T]
     return RotatableList[T](items: Places[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
 
 ### Builds a list from its serialized element list.
+### :param value: The serialized value to read.
+### :returns: The RotatableList value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
 common routine RotatableList[T].from_serial(value: SerialValue) -> RotatableList[T]
     var result = RotatableList[T]()
@@ -441,12 +443,16 @@ routine RotatableList[T].reverse_in_place()
 # ============================================================================
 
 ### The memory place of the element at `index`, counted from the first one.
+### :param index: The position of the element, counted from the first one.
+### :returns: The place of the element.
 @inline
 secret routine RotatableList[T].place(index: U64) -> U64
     var place = me.head + index
     var room = me.items.room()
     return if place >= room then place - room else place
 ### The position `index` names, crashing unless it is the position of an element.
+### :param index: The index given, counted from 0 (a negative one counts from the end).
+### :returns: The index as a position.
 secret routine RotatableList[T].checked_position(index: Int) -> U64
     var at = position_of(value: index)
     if at >= me.count
@@ -454,6 +460,7 @@ secret routine RotatableList[T].checked_position(index: Int) -> U64
     return at
 
 ### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count).
+### :param kept: How many leading elements stay.
 secret routine RotatableList[T].cut(kept: U64)
     var i = kept
     until i >= me.count
@@ -463,6 +470,7 @@ secret routine RotatableList[T].cut(kept: U64)
     return
 
 ### Tears down the oldest elements until at most `kept` remain.
+### :param kept: How many of the newest elements stay.
 secret routine RotatableList[T].drop_oldest(kept: U64)
     until me.count <= kept
         me.items.erase_at(position: me.head)
@@ -470,6 +478,7 @@ secret routine RotatableList[T].drop_oldest(kept: U64)
     return
 
 ### Moves the first `count` elements to the back, keeping their order.
+### :param count: How many elements move to the back.
 secret routine RotatableList[T].turn(count: U64)
     if me.count == 0
         return
@@ -485,6 +494,7 @@ secret routine RotatableList[T].turn(count: U64)
     return
 
 ### Forgets the last `count` elements (already handed out or torn down).
+### :param count: How many elements to forget.
 secret routine RotatableList[T].forget(count: U64)
     me.count = me.count - count
     if me.count == 0
@@ -507,6 +517,7 @@ secret routine RotatableList[T].straighten()
 
 ### Moves into a bigger memory when fewer than `extra` places are free: twice the room, at least four, or as much
 ### as needed.
+### :param extra: How many more elements must fit.
 secret routine RotatableList[T].make_room(extra: U64)
     var needed = me.count + extra
     var room = me.items.room()

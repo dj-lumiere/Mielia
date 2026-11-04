@@ -203,6 +203,10 @@ routine Q128.to_euler() -> (B32, B32, B32)
 routine Q128.represent() -> Text
 
 ### One imaginary term of `fixed`, with an explicit leading sign.
+### :param v: The coefficient.
+### :param unit: The unit letter to append.
+### :param places: The number of digits after the decimal point.
+### :returns: The term, such as `+0.50i`.
 @rf("q128_fixed_term")
 routine q128_fixed_term(v: B32, unit: Text, places: U64) -> Text
 

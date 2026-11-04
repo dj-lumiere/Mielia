@@ -205,6 +205,10 @@ routine Q256.to_euler() -> (B64, B64, B64)
 routine Q256.represent() -> Text
 
 ### One imaginary term of `fixed`, with an explicit leading sign.
+### :param v: The coefficient.
+### :param unit: The unit letter to append.
+### :param places: The number of digits after the decimal point.
+### :returns: The term, such as `+0.50i`.
 @rf("q256_fixed_term")
 routine q256_fixed_term(v: B64, unit: Text, places: U64) -> Text
 

@@ -254,6 +254,7 @@ routine PriorityQueue[TPriority, TElement].diagnose() -> Text
 # ============================================================================
 
 ### Moves the entry at `index` toward the root while its priority is smaller than its parent's.
+### :param index: The position of the element, counted from 0.
 secret routine PriorityQueue[TPriority, TElement].sift_up(index: U64)
     var at = index
     until at == 0
@@ -265,6 +266,7 @@ secret routine PriorityQueue[TPriority, TElement].sift_up(index: U64)
     return
 
 ### Moves the entry at `index` toward the leaves while a child has a smaller priority.
+### :param index: The position of the element, counted from 0.
 secret routine PriorityQueue[TPriority, TElement].sift_down(index: U64)
     var at = index
     loop
@@ -280,12 +282,15 @@ secret routine PriorityQueue[TPriority, TElement].sift_down(index: U64)
         at = child
 
 ### Swaps the entries at `a` and `b`.
+### :param a: The position of the first entry.
+### :param b: The position of the second entry.
 secret routine PriorityQueue[TPriority, TElement].swap_entries(a: U64, b: U64)
     me.priorities.swap_at(first: a, second: b)
     me.elements.swap_at(first: a, second: b)
     return
 
 ### Moves both buffers into rows of `room` places.
+### :param room: How many places the row has.
 secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
     # The elements grow first: the pool's room is the priorities' room, so a failure growing the priorities leaves
     # a pool whose elements merely have more room than it uses.

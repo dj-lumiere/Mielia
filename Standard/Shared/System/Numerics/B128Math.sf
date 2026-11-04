@@ -48,12 +48,16 @@ routine B128.exp2() -> B128
 routine B128.exp10() -> B128
 
 ### Returns `me ^ you`.
+### :param you: The exponent.
+### :returns: `me` to the power `you`.
 @rf("B128.pow")
 routine B128.pow(you: B128) -> B128
 
 ### `me^you` with raw IEEE (the full C99 pow special-case ladder). No crash. The general case is
 ### exp(you * ln|me|) on the 384-bit tier when the fast path leaves the rounding open, the sign of an
 ### odd-integer exponent reapplied.
+### :param you: The exponent.
+### :returns: `me` to the power `you`, or an infinity or a NaN where it has no finite value.
 @rf("B128.pow_unchecked")
 routine B128.pow_unchecked(you: B128) -> B128
 
@@ -110,10 +114,16 @@ routine B128.acosh_unchecked() -> B128
 routine B128.tan() -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding.
+### :param b: The second factor.
+### :param c: The value added to the product.
+### :returns: `me * b + c`, rounded once.
 @rf("B128.mul_add")
 routine B128.mul_add(b: B128, c: B128) -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding, with raw IEEE 754 propagation.
+### :param b: The second factor.
+### :param c: The value added to the product.
+### :returns: `me * b + c`, rounded once.
 @rf("B128.mul_add_unchecked")
 routine B128.mul_add_unchecked(b: B128, c: B128) -> B128
 

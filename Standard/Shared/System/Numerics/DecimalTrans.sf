@@ -36,6 +36,8 @@ routine Decimal.log2() -> Decimal
 routine Decimal.log10() -> Decimal
 
 ### me raised to the power `you`.
+### :param you: The exponent.
+### :returns: `me` to the power `you`.
 @rf("Decimal.pow")
 routine Decimal.pow(you: Decimal) -> Decimal
 
@@ -53,14 +55,24 @@ routine Decimal.rsqrt() -> Decimal
 routine Decimal.cbrt() -> Decimal
 
 ### Euclidean norm sqrt(x^2 + y^2), computed without overflow/underflow.
+### :param x: One leg.
+### :param y: The other leg.
+### :returns: The length of the hypotenuse.
 @rf("hypot")
 routine hypot(x: Decimal, y: Decimal) -> Decimal
 
 ### 3D Euclidean norm sqrt(x^2 + y^2 + z^2), computed without overflow/underflow.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+### :returns: The length of the 3D hypotenuse.
 @rf("hypot")
 routine hypot(x: Decimal, y: Decimal, z: Decimal) -> Decimal
 
 ### Fused multiply-add me*b + c with a single rounding.
+### :param b: The second factor.
+### :param c: The value added to the product.
+### :returns: `me * b + c`, rounded once.
 @rf("Decimal.mul_add")
 routine Decimal.mul_add(b: Decimal, c: Decimal) -> Decimal
 
@@ -89,6 +101,9 @@ routine Decimal.acos() -> Decimal
 routine Decimal.atan() -> Decimal
 
 ### Two-argument arctangent atan2(y, x) (result in radians).
+### :param y: The vertical coordinate.
+### :param x: The horizontal coordinate.
+### :returns: The angle in radians, in the range -pi to pi.
 @rf("atan2")
 routine atan2(y: Decimal, x: Decimal) -> Decimal
 
@@ -173,30 +188,44 @@ routine Decimal.abs() -> Decimal
 routine Decimal.neg() -> Decimal
 
 ### Magnitude of me with the sign of `you`.
+### :param you: The value whose sign is used.
+### :returns: The magnitude of `me` with the sign of `you`.
 @rf("Decimal.copysign")
 routine Decimal.copysign(you: Decimal) -> Decimal
 
 ### Positive difference max(me - you, 0).
+### :param you: The value to subtract.
+### :returns: `me - you` when `me` is greater, otherwise zero.
 @rf("Decimal.fdim")
 routine Decimal.fdim(you: Decimal) -> Decimal
 
 ### IEEE minimumNumber(me, you).
+### :param you: The value to compare against.
+### :returns: The smaller value, or the other one if one is a NaN.
 @rf("Decimal.min_num")
 routine Decimal.min_num(you: Decimal) -> Decimal
 
 ### IEEE maximumNumber(me, you).
+### :param you: The value to compare against.
+### :returns: The larger value, or the other one if one is a NaN.
 @rf("Decimal.max_num")
 routine Decimal.max_num(you: Decimal) -> Decimal
 
 ### IEEE minimum(me, you).
+### :param you: The value to compare against.
+### :returns: The smaller value, or a NaN if either is a NaN.
 @rf("Decimal.minimum")
 routine Decimal.minimum(you: Decimal) -> Decimal
 
 ### IEEE maximum(me, you).
+### :param you: The value to compare against.
+### :returns: The larger value, or a NaN if either is a NaN.
 @rf("Decimal.maximum")
 routine Decimal.maximum(you: Decimal) -> Decimal
 
 ### Floating remainder of me / you (C fmod; result has me's sign).
+### :param you: The divisor.
+### :returns: `me - trunc(me / you) * you`.
 @rf("Decimal.mod_trunc")
 routine Decimal.mod_trunc(you: Decimal) -> Decimal
 
@@ -242,17 +271,25 @@ routine Decimal.fract() -> Decimal
 routine Decimal.modf() -> (Decimal, Decimal)
 
 ### True if me and you have the same quantum (exponent).
+### :param you: The value to compare against.
+### :returns: `true` if both have the same exponent.
 @rf("Decimal.same_quantum")
 routine Decimal.same_quantum(you: Decimal) -> Bool
 
 ### Rounds me to the quantum (exponent) of you.
+### :param you: The value that gives the target exponent.
+### :returns: `me` with the exponent of `you`, or a NaN if it does not fit.
 @rf("Decimal.quantize")
 routine Decimal.quantize(you: Decimal) -> Decimal
 
 ### IEEE totalOrder predicate (a total order over all values).
+### :param you: The value to compare against.
+### :returns: `true` if `me` precedes or equals `you` in the total order.
 @rf("Decimal.total_compare")
 routine Decimal.total_compare(you: Decimal) -> Bool
 
 ### IEEE totalOrderMag predicate (total order over magnitudes).
+### :param you: The value to compare against.
+### :returns: `true` if `|me|` precedes or equals `|you|` in the total order.
 @rf("Decimal.total_order_mag")
 routine Decimal.total_order_mag(you: Decimal) -> Bool

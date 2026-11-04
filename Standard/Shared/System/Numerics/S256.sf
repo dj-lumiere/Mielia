@@ -53,6 +53,8 @@ routine S256.mul(you: S256) -> S256
 
 ### `|x|` as a U256 magnitude. `S256_MIN` maps to exactly 2²⁵⁵ (the wrapping
 ### negate reinterpreted as unsigned), so there is no overflow.
+### :param x: The value to take the magnitude of.
+### :returns: The magnitude of `x`, also correct for the smallest S256.
 @rf("s256_abs_u256")
 routine s256_abs_u256(x: S256) -> U256
 
@@ -276,10 +278,14 @@ routine S256.reverse_bits() -> S256
 routine S256.swap_bytes() -> S256
 
 ### Returns this value rotated left by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated left.
 @rf("S256.rotate_left")
 routine S256.rotate_left(bits: U32) -> S256
 
 ### Returns this value rotated right by `bits` positions.
+### :param bits: The number of positions to rotate. It counts modulo the bit width.
+### :returns: `me` rotated right.
 @rf("S256.rotate_right")
 routine S256.rotate_right(bits: U32) -> S256
 
@@ -292,10 +298,14 @@ routine S256.to_bytes_le() -> Items[Byte, 32]
 routine S256.to_bytes_be() -> Items[Byte, 32]
 
 ### Builds an `S256` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The S256 value stored in `bytes`.
 @rf("S256.from_bytes_le")
 common routine S256.from_bytes_le(bytes: Items[Byte, 32]) -> S256
 
 ### Builds an `S256` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The S256 value stored in `bytes`.
 @rf("S256.from_bytes_be")
 common routine S256.from_bytes_be(bytes: Items[Byte, 32]) -> S256
 

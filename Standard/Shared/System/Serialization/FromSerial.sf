@@ -88,10 +88,14 @@ routine SerialValue.to[T]() -> T
 needs AnyType T
 
 ### Builds a `Byte` from its serialized form (a `U8`). :throws: {SerialShapeError} on any other arm.
+### :param value: The serialized value to read.
+### :returns: The Byte value stored in `value`.
 @rf("Byte.from_serial")
 common routine Byte.from_serial(value: SerialValue) -> Byte
 
 ### Builds a `Char` from its serialized form (a one-character `Text`).
+### :param value: The serialized value to read.
+### :returns: The Char value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a one-character text.
 @rf("Char.from_serial")
 common routine Char.from_serial(value: SerialValue) -> Char

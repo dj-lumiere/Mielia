@@ -299,10 +299,14 @@ routine U64.to_bytes_le() -> Items[Byte, 8]
 routine U64.to_bytes_be() -> Items[Byte, 8]
 
 ### Builds a `U64` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The U64 value stored in `bytes`.
 @rf("U64.from_bytes_le")
 common routine U64.from_bytes_le(bytes: Items[Byte, 8]) -> U64
 
 ### Builds a `U64` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The U64 value stored in `bytes`.
 @rf("U64.from_bytes_be")
 common routine U64.from_bytes_be(bytes: Items[Byte, 8]) -> U64
 

@@ -300,10 +300,14 @@ routine U8.to_bytes_le() -> Items[Byte, 1]
 routine U8.to_bytes_be() -> Items[Byte, 1]
 
 ### Builds a `U8` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The U8 value stored in `bytes`.
 @rf("U8.from_bytes_le")
 common routine U8.from_bytes_le(bytes: Items[Byte, 1]) -> U8
 
 ### Builds a `U8` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The U8 value stored in `bytes`.
 @rf("U8.from_bytes_be")
 common routine U8.from_bytes_be(bytes: Items[Byte, 1]) -> U8
 

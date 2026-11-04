@@ -65,6 +65,8 @@ routine List[T].to[RF::System.List[T]]() -> RF::System.List[T]
     return result
 
 ### Builds a list from its serialized element list.
+### :param value: The serialized value to read.
+### :returns: The List value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
 common routine List[T].from_serial(value: SerialValue) -> List[T]
     var result = List[T]()
@@ -407,6 +409,8 @@ routine List[T].reverse_in_place()
 # ============================================================================
 
 ### The position `index` names, crashing unless it is the position of an element.
+### :param index: The index given, counted from 0 (a negative one counts from the end).
+### :returns: The index as a position.
 @inline
 secret routine List[T].checked_position(index: Int) -> U64
     var at = position_of(value: index)
@@ -415,6 +419,7 @@ secret routine List[T].checked_position(index: Int) -> U64
     return at
 
 ### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count).
+### :param kept: How many leading elements stay.
 secret routine List[T].cut(kept: U64)
     var i = kept
     until i >= me.count
@@ -425,6 +430,7 @@ secret routine List[T].cut(kept: U64)
 
 ### Moves into a bigger memory when fewer than `extra` places are free: twice the room, at least four, or as much
 ### as needed.
+### :param extra: How many more elements must fit.
 @inline
 secret routine List[T].make_room(extra: U64)
     var needed = me.count + extra
@@ -434,6 +440,7 @@ secret routine List[T].make_room(extra: U64)
 
 ### Moves into a memory with room for at least `needed` elements: twice the room, at least four, or as much as
 ### needed.
+### :param needed: The element count the memory must have room for.
 secret routine List[T].grow_for(needed: U64)
     var room = me.items.room()
     var grown: U64 = if room < 4 then 4 else room * 2

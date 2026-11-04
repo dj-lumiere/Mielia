@@ -74,6 +74,8 @@ needs U64 BITS
 # Query Operations
 # ============================================================================
 
+### The number of bits, as an unsigned count.
+### :returns: The bit count.
 secret routine Bits[BITS].count_raw() -> U64
     return BITS
 
@@ -92,6 +94,9 @@ routine Bits[BITS].is_empty() -> Bool
 # Indexing (read-only, value semantics)
 # ============================================================================
 
+### The bit at a position, with the position already an unsigned number.
+### :param index: The zero-based position. Crashes when it is not below the count.
+### :returns: The bit.
 secret routine Bits[BITS].getitem_raw(index: U64) -> Bool
     if index >= BITS
         throw IndexOutOfBoundsError(index: index, count: BITS)
@@ -111,6 +116,9 @@ secret routine Bits[BITS].getitem_raw(index: U64) -> Bool
 routine Bits[BITS].getitem(index: Int) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
+### Sets the bit at a position, with the position already an unsigned number.
+### :param index: The zero-based position. Crashes when it is not below the count.
+### :param value: The bit to store.
 secret routine Bits[BITS].setitem_raw(index: U64, value: Bool)
     if index >= BITS
         throw IndexOutOfBoundsError(index: index, count: BITS)
@@ -146,6 +154,10 @@ routine Bits[BITS].setitem(index: Int, value: Bool)
 # Functional Modification (returns new copy)
 # ============================================================================
 
+### A copy with the bit at a position set, with the position already an unsigned number.
+### :param index: The zero-based position.
+### :param value: The bit to store.
+### :returns: The changed copy, or the same bits when the position is out of range.
 secret routine Bits[BITS].with_set_raw(index: U64, value: Bool) -> Bits[BITS]
     # Returns a new Bits with the bit at index changed
     if index >= BITS
@@ -170,6 +182,9 @@ secret routine Bits[BITS].with_set_raw(index: U64, value: Bool) -> Bits[BITS]
 routine Bits[BITS].with_set(index: Int, value: Bool) -> Bits[BITS]
     return me.with_set_raw(index: position_of(value: index), value: value)
 
+### A copy with the bit at a position toggled.
+### :param index: The zero-based position.
+### :returns: The changed copy, or the same bits when the position is out of range.
 secret routine Bits[BITS].with_flipped_raw(index: U64) -> Bits[BITS]
     # Returns a new Bits with the bit at index toggled
     if index >= BITS
@@ -188,6 +203,8 @@ routine Bits[BITS].with_flipped(index: Int) -> Bits[BITS]
 # Bit Queries
 # ============================================================================
 
+### Counts the bits set to `true`, as an unsigned count.
+### :returns: The number of one-bits.
 secret routine Bits[BITS].count_trues_raw() -> U64
     var count: U64 = 0
     var i: U64 = 0
@@ -202,6 +219,8 @@ secret routine Bits[BITS].count_trues_raw() -> U64
 routine Bits[BITS].count_trues() -> Int
     return me.count_trues_raw().to[Int]()
 
+### Counts the bits set to `false`, as an unsigned count.
+### :returns: The number of zero-bits.
 secret routine Bits[BITS].count_falses_raw() -> U64
     return BITS -% me.count_trues_raw()
 
@@ -303,6 +322,8 @@ routine Bits[BITS].next_false(after: Int) -> Int?
 # Display
 # ============================================================================
 
+### Returns the text form of `me`: the bits in brackets, separated by commas.
+### :returns: The text form of `me`.
 @override
 routine Bits[BITS].represent() -> Text
     var result = "["
@@ -315,6 +336,8 @@ routine Bits[BITS].represent() -> Text
     result = result + "]"
     return result
 
+### Returns the diagnostic text of `me`: its type and bits.
+### :returns: The diagnostic text of `me`.
 @override
 routine Bits[BITS].diagnose() -> Text
     var result = me.full_type_name() + "(["
@@ -327,6 +350,8 @@ routine Bits[BITS].diagnose() -> Text
     result = result + "])"
     return result
 
+### Returns an emitter that walks the elements of `me` in order, for a `for` loop.
+### :returns: The emitter, positioned before the first element.
 routine Bits[BITS].emitter() -> BitsEmitter[BITS]
     return BitsEmitter[BITS](bits: me, index: 0)
 

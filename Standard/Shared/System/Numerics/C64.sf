@@ -218,6 +218,8 @@ routine C64.pow(you: C64) -> C64
 
 ### Crashes unless both parts of `r` are finite: a NaN part is a domain error, an infinite part an
 ### overflow. The check behind the `!` forms of `exp`/`ln`/`sqrt`/`sinh`/`cosh`.
+### :param r: The result to check.
+### :returns: `r`, known to be finite.
 @rf("c64_checked")
 routine c64_checked(r: C64) -> C64
 

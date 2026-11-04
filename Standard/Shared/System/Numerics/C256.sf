@@ -218,6 +218,8 @@ routine C256.sqrt_unchecked() -> C256
 
 ### Crashes unless both parts of `r` are finite: a NaN part is a domain error, an infinite part an
 ### overflow. The check behind the `!` forms of `exp`/`ln`/`sqrt`/`sinh`/`cosh`.
+### :param r: The result to check.
+### :returns: `r`, known to be finite.
 @rf("c256_checked")
 routine c256_checked(r: C256) -> C256
 

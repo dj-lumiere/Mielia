@@ -26,9 +26,15 @@ obeys Copyable, Integral, Negatable, Comparable, Hashable
 @rf("Int")
 routine Int() -> Int
 
+### Converts an S64 to an `Int`.
+### :param v: The value to convert.
+### :returns: The `Int` equal to `v`.
 @rf("integer_of_s64")
 routine integer_of_s64(v: S64) -> Int
 
+### Converts a U64 to an `Int`.
+### :param v: The value to convert.
+### :returns: The `Int` equal to `v`.
 @rf("integer_of_u64")
 routine integer_of_u64(v: U64) -> Int
 
@@ -306,15 +312,23 @@ routine U64.to[Int]() -> Int
 @rf("S8.to")
 routine S8.to[Int]() -> Int
 
+### Widens an S16 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("S16.to")
 routine S16.to[Int]() -> Int
 
+### Widens an S32 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("S32.to")
 routine S32.to[Int]() -> Int
 
+### Widens an S128 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("S128.to")
 routine S128.to[Int]() -> Int
 
+### Widens an S256 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("S256.to")
 routine S256.to[Int]() -> Int
 
@@ -323,15 +337,23 @@ routine S256.to[Int]() -> Int
 @rf("U8.to")
 routine U8.to[Int]() -> Int
 
+### Widens a U16 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("U16.to")
 routine U16.to[Int]() -> Int
 
+### Widens a U32 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("U32.to")
 routine U32.to[Int]() -> Int
 
+### Widens a U128 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("U128.to")
 routine U128.to[Int]() -> Int
 
+### Widens a U256 into an `Int` (exact).
+### :returns: `me` as an `Int`.
 @rf("U256.to")
 routine U256.to[Int]() -> Int
 
@@ -426,7 +448,7 @@ routine Int.to[B64]() -> B64
 routine Int.to[Decimal]() -> Decimal
 
 ### Builds an `Int` from its serialized base-10 text.
-### :param from: The serialized value.
+### :param value: The serialized value to read.
 ### :returns: The parsed value.
 ### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
 @rf("Int.from_serial")

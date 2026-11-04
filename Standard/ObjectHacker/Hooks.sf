@@ -31,6 +31,8 @@ secret entity HookRegistry
     secret hooked: U64
 
 # The registry, made on first use. Called with the lock held.
+### Finds the registry of hooked objects and makes it on first use.
+### :returns: The registry.
 secret routine hook_registry() -> HookRegistry
     when stored_registry()
         is None =>
@@ -39,12 +41,22 @@ secret routine hook_registry() -> HookRegistry
             return made
         else as kept => return kept.to[HookRegistry]()
 
+### Adds a hook that runs after any change of a member variable of the object.
+### :param key: The key of the object.
+### :param target: The object, kept alive while it has hooks.
+### :param handler: Runs after a change, with the member variable name, the old value and the new value.
+### :returns: The id of the new hook.
 secret routine add_change_hook(key: U64, target: Unknown, handler: Callable[(Text, Unknown, Unknown), None]) -> U64
     hooks_enter()
     var id = add_change_hook_held(key: key, target: target, handler: handler)
     hooks_leave()
     return id
 
+### Adds the hook, with the lock already held.
+### :param key: The key of the object.
+### :param target: The object, kept alive while it has hooks.
+### :param handler: Runs after a change, with the member variable name, the old value and the new value.
+### :returns: The id of the new hook.
 secret routine add_change_hook_held(key: U64, target: Unknown, handler: Callable[(Text, Unknown, Unknown), None]) -> U64
     var registry = hook_registry()
     var id = registry.next_id
@@ -61,18 +73,30 @@ secret routine add_change_hook_held(key: U64, target: Unknown, handler: Callable
     return id
 
 # Takes an object's table out of the registry once it has neither hooks nor implants.
+### Takes an object out of the registry when it has no hooks and no implants.
+### :param registry: The registry.
+### :param key: The key of the object.
+### :param table: The table of the object.
 secret routine forget_if_empty(registry: HookRegistry, key: U64, table: HookTable)
     if table.hooks.count() == 0 and table.implants.count() == 0
         registry.tables.remove(key: key)
         registry.hooked = registry.hooked - 1
         set_hooked_count(count: registry.hooked)
 
+### Removes a change hook of the object.
+### :param key: The key of the object.
+### :param hook: The id the hook was given.
+### :returns: true when the hook was found.
 secret routine drop_change_hook(key: U64, hook: U64) -> Bool
     hooks_enter()
     var found = drop_change_hook_held(key: key, hook: hook)
     hooks_leave()
     return found
 
+### Removes the hook, with the lock already held.
+### :param key: The key of the object.
+### :param hook: The id the hook was given.
+### :returns: true when the hook was found.
 secret routine drop_change_hook_held(key: U64, hook: U64) -> Bool
     when stored_registry()
         is None => return false
@@ -95,11 +119,21 @@ secret routine drop_change_hook_held(key: U64, hook: U64) -> Bool
 # What the builder writes for `implant(target: hero, replacing: Hero.attack, with: f)`: from now on a call of that member
 # routine on the object runs the replacement instead (an `Unknown` keeping the routine value, whose signature the
 # builder checks where `implant` is written). An implant keeps its object alive until it is removed.
+### Makes a call of a member routine on the object run a replacement instead.
+### :param key: The key of the object.
+### :param target: The object, kept alive while it has implants.
+### :param routine_key: The key of the member routine.
+### :param replacement: The routine value that runs instead.
 secret routine add_implant(key: U64, target: Unknown, routine_key: Text, replacement: Unknown)
     hooks_enter()
     add_implant_held(key: key, target: target, routine_key: routine_key, replacement: replacement)
     hooks_leave()
 
+### Adds the implant, with the lock already held.
+### :param key: The key of the object.
+### :param target: The object, kept alive while it has implants.
+### :param routine_key: The key of the member routine.
+### :param replacement: The routine value that runs instead.
 secret routine add_implant_held(key: U64, target: Unknown, routine_key: Text, replacement: Unknown)
     var registry = hook_registry()
     # Any thread that calls the routine on the object takes the replacement out of the lock (implant_for).
@@ -114,12 +148,20 @@ secret routine add_implant_held(key: U64, target: Unknown, routine_key: Text, re
             set_hooked_count(count: registry.hooked)
         else as table => table.implants[routine_key] = replacement
 
+### Removes the replacement of a member routine of the object.
+### :param key: The key of the object.
+### :param routine_key: The key of the member routine.
+### :returns: true when there was one.
 secret routine drop_implant(key: U64, routine_key: Text) -> Bool
     hooks_enter()
     var found = drop_implant_held(key: key, routine_key: routine_key)
     hooks_leave()
     return found
 
+### Removes the replacement, with the lock already held.
+### :param key: The key of the object.
+### :param routine_key: The key of the member routine.
+### :returns: true when there was one.
 secret routine drop_implant_held(key: U64, routine_key: Text) -> Bool
     when stored_registry()
         is None => return false
@@ -133,6 +175,10 @@ secret routine drop_implant_held(key: U64, routine_key: Text) -> Bool
                     return found
 
 # Whether the object has a replacement for a member routine. Called with the lock held (implant_for).
+### Tells whether the object has a replacement for a member routine.
+### :param key: The key of the object.
+### :param routine_key: The key of the member routine.
+### :returns: true when it has one.
 secret routine has_implant_held(key: U64, routine_key: Text) -> Bool
     when stored_registry()
         is None => return false
@@ -142,14 +188,24 @@ secret routine has_implant_held(key: U64, routine_key: Text) -> Bool
                 else as table => return table.implants.has_key(key: routine_key)
 
 # The object's replacement for a member routine, found by `has_implant_held`. Called with the lock held.
+### Gives the object's replacement for a member routine.
+### :param key: The key of the object.
+### :param routine_key: The key of the member routine.
+### :returns: The replacement.
 secret routine implant_of_held(key: U64, routine_key: Text) -> Unknown
     return hook_registry().tables[key].implants[routine_key]
 
+### Takes the value a member variable has before a change, for the hooks to see after it.
+### :param key: The key of the object.
+### :param memvar: The name of the member variable.
 secret routine hooks_before(key: U64, memvar: Text)
     hooks_enter()
     hooks_before_held(key: key, memvar: memvar)
     hooks_leave()
 
+### Takes the value before the change, with the lock already held.
+### :param key: The key of the object.
+### :param memvar: The name of the member variable.
 secret routine hooks_before_held(key: U64, memvar: Text)
     when stored_registry()
         is None => return
@@ -168,6 +224,9 @@ secret routine hooks_before_held(key: U64, memvar: Text)
                                     table.pending[flow] = olds
                                 else as olds => olds.add_last(value: old)
 
+### Runs the change hooks of the object after a member variable changed.
+### :param key: The key of the object.
+### :param memvar: The name of the member variable.
 secret routine hooks_after(key: U64, memvar: Text)
     # The values before and after the change, which only this thread holds once they are out of the registry.
     var values = List[Unknown]()
@@ -182,6 +241,11 @@ secret routine hooks_after(key: U64, memvar: Text)
 # Takes the value a member variable had before the change out of the object's table, and puts it and the value it has
 # now in `values`. Returns a copy of the object's hooks, so a hook may add or remove hooks while they run. Called with
 # the lock held: nothing of the registry is kept after it returns.
+### Takes the value a member variable had before the change and puts it and the value it has now in `values`.
+### :param key: The key of the object.
+### :param memvar: The name of the member variable.
+### :param values: Receives the old and the new value.
+### :returns: A copy of the object's hooks, to run after the lock is left.
 secret routine change_to_run(key: U64, memvar: Text, values: List[Unknown]) -> List[ChangeHook]
     var running = List[ChangeHook]()
     when stored_registry()

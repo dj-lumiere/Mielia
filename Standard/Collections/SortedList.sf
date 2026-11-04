@@ -210,10 +210,14 @@ routine SortedList[T].to[List[T]]() -> List[T]
 # Display / Equality
 # ============================================================================
 
+### Returns the text form of `me`: the elements of the list in ascending order in brackets, separated by commas.
+### :returns: The text form of `me`.
 @override
 routine SortedList[T].represent() -> Text
     return f"[{me.items_text(diagnosing: false)}]"
 
+### Returns the diagnostic text of `me`: its type, count and elements.
+### :returns: The diagnostic text of `me`.
 @override
 routine SortedList[T].diagnose() -> Text
     return f"{me.full_type_name()}(count: {me.count()}, [{me.items_text(diagnosing: true)}])"
@@ -241,6 +245,8 @@ routine SortedList[T].serialize() -> SerialValue
     return SerialValue(result.duplicate())
 
 ### Builds the list from its serialized element list.
+### :param value: The serialized value to read.
+### :returns: The SortedList value stored in `value`.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
 common routine SortedList[T].from_serial(value: SerialValue) -> SortedList[T]
     var result = SortedList[T]()

@@ -115,6 +115,8 @@ routine BitList(count: Int, fill_value: Bool) -> BitList
     return result
 
 ### Returns how many 64-bit words hold `bits` bits.
+### :param bits: The number of bits.
+### :returns: The word count.
 secret routine bit_words(bits: U64) -> U64
     var words = bits >> 6
     if bits & 63 != 0
@@ -174,6 +176,8 @@ secret routine BitList.set_bit_internal(index: U64, value: Bool)
 # Core Operations
 # ============================================================================
 
+### The number of bits, as an unsigned count.
+### :returns: The bit count.
 secret routine BitList.count_raw() -> U64
     # Get current number of bits
     return me.count
@@ -183,6 +187,8 @@ secret routine BitList.count_raw() -> U64
 routine BitList.count() -> Int
     return me.count_raw().to[Int]()
 
+### The capacity in bits, as an unsigned count.
+### :returns: The capacity in bits.
 secret routine BitList.capacity_raw() -> U64
     # Get current capacity in bits
     return me.capacity
@@ -238,6 +244,8 @@ routine BitList.remove_last() -> Bool
     me.count = me.count - 1
     return me.get_bit_internal(me.count)
 
+### Grows the storage until it holds at least the given number of bits.
+### :param new_capacity: The least capacity wanted, in bits.
 secret routine BitList.reserve_raw(new_capacity: U64)
     # Ensure capacity is at least new_capacity (in bits)
     if new_capacity > me.capacity
@@ -279,6 +287,9 @@ routine BitList.clear()
 # Indexing with Integral (forward index)
 # ============================================================================
 
+### The bit at a position, with the position already an unsigned number.
+### :param index: The zero-based position. Crashes when it is not below the count.
+### :returns: The bit.
 secret routine BitList.getitem_raw(index: U64) -> Bool
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
@@ -291,6 +302,9 @@ secret routine BitList.getitem_raw(index: U64) -> Bool
 routine BitList.getitem(index: Int) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
+### Sets the bit at a position, with the position already an unsigned number.
+### :param index: The zero-based position. Crashes when it is not below the count.
+### :param value: The bit to store.
 secret routine BitList.setitem_raw(index: U64, value: Bool)
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
@@ -321,6 +335,8 @@ routine BitList.set_all(value: Bool)
         rf_set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
     return
 
+### Toggles the bit at a position.
+### :param index: The zero-based position. Crashes when it is not below the count.
 secret routine BitList.flip_raw(index: U64)
     # Toggle bit at index
     if index >= me.count
@@ -351,6 +367,8 @@ routine BitList.flip_all()
         i = i +% 1
     return
 
+### Counts the bits set to `true`, as an unsigned count.
+### :returns: The number of one-bits.
 secret routine BitList.count_trues_raw() -> U64
     # Count number of bits set to 1 (popcount)
     var count: U64 = 0
@@ -366,6 +384,8 @@ secret routine BitList.count_trues_raw() -> U64
 routine BitList.count_trues() -> Int
     return me.count_trues_raw().to[Int]()
 
+### Counts the bits set to `false`, as an unsigned count.
+### :returns: The number of zero-bits.
 secret routine BitList.count_falses_raw() -> U64
     # Count number of bits set to 0
     return me.count -% me.count_trues_raw()
@@ -695,6 +715,8 @@ common routine BitList.from_u32(value: U32) -> BitList
         i = i + 1
     return result
 
+### Returns the text form of `me`: the bits of the list in brackets, separated by commas.
+### :returns: The text form of `me`.
 @override
 routine BitList.represent() -> Text
     var result = "["
@@ -734,6 +756,7 @@ common routine BitList.from_u64(value: U64) -> BitList
         i = i +% 1
     return result
 
+### Frees the bit storage of `me`.
 @override
 routine BitList.destruct()
     danger

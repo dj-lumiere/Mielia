@@ -14,6 +14,8 @@ obeys Numeric, Comparable, Copyable, Hashable
 routine D32.to_bits() -> U32
 
 ### Reinterprets a raw U32 as BID32 storage (no validation).
+### :param bits: The bit pattern.
+### :returns: The value with exactly those bits.
 @rf("D32.from_bits")
 common routine D32.from_bits(bits: U32) -> D32
 
@@ -22,10 +24,14 @@ common routine D32.from_bits(bits: U32) -> D32
 routine D32.to_dpd() -> U32
 
 ### Decodes a DPD interchange word into a decimal32. Never crashes.
+### :param bits: The DPD interchange word.
+### :returns: The decoded value.
 @rf("D32.from_dpd")
 common routine D32.from_dpd(bits: U32) -> D32
 
 ### Infinity / quiet NaN.
+### :param sign: `true` for negative infinity.
+### :returns: Positive infinity, or negative infinity when `sign` is true.
 @rf("D32.infinity")
 common routine D32.infinity(sign: Bool) -> D32
 
@@ -59,65 +65,97 @@ routine D32.is_zero() -> Bool
 
 ### Builds a finite D32 from a sign, a coefficient and a base-10 exponent: value = (-1)^sign * coeff *
 ### 10^exp, rounded half to even to 7 digits and brought into the exponent range.
+### :param sign: `true` for a negative value.
+### :param coeff: The integer coefficient.
+### :param exp: The power of ten.
+### :returns: The value (-1)^sign * coeff * 10^exp, rounded if the coefficient has too many digits.
 @rf("D32.from_components")
 common routine D32.from_components(sign: Bool, coeff: U64, exp: S64) -> D32
 
 ### Builds a D32 from a 64-bit signed integer (exponent 0).
+### :param value: The integer to convert.
+### :returns: The value equal to `value`, rounded if it needs more digits than the type holds.
 @rf("D32.from_int64")
 common routine D32.from_int64(value: S64) -> D32
 
 ### An integer (sign and 256-bit magnitude) as a D32, rounded half to even to 7 digits.
+### :param neg: `true` for a negative value.
+### :param m: The magnitude.
+### :returns: The D32 value.
 @rf("d32_of_integer")
 routine d32_of_integer(neg: Bool, m: U256) -> D32
 
 ### The bits of the binary float nearest to x, `which` bits wide (16, 32, 64, or 128). An infinity keeps its sign,
 ### a NaN becomes the positive quiet NaN.
+### :param x: The D32 value to convert.
+### :param which: The binary float width in bits: 16, 32, 64, or 128.
+### :returns: The bits of the binary float. An infinity keeps its sign and a NaN becomes the positive quiet NaN.
 @rf("d32_to_binary")
 routine d32_to_binary(x: D32, which: U32) -> U128
 
 ### A B128 as a D32, correctly rounded (a narrower binary float widens to B128 exactly first).
+### :param x: The binary float to convert.
+### :returns: `x` as a D32.
 @rf("d32_of_b128")
 routine d32_of_b128(x: B128) -> D32
 
 ### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
 ### IEEE.
+### :param you: The value to add.
+### :returns: `me + you`.
 @rf("D32.add")
 routine D32.add(you: D32) -> D32
 
 ### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
 ### IEEE.
+### :param you: The value to subtract.
+### :returns: `me - you`.
 @rf("D32.sub")
 routine D32.sub(you: D32) -> D32
 
 ### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
 ### IEEE.
+### :param you: The factor to multiply by.
+### :returns: `me * you`.
 @rf("D32.mul")
 routine D32.mul(you: D32) -> D32
 
 ### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
 ### overflow.
 ### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
+### :param you: The divisor.
+### :returns: `me / you`.
 @rf("D32.truediv")
 routine D32.truediv(you: D32) -> D32
 
 ### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+### :param you: The value to add.
+### :returns: `me + you`, possibly an infinity or a NaN.
 @rf("D32.add_unchecked")
 routine D32.add_unchecked(you: D32) -> D32
 
 ### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+### :param you: The value to subtract.
+### :returns: `me - you`, possibly an infinity or a NaN.
 @rf("D32.sub_unchecked")
 routine D32.sub_unchecked(you: D32) -> D32
 
 ### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+### :param you: The factor to multiply by.
+### :returns: `me * you`, possibly an infinity or a NaN.
 @rf("D32.mul_unchecked")
 routine D32.mul_unchecked(you: D32) -> D32
 
 ### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
+### :param you: The divisor.
+### :returns: `me / you`, with an infinity for a division by zero and a NaN for 0/0.
 @rf("D32.truediv_unchecked")
 routine D32.truediv_unchecked(you: D32) -> D32
 
 ### Decimal value equality (NaN never equal; infinities equal only with the same sign;
 ### finite values compare by value, so different cohorts of the same number are equal).
+### :param you: The value to compare against.
+### :returns: `true` if the two compare equal.
 @rf("D32.eq")
 routine D32.eq(you: D32) -> Bool
 
@@ -131,10 +169,14 @@ routine D32.hash(k0: U64, k1: U64) -> U64
 
 ### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
 ### maps to `SAME` (matching the B128 engine convention).
+### :param you: The value to compare against.
+### :returns: Whether `me` is smaller than, equal to, or larger than `you`.
 @rf("D32.compare")
 routine D32.compare(you: D32) -> ComparisonSign
 
 ### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
+### :param you: The exponent.
+### :returns: `me` to the power `you`.
 @rf("D32.pow")
 routine D32.pow(you: D32) -> D32
 

@@ -10,16 +10,22 @@ obeys Numeric, Comparable, Copyable, Hashable
     nothing
 
 ### Views this Decimal as its underlying `D128` (bit-for-bit; a Decimal is always finite).
+### :param x: The Decimal to view.
+### :returns: The same bits as a D128.
 @rf("dec_to_d128")
 routine dec_to_d128(x: Decimal) -> D128
 
 ### Wraps a finite `D128` as a Decimal in its one form: trailing zeros of the coefficient stripped, a zero +0 (the
 ### caller guarantees finiteness).
+### :param x: A finite D128.
+### :returns: The Decimal.
 @rf("dec_of_d128")
 routine dec_of_d128(x: D128) -> Decimal
 
 ### Crashes if `d` is non-finite, else wraps it as a Decimal. The single guard that keeps
 ### Decimal finite-only on every conversion from a possibly infinite/NaN source.
+### :param d: The D128 to wrap.
+### :returns: The Decimal.
 ### :throws: {NumericOverflowError} if `d` is +-infinity; {NumericDomainError} if `d` is NaN.
 @rf("dec_of_d128_finite")
 routine dec_of_d128_finite(d: D128) -> Decimal
@@ -29,6 +35,8 @@ routine dec_of_d128_finite(d: D128) -> Decimal
 routine Decimal.to_bits() -> U128
 
 ### Reads a raw U128 as a Decimal in its one form (assumes a valid finite BID encoding).
+### :param bits: The bit pattern.
+### :returns: The value with exactly those bits.
 @rf("Decimal.from_bits")
 common routine Decimal.from_bits(bits: U128) -> Decimal
 
@@ -41,6 +49,10 @@ routine Decimal.to_bytes_le() -> Items[Byte, 16]
 routine Decimal.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds a Decimal from a sign + U128 coefficient at the given exponent (rounds to <= 34 digits).
+### :param sign: `true` for a negative value.
+### :param coeff: The integer coefficient.
+### :param exp: The power of ten.
+### :returns: The value (-1)^sign * coeff * 10^exp, rounded if the coefficient has too many digits.
 @rf("Decimal.from_components")
 common routine Decimal.from_components(sign: Bool, coeff: U128, exp: S64) -> Decimal
 
@@ -57,10 +69,14 @@ routine Decimal.is_infinite() -> Bool
 routine Decimal.is_nan() -> Bool
 
 ### Three-way comparison under IEEE ordered semantics (delegated to D128).
+### :param you: The value to compare against.
+### :returns: Whether `me` is smaller than, equal to, or larger than `you`.
 @rf("Decimal.compare")
 routine Decimal.compare(you: Decimal) -> ComparisonSign
 
 ### Value equality (delegated to D128): `1.0` and `1.00` are equal (and are the same bits).
+### :param you: The value to compare against.
+### :returns: `true` if the two compare equal.
 @rf("Decimal.eq")
 routine Decimal.eq(you: Decimal) -> Bool
 
@@ -72,21 +88,29 @@ routine Decimal.eq(you: Decimal) -> Bool
 routine Decimal.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `me * you`, exactly.
+### :param you: The factor to multiply by.
+### :returns: `me * you`.
 ### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.
 @rf("Decimal.mul")
 routine Decimal.mul(you: Decimal) -> Decimal
 
 ### Returns `me + you`, exactly.
+### :param you: The value to add.
+### :returns: `me + you`.
 ### :throws: {NumericOverflowError} when the exact sum needs more than 34 significant digits.
 @rf("Decimal.add")
 routine Decimal.add(you: Decimal) -> Decimal
 
 ### Returns `me - you`, exactly.
+### :param you: The value to subtract.
+### :returns: `me - you`.
 ### :throws: {NumericOverflowError} when the exact difference needs more than 34 significant digits.
 @rf("Decimal.sub")
 routine Decimal.sub(you: Decimal) -> Decimal
 
 ### Returns `me / you`.
+### :param you: The divisor.
+### :returns: `me / you`.
 @rf("Decimal.truediv")
 routine Decimal.truediv(you: Decimal) -> Decimal
 

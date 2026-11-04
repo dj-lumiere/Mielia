@@ -30,6 +30,7 @@ routine set_exit_code(code: S32)
 ### `rf_reciprocal_word` (returns 0 on x86-64/MSVC where the divide is hardware; the real M-G
 ### reciprocal on arm64/wasm). Hoist it: compute once per divisor, reuse across every `div2by1`
 ### by that `d` — that reuse is what makes M-G win on arm64 (see div_ab_bench).
+### :param d: The normalized divisor, with its top bit set.
 ### :returns: the reciprocal `v` feeding `div2by1` (meaningful only on the M-G targets).
 @rf("reciprocal_word")
 routine reciprocal_word(d: U64) -> U64

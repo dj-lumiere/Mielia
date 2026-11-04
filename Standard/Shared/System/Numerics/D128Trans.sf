@@ -200,34 +200,59 @@ routine D128.gamma_unchecked() -> D128
 routine D128.ln_gamma() -> D128
 
 ### `me^you` with raw IEEE (the C99 pow special cases), correctly rounded.
+### :param you: The exponent.
+### :returns: `me` to the power `you`, or an infinity or a NaN where it has no finite value.
 @rf("D128.pow_unchecked")
 routine D128.pow_unchecked(you: D128) -> D128
 
 ### atan2(y, x), the angle of (x, y) in (-pi, pi], with the C99 special cases for zeros and infinities.
+### :param y: The vertical coordinate.
+### :param x: The horizontal coordinate.
+### :returns: The angle in radians, in the range -pi to pi.
 @rf("atan2")
 routine atan2(y: D128, x: D128) -> D128
 
 ### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
+### :param x: One leg.
+### :param y: The other leg.
+### :returns: The length of the hypotenuse.
 @rf("hypot")
 routine hypot(x: D128, y: D128) -> D128
 
 ### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
+### :param x: One leg.
+### :param y: The other leg.
+### :returns: The length of the hypotenuse.
 @rf("hypot_unchecked")
 routine hypot_unchecked(x: D128, y: D128) -> D128
 
 ### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+### :returns: The length of the 3D hypotenuse.
 @rf("hypot")
 routine hypot(x: D128, y: D128, z: D128) -> D128
 
 ### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+### :returns: The length of the 3D hypotenuse.
 @rf("hypot_unchecked")
 routine hypot_unchecked(x: D128, y: D128, z: D128) -> D128
 
 ### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
+### :param b: The second factor.
+### :param c: The value added to the product.
+### :returns: `me * b + c`, rounded once.
 @rf("D128.mul_add")
 routine D128.mul_add(b: D128, c: D128) -> D128
 
 ### me*b + c with a single rounding, raw IEEE.
+### :param b: The second factor.
+### :param c: The value added to the product.
+### :returns: `me * b + c`, rounded once.
 @rf("D128.mul_add_unchecked")
 routine D128.mul_add_unchecked(b: D128, c: D128) -> D128
 
@@ -295,6 +320,8 @@ routine D128.signum() -> D128
 routine D128.finite() -> D128
 
 ### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
+### :param you: The divisor.
+### :returns: `me - trunc(me / you) * you`.
 @rf("D128.mod_trunc")
 routine D128.mod_trunc(you: D128) -> D128
 
@@ -373,6 +400,9 @@ routine D128.rem(you: D128) -> D128
 routine D128.normalize() -> D128
 
 ### Rounds to integral. mode: 0 trunc, 1 floor, 2 ceil, 3 round (half away), 4 rint (half even).
+### :param x: The value to round.
+### :param mode: The rounding mode: 0 truncate, 1 floor, 2 ceil, 3 half away from zero, 4 half to even, 5 half up.
+### :returns: `x` rounded to an integral value.
 @rf("d128_round_int")
 routine d128_round_int(x: D128, mode: S64) -> D128
 

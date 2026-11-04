@@ -55,6 +55,8 @@ needs U64 COUNT
 
 ### Returns the element at `index` as the array holds it, without bounds checking and without a holder of
 ### its own. Only call this when the index is already proven to be in range.
+### :param index: The position to read. It must be in range.
+### :returns: The element at `index`.
 @rf("Items.get_raw")
 infallible routine Items[T, COUNT].get_raw(index: U64) -> T
 
@@ -108,9 +110,13 @@ routine Items[T, COUNT].emitter() -> ItemsEmitter[T, COUNT]
 @rf("ItemsEmitter.emit")
 routine ItemsEmitter[T, COUNT].emit() -> T
 
+### Returns the text form of `me`: the elements of the array in brackets, separated by commas.
+### :returns: The text form of `me`.
 @rf("Items.represent")
 routine Items[T, COUNT].represent() -> Text
 
+### Returns the diagnostic text of `me`: its type and elements.
+### :returns: The diagnostic text of `me`.
 @rf("Items.diagnose")
 routine Items[T, COUNT].diagnose() -> Text
 

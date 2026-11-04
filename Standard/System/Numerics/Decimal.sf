@@ -72,5 +72,7 @@ routine Decimal.div_round(you: Decimal, places: Int, rule: RoundingRule = Roundi
     return me.div_round(you: you, places: places.to[U64](), rule: rule)
 
 ### me * 10^n (the decimal analog of ldexp).
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me * 10^n`.
 routine Decimal.scaleb(n: Int) -> Decimal
     return me.scaleb(n: n.to[S64]())

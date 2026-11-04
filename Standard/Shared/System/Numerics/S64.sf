@@ -303,10 +303,14 @@ routine S64.to_bytes_le() -> Items[Byte, 8]
 routine S64.to_bytes_be() -> Items[Byte, 8]
 
 ### Builds an `S64` from its little-endian raw byte representation.
+### :param bytes: The raw bytes, least significant first.
+### :returns: The S64 value stored in `bytes`.
 @rf("S64.from_bytes_le")
 common routine S64.from_bytes_le(bytes: Items[Byte, 8]) -> S64
 
 ### Builds an `S64` from its big-endian raw byte representation.
+### :param bytes: The raw bytes, most significant first.
+### :returns: The S64 value stored in `bytes`.
 @rf("S64.from_bytes_be")
 common routine S64.from_bytes_be(bytes: Items[Byte, 8]) -> S64
 
