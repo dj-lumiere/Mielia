@@ -22,13 +22,6 @@ obeys Sink
 @rv("show")
 routine show(value: Text, end: Text = "\n")
 
-### Writes raw bytes to standard output.
-### `end` is appended after `value`.
-### :param value: The bytes to write.
-### :param end: The trailing text to append.
-@rv("show")
-routine show(value: Bytes, end: Text = "\n")
-
 ### Writes a single value to standard output using its representable form.
 ### :param value: The value to render and write.
 ### :param end: The trailing text to append.
@@ -40,12 +33,6 @@ routine show[T](value: T, end: Text = "\n")
 ### :param end: The trailing text to append.
 @rv("alert")
 routine alert(value: Text, end: Text = "\n")
-
-### Writes raw bytes to standard error.
-### :param value: The bytes to write.
-### :param end: The trailing text to append.
-@rv("alert")
-routine alert(value: Bytes, end: Text = "\n")
 
 ### Writes a single value to standard error using its diagnostic form.
 ### :param value: The value to render and write.
