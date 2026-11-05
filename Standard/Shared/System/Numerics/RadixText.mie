@@ -9,12 +9,6 @@ module System/Numerics
 @rv("check_radix")
 routine check_radix(radix: S32)
 
-### The digit character for `d` (0 to 35): `0`-`9`, then `a`-`z`.
-### :param d: The digit value, 0 to 35.
-### :returns: `0` to `9`, then `a` to `z`.
-@rv("radix_digit")
-routine radix_digit(d: U64) -> Char
-
 ### The digits of `mag` in base `radix`, with a leading `-` when `negative`.
 ### :param mag: The magnitude to render.
 ### :param negative: Whether to prefix a minus sign.
@@ -31,13 +25,18 @@ routine radix_text(mag: U64, negative: Bool, radix: S32) -> Text
 @rv("signed_radix_text")
 routine signed_radix_text(value: S64, radix: S32) -> Text
 
-### `radix_text` for a wide unsigned magnitude (`U128`, `U256`), dividing in the value's own width through its
-### `//` and `%` (Knuth division, never a 128-bit or 256-bit LLVM divide).
+### `radix_text` for a `U128` magnitude.
 ### :param mag: The magnitude to format.
 ### :param negative: `true` to put a `-` in front.
 ### :param radix: The base, 2 to 36.
 ### :returns: The digits, with a leading `-` when `negative` is true.
 @rv("wide_radix_text")
-routine wide_radix_text[T](mag: T, negative: Bool, radix: S32) -> Text
-needs RecordType T
-needs T obeys FloorDivisible
+routine wide_radix_text(mag: U128, negative: Bool, radix: S32) -> Text
+
+### `radix_text` for a `U256` magnitude.
+### :param mag: The magnitude to format.
+### :param negative: `true` to put a `-` in front.
+### :param radix: The base, 2 to 36.
+### :returns: The digits, with a leading `-` when `negative` is true.
+@rv("wide_radix_text")
+routine wide_radix_text(mag: U256, negative: Bool, radix: S32) -> Text
