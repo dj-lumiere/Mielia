@@ -741,19 +741,34 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             _libraryRoutines = [];
             foreach ((Program program, _, _) in ctx.Registry.StdlibPrograms)
             {
-                AstWalker.Walk(root: program,
-                    visit: node =>
-                    {
-                        if (node is RoutineDeclaration { Body: not null } declaration)
-                        {
-                            _libraryRoutines.TryAdd(key: (declaration.Location.FileName, declaration.Location.Line),
-                                value: declaration);
-                        }
-                    });
+                IndexRoutines(node: program, into: _libraryRoutines);
             }
         }
 
         return _libraryRoutines.GetValueOrDefault(key: (file, line));
+    }
+
+    /// <summary>Adds the routine declarations under <paramref name="node"/> to <paramref name="into"/>. Routines are
+    /// declared only among declarations, so statements, expressions and routine bodies are not walked.</summary>
+    private static void IndexRoutines(object node, Dictionary<(string, int), RoutineDeclaration> into)
+    {
+        switch (node)
+        {
+            case RoutineDeclaration declaration:
+                if (declaration.Body != null)
+                {
+                    into.TryAdd(key: (declaration.Location.FileName, declaration.Location.Line), value: declaration);
+                }
+
+                return;
+            case Statement or Expression:
+                return;
+        }
+
+        foreach (object child in AstWalker.EnumerateChildren(node: node))
+        {
+            IndexRoutines(node: child, into: into);
+        }
     }
 
     /// <summary>Whether <paramref name="type"/> (a handle's entity, for a handle) obeys <c>Emitter</c>.</summary>
