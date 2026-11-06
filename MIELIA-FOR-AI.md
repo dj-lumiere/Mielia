@@ -1634,6 +1634,8 @@ module_paths = ["../shared"]  # folders whose modules join the solution (optiona
 mode = "debug"              # debug | debug-jit | release | release-time | release-space
 ```
 
+- A section or key `config.toml` does not read is a build error naming it, and the key meant when there is one (`module-paths` →
+  "Did you mean module_paths?"). The multi-word keys are `module_paths`, `c_libraries`, `library_paths` and the hyphenated rest.
 - A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
 - **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
   (`--step extensions` does only that, with the `ME-` spelling of diagnostic codes in comments and `mielia-version`
