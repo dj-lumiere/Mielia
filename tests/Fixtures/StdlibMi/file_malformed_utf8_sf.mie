@@ -1,0 +1,71 @@
+module Tests/StdlibMi/FileMalformedUtf8Mi
+
+# Malformed UTF-8 fails by default: `read_text`, and a FileSource's `read_line`, `read_word`, `read_all` and `read_lines`,
+# throw `MalformedUtf8Error` naming the byte. The `_lossy` twin of each reads the same file with U+FFFD in place of
+# each malformed byte. The file holds the bytes of "ok ", FF, FE and " bad".
+
+routine receive_text(file: File) -> Text
+    when check FileManager.read_text(at: file)
+        is Text as text =>
+            return f"read {text.count()}"
+        is MalformedUtf8Error as e =>
+            return e.crash_message()
+        is Crashables as e =>
+            return "other"
+
+routine receive_line(file: File) -> Text
+    using FileManager.open_read(at: file) as r
+        when check r.read_line()
+            is Text as text =>
+                return f"line {text.count()}"
+            is MalformedUtf8Error as e =>
+                return e.crash_message()
+            is Crashables as e =>
+                return "other"
+
+routine receive_word(file: File) -> Text
+    using FileManager.open_read(at: file) as r
+        when check r.read_word()
+            is Text as text =>
+                return f"word {text.count()}"
+            is MalformedUtf8Error as e =>
+                return e.crash_message()
+            is Crashables as e =>
+                return "other"
+
+routine receive_all(file: File) -> Text
+    using FileManager.open_read(at: file) as r
+        when check r.read_all()
+            is Text as text =>
+                return f"all {text.count()}"
+            is MalformedUtf8Error as e =>
+                return e.crash_message()
+            is Crashables as e =>
+                return "other"
+
+routine receive_lines(file: File) -> Text
+    using FileManager.open_read(at: file) as r
+        when check r.read_lines().count()
+            is U64 as lines =>
+                return f"lines {lines}"
+            is MalformedUtf8Error as e =>
+                return e.crash_message()
+            is Crashables as e =>
+                return "other"
+
+routine start()
+    var file = File(at: "tests/Fixtures/StdlibMi/malformed_utf8.dat")
+    show(receive_text(file: file))
+    show(receive_line(file: file))
+    show(receive_word(file: file))
+    show(receive_all(file: file))
+    show(receive_lines(file: file))
+    show(FileManager.read_text_lossy(at: file))
+    using FileManager.open_read(at: file) as r
+        show(r.read_line_lossy())
+    using FileManager.open_read(at: file) as r
+        show(r.read_word_lossy())
+        show(r.read_word_lossy())
+    using FileManager.open_read(at: file) as r
+        show(r.read_all_lossy().count())
+    return

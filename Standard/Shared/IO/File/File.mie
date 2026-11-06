@@ -414,14 +414,23 @@ common routine FileManager.set_readonly(at: Directory, readonly: Bool = true)
 @rv("FileManager.set_size")
 common routine FileManager.set_size(at: File, bytes: U64)
 
-### Reads a whole file as text (UTF-8, lossy). UNCOLORED, like `waitfor`: inside work a Work runs as a fiber
+### Reads a whole file as text (UTF-8). UNCOLORED, like `waitfor`: inside work a Work runs as a fiber
 ### (`start_now()`/`start_here()`) the fiber PARKS while a worker thread does the blocking read (its siblings keep
 ### progressing), anywhere else it reads inline. This is the way to read a whole file from such work.
 ### :param at: The file.
 ### :returns: Its contents as `Text`.
-### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be read.
+### :throws: {NotFoundError} when the file doesn't exist, {MalformedUtf8Error} (with the byte position) when it is not
+### well-formed UTF-8, or the crashable for why it can't be read.
 @rv("FileManager.read_text")
 common routine FileManager.read_text(at: File) -> Text
+
+### Reads a whole file as text, replacing malformed UTF-8 with the replacement character U+FFFD. Otherwise it is
+### {FileManager.read_text}.
+### :param at: The file.
+### :returns: Its contents as `Text`.
+### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be read.
+@rv("FileManager.read_text_lossy")
+common routine FileManager.read_text_lossy(at: File) -> Text
 
 ### Reads a whole file. UNCOLORED, like `read_text`.
 ### :param at: The file.
@@ -507,11 +516,18 @@ common routine FileManager.walk(at: Directory) -> List[Text]
 @rv("FileSource.pull")
 routine FileSource.pull(max: U64) -> Bytes
 
-### Reads one line as text (UTF-8, lossy), without its line ending.
+### Reads one line as text (UTF-8), without its line ending.
 ### :returns: The line.
-### :throws: {EndOfInputError} when the file has ended before another line.
+### :throws: {EndOfInputError} when the file has ended before another line, {MalformedUtf8Error} when the line is not
+### well-formed UTF-8.
 @rv("FileSource.read_line")
 routine FileSource.read_line() -> Text
+
+### Reads one line as text, replacing malformed UTF-8 with U+FFFD, without its line ending.
+### :returns: The line.
+### :throws: {EndOfInputError} when the file has ended before another line.
+@rv("FileSource.read_line_lossy")
+routine FileSource.read_line_lossy() -> Text
 
 ### Reads one line as a `T`: `var n: S64 = f.read()` (the type the value goes to), or `f.read[S64]()`. The line
 ### becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like that does.
@@ -522,16 +538,29 @@ routine FileSource.read_line() -> Text
 @rv("FileSource.read")
 routine FileSource.read[T]() -> T
 
-### Reads one whitespace-delimited word as text (UTF-8, lossy).
+### Reads one whitespace-delimited word as text (UTF-8).
 ### :returns: The word.
-### :throws: {EndOfInputError} when the file has ended before another word.
+### :throws: {EndOfInputError} when the file has ended before another word, {MalformedUtf8Error} when the word is not
+### well-formed UTF-8.
 @rv("FileSource.read_word")
 routine FileSource.read_word() -> Text
 
-### Reads the rest of the file as text (UTF-8, lossy).
+### Reads one whitespace-delimited word as text, replacing malformed UTF-8 with U+FFFD.
+### :returns: The word.
+### :throws: {EndOfInputError} when the file has ended before another word.
+@rv("FileSource.read_word_lossy")
+routine FileSource.read_word_lossy() -> Text
+
+### Reads the rest of the file as text (UTF-8).
 ### :returns: The text, empty at the end of the file.
+### :throws: {MalformedUtf8Error} when the rest is not well-formed UTF-8.
 @rv("FileSource.read_all")
 routine FileSource.read_all() -> Text
+
+### Reads the rest of the file as text, replacing malformed UTF-8 with U+FFFD.
+### :returns: The text, empty at the end of the file.
+@rv("FileSource.read_all_lossy")
+routine FileSource.read_all_lossy() -> Text
 
 ### Reads the rest of the file and splits it into lines, as {Text.lines} does: the line ending after the last line
 ### starts no new one.

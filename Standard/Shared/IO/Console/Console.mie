@@ -44,9 +44,16 @@ routine alert[T](value: T, end: Text = "\n")
 ### Line termination is not included in the returned text, and a blank line is `""`. Right after {ask_word}, the line
 ### end that ended the word is not read as a blank line of its own.
 ### :returns: The resulting `Text` value.
-### :throws: {EndOfInputError} when the input has ended.
+### :throws: {EndOfInputError} when the input has ended, {MalformedUtf8Error} when the line is not well-formed UTF-8.
 @rv("ask_line")
 routine ask_line() -> Text
+
+### Reads one line of text from standard input, replacing malformed UTF-8 with the replacement character U+FFFD.
+### Otherwise it is {ask_line}.
+### :returns: The resulting `Text` value.
+### :throws: {EndOfInputError} when the input has ended.
+@rv("ask_line_lossy")
+routine ask_line_lossy() -> Text
 
 ### Reads one line of standard input as a `T`: `var n: Int = ask()` (the type the value goes to), or
 ### `ask[Int]()`. The line becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like
@@ -60,14 +67,27 @@ routine ask[T]() -> T
 
 ### Reads one whitespace-delimited word from standard input.
 ### :returns: The resulting `Text` value.
-### :throws: {EndOfInputError} when the input has ended before another word.
+### :throws: {EndOfInputError} when the input has ended before another word, {MalformedUtf8Error} when the word is not
+### well-formed UTF-8.
 @rv("ask_word")
 routine ask_word() -> Text
 
+### Reads one whitespace-delimited word from standard input, replacing malformed UTF-8 with U+FFFD.
+### :returns: The resulting `Text` value.
+### :throws: {EndOfInputError} when the input has ended before another word.
+@rv("ask_word_lossy")
+routine ask_word_lossy() -> Text
+
 ### Reads all remaining text from standard input.
 ### :returns: The resulting `Text` value.
+### :throws: {MalformedUtf8Error} when the input is not well-formed UTF-8.
 @rv("ask_all")
 routine ask_all() -> Text
+
+### Reads all remaining text from standard input, replacing malformed UTF-8 with U+FFFD.
+### :returns: The resulting `Text` value.
+@rv("ask_all_lossy")
+routine ask_all_lossy() -> Text
 
 ### Reads all remaining standard input as raw bytes.
 ### :returns: The resulting `Bytes` value.
