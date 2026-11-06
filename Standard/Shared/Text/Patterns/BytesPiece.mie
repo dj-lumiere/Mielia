@@ -4,7 +4,7 @@ module Text/Patterns
 # checks that the two still match.
 
 ### One piece of a bytes pattern: what it matches, written as a value. Pieces are put together into a
-### `BytesPattern` with `BytesPattern.of([...])`. A bytes piece matches bytes (`byte(0x89)`, `bytes(b"PNG")`,
+### `BytesPattern` with `BytesPattern.of([...])`. A bytes piece matches bytes (`byte(0x89)`, `bytes("PNG")`,
 ### `any_byte`, `byte_range(0x00 to 0x1F)`), a `TextPiece` characters, and the two never mix.
 @rv("BytesPiece")
 record BytesPiece
@@ -17,7 +17,7 @@ record BytesPiece
 @rv("byte")
 routine byte(value: U8) -> BytesPiece
 
-### The bytes of `value`, in a row: `bytes(b"PNG")`.
+### The bytes of `value`, in a row: `bytes("PNG")`.
 ### :param value: The bytes.
 ### :returns: The piece.
 @rv("bytes")

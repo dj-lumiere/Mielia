@@ -32,5 +32,5 @@ routine start()
         is Crashables as e => show("failed")
     for (i, row) in rows().enumerate()
         show(f"{i} {row}")
-    var a = b"ab"
+    var a: Bytes = "ab"
     show((a + a).count())

@@ -287,9 +287,14 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits, a real code point: a surrogate or a value above `\u10FFFF` is a build error). Text has NO `\x` escape (any `\x` in `"..."`, `'...'` or `f"..."` is a build error that points at `\u`). Characters:
-  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (one byte: ASCII or an `\xHH` escape). In `b"..."`, `\x00`..`\xFF` are single bytes and a non-ASCII character is its UTF-8 bytes (`b"한국어"` is 9 bytes). A `Byte` shows
-  (alone or in a `List[Byte]`) as the byte literal that makes it, always two uppercase hex digits: `b'\x4C'`,
-  `b'\x0A'`. `Bytes` shows as the bytes literal that makes it, `\xHH` per byte: `b"\x47\x45\x54"`. `show`/`alert`
+  `'A'`, `'한'`. Bytes: the place a literal goes decides its type, like a bare number. `"abc"` (and `r"..."`) is a `Bytes` where a `Bytes` goes
+  (`var b: Bytes = "abc"`, an argument, a return, a comparison with a `Bytes`), and `'x'` is a `Byte` where a `Byte` goes
+  (`var b: Byte = 'a'`). Elsewhere they are `Text` and `Char`. `Byte('x')` makes a byte in any place. There is no `b` prefix
+  (`b"..."`, `b'x'`, `br"..."` are ME-G011, and `migrate --step byte-literals` rewrites them). In a `Bytes` place `\x00`..`\xFF`
+  are single bytes and a non-ASCII character is its UTF-8 bytes (`"한국어"` is 9 bytes there). In a `Byte` place `'x'` is ASCII
+  or `'\xHH'`, and a non-ASCII character is ME-S022. In a `Text` or `Char` place `\x` is ME-S021. A `Byte` shows
+  (alone or in a `List[Byte]`) as the `Byte(...)` that makes it, always two uppercase hex digits: `Byte('\x4C')`,
+  `Byte('\x0A')`. `Bytes` shows as the `Bytes(...)` that makes it, `\xHH` per byte: `Bytes("\x47\x45\x54")`. `show`/`alert`
   print that form too. Raw bytes go out through `stdout().push(data:)`.
 - Tuples: `(1, "a")` has type `(Int, Text)`; read `t.item0`, `t.item1`; destructure with
   `var (q, r) = pair`. `(a, b) = (b, a)` swaps places (locals, member variables); any other tuple on the left is
@@ -1024,7 +1029,7 @@ digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pa
   (non-overlapping, `List[TextMatch]`), `p.replace(text: t, with: "#")`, `p.split(text)`. A `TextMatch` has `start()`,
   `end()` (character positions, `Int`), `text()`, `group("name")` (a `Text?`: `none` for a capture that took no part,
   `CaptureNameError` for an unknown name).
-- `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes(b"PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
+- `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes("PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
   `end_of_bytes`; `BytesMatch.bytes()`. Text and bytes pieces never mix (a type error).
 - Failable `TextPattern.from_regex(text)` / `BytesPattern.from_regex` read the usual regex syntax (unnamed groups
   capture as `"1"`, `"2"`, `|` is the longest alternative, `(?i)` `(?m)` `(?s)` at the start). Backreferences,
