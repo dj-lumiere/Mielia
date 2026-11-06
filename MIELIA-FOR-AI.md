@@ -149,8 +149,8 @@ routine start()
 - Comments start with `#`. Doc comments use `###` on the lines before a declaration.
 
 **Modules.** `module <Path>` is optional: without it the module path comes from the file's location
-relative to `config.toml` (each folder and the file name PascalCased, joined with `/`:
-`tools/text utils.mie` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
+relative to `config.toml` (each folder and the file name PascalCased, with spaces, `_` and `-` dropped, joined with `/`:
+`tools/text utils.mie` → `Tools/TextUtils`, `my-lib/tax_rules.mie` → `MyLib/TaxRules`). Declare `module` only to override that. Files in one folder that
 declare the same `module` are one module and build together. A file there with its own `routine start()` is another
 program and is not built with yours, so a draft that does not build yet can sit next to the program. A file there
 with top-level statements and no `routine start()` is built and is ME-S443, since only the entry file may be a
