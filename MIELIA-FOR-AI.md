@@ -39,8 +39,8 @@ through a `.rvr` module the program imports (section 18).
 
 1. **Arguments without a label fill the parameters in order from the first** (`volume(2, 3, 4)`), labels pick a
    parameter (`gcd(a: 252, b: 105)`) and follow the unlabeled ones: an unlabeled argument after a labeled one is
-   MI-S512. A bare variable named like ANOTHER parameter of the routine, sitting in a different parameter's place,
-   is MI-S510 (`f(n - 1, from, to, tmp)`: write `f(n - 1, from, tmp: to, to: tmp)`). Routines annotated
+   ME-S512. A bare variable named like ANOTHER parameter of the routine, sitting in a different parameter's place,
+   is ME-S510 (`f(n - 1, from, to, tmp)`: write `f(n - 1, from, tmp: to, to: tmp)`). Routines annotated
    `@positional` skip the place check.
 2. **A routine that returns a value returns it on every path** (`return x`). A routine that returns nothing
    needs no closing `return`: it ends where its body ends. `return` still leaves one early.
@@ -63,7 +63,7 @@ through a `.rvr` module the program imports (section 18).
    number types never mix without an explicit conversion (`n.to[S64]()`, §5). The one exception is the two
    default types: an `Int` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
    (`3.5 * 2` is `7`), and an `Int` with more significant digits than a `Decimal` holds (34) crashes. Mixing
-   two chosen types (`S32` and `U32`) is MI-S767, whose message names a type holding both
+   two chosen types (`S32` and `U32`) is ME-S767, whose message names a type holding both
    (`a.to[S64]() + b.to[S64]()`).
 5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
    significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Int` values turns each into a `Decimal`
@@ -79,39 +79,39 @@ through a `.rvr` module the program imports (section 18).
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **Every routine passes its failures to its caller.** Nothing marks a routine that can fail (`failable` is
-   MI-G230, `routine parse!(...)` is MI-G222), and call sites never mark the call. A failure nobody receives stops
+   ME-G230, `routine parse!(...)` is ME-G222), and call sites never mark the call. A failure nobody receives stops
    the program loudly where it happened. To recover, prefix the call with `try` / `check` and take the result apart
    with `when`: they receive a failure from any depth below the call. Only `infallible routine` is a wall. There is
    no try/catch and no `try_parse` name form (§11).
 8. **Conditional expressions are top-level only.** `if c then a else b` is the whole value of `var x =` (also
-   `global`), a plain `x =`, or `return`. Anywhere else it is MI-G112 by design: inside parentheses, an argument
+   `global`), a plain `x =`, or `return`. Anywhere else it is ME-G112 by design: inside parentheses, an argument
    (`f(x: if c then a else b)`), an operand (`(if c then a else b) + 1`, `x += if ...`), a subscript, an f-text
    slot, a branch or condition of another conditional (`else if ...` too), a `when` arm's value, and directly
    after `try`/`check`. Use `when` or a named intermediate.
 9. **Changing a collection while `for`-looping it is banned.** `for x in xs` with `xs.add_last(...)` in the
-   body is a build error (MI-S625); the same change made inside a called routine crashes at run time with
+   body is a build error (ME-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
-10. **A result you do not need takes no marker** (`drop` and `discard` are MI-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
-    A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[MI-W007]`,
+10. **A result you do not need takes no marker** (`drop` and `discard` are ME-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
+    A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[ME-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
     `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`), which get none.
-    Doc comment notes: MI-W305 a routine with no `###` doc comment, only for a routine of a module another file
-    imports (not the entry file, a script or the REPL), MI-W306 a parameter with no `:param` line, MI-W307 a `:param`
+    Doc comment notes: ME-W305 a routine with no `###` doc comment, only for a routine of a module another file
+    imports (not the entry file, a script or the REPL), ME-W306 a parameter with no `:param` line, ME-W307 a `:param`
     line naming no parameter (these two everywhere). There is no `:returns:` note. Files under a `tests`, `playground`,
     `scratch` or `generated` folder are exempt.
-    Other notes: `until false` gets MI-W304 with the quick fix "Write 'loop'", the body of `until true` gets
-    MI-W057 and is shown faded (as is code after an unconditional `return`, MI-S786,
+    Other notes: `until false` gets ME-W304 with the quick fix "Write 'loop'", the body of `until true` gets
+    ME-W057 and is shown faded (as is code after an unconditional `return`, ME-S786,
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `mielia check --json`
     writes all diagnostics as a JSON array (`file`, `line`, `column`, `severity`, `code`, `message`, `endLine?`,
     `fix?` with 1-based edits).
-11. **A module-level `var` is an error (MI-S435).** Module-level mutable state is `global name: Type = init`
+11. **A module-level `var` is an error (ME-S435).** Module-level mutable state is `global name: Type = init`
     (§6). Constants are `preset`.
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
 13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Int]`. `<` is a
     comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
 14. **Containment is a call on the container:** `xs.has(3)`, `"hello".has("ell")`, `xs.lacks(3)`, and a dict's
     keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
-    `x in xs` as a test is a grammar error (MI-G212); `in` belongs only to `for x in xs`.
+    `x in xs` as a test is a grammar error (ME-G212); `in` belongs only to `for x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** A line with no work is `nothing`. The words are `entity`/`record`, `routine`, `var`,
     `preset`, `for`, `when`, `to[Work]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
@@ -142,10 +142,10 @@ routine start()
 
 - Declarations (`import`, types, routines, `preset`, `global`) may sit among script statements; they are
   hoisted.
-- Mixing loose statements with an explicit `routine start()` is an error (MI-G150). Choose one.
-- Only the program's entry file may be a script. Loose statements in an imported file are MI-S443.
+- Mixing loose statements with an explicit `routine start()` is an error (ME-G150). Choose one.
+- Only the program's entry file may be a script. Loose statements in an imported file are ME-S443.
 - A top-level `var` in a script belongs to the script's own scope, not the module: routines in the file
-  cannot see it (MI-S444). Pass it as an argument, or make it a `global`.
+  cannot see it (ME-S444). Pass it as an argument, or make it a `global`.
 - Comments start with `#`. Doc comments use `###` on the lines before a declaration.
 
 **Modules.** `module <Path>` is optional: without it the module path comes from the file's location
@@ -153,19 +153,19 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 `tools/text utils.mie` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
 declare the same `module` are one module and build together. A file there with its own `routine start()` is another
 program and is not built with yours, so a draft that does not build yet can sit next to the program. A file there
-with top-level statements and no `routine start()` is built and is MI-S443, since only the entry file may be a
+with top-level statements and no `routine start()` is built and is ME-S443, since only the entry file may be a
 script. Only files that are part of the build report their errors. A failed `build` keeps the
 last executable that built.
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
 `preset` or `global`) of module `Foo`, and `import Foo.[bar, Baz]` several. A member import brings only
-those names bare (another name of `Foo` used bare is MI-S007 with a hint) unless the file also imports `Foo`
+those names bare (another name of `Foo` used bare is ME-S007 with a hint) unless the file also imports `Foo`
 whole, and a routine is always reachable with its module in front (`Foo.qux(...)`). `as` adds a second
 name and both work: `import Foo.bar as b` → `b` and `Foo.bar` (no bare `bar`), `import Foo as F` →
 `F.qux(...)` and `Foo.qux(...)` (no bare names of `Foo`). An import brings the module it names, never the modules under it
 (`import IO` doesn't bring `IO/Console`). A folder that holds modules but is no module itself (`import IO`) is
-MI-S105 listing the modules in it. A module the Mielia standard library doesn't have (`BuilderQuery`, `Simd`) is
-MI-S116 at the import ("'BuilderQuery' isn't a module of the Mielia standard library, so a Mielia file can't import
+ME-S105 listing the modules in it. A module the Mielia standard library doesn't have (`BuilderQuery`, `Simd`) is
+ME-S116 at the import ("'BuilderQuery' isn't a module of the Mielia standard library, so a Mielia file can't import
 it"). Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/Numerics`: the number types,
 `Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
@@ -187,7 +187,7 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
 - field → **member variable**, a bare `name: Type` line in the type body (no `var`). Visibility is written
   only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private: seen in its module and the modules under it). In the standard library a secret name is seen by the whole library and by no program.
   Giving a `secret` or `posted` member variable a value in `T(field: value, ...)` is allowed only inside the
-  type's module (MI-S403 / MI-S404): outside, build it with a routine the module opens (`HttpResult.ok(body: b)`).
+  type's module (ME-S403 / ME-S404): outside, build it with a routine the module opens (`HttpResult.ok(body: b)`).
 - Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
 - Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
@@ -250,14 +250,14 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
   goes too), and otherwise it is an `Int` (a `Decimal` with a fraction point). Where another type is
   wanted with nothing around to give it, the declaration states it: `var x: U8 = 5`. A variable's type is
   never guessed from its later uses. A number that names its type (`5_u8`, `7s32`, `10n`, `2.5dn`) is
-  MI-G010, and `migrate --step suffix` rewrites old code.
+  ME-G010, and `migrate --step suffix` rewrites old code.
 - `inf` and `nan` are number literals (reserved words) that take their type from where they go: `var x: B64 = inf`,
   `limit: B32 = -inf` (negative infinity is `-` on `inf`), `return nan`, `x < inf`. The binary floats (B16 B32 B64
-  B128) and D32 D64 D128 take them. With nothing giving a type (`var x = inf`) it is MI-S019, and where a
-  `Decimal`, `Int` or integer type goes it is MI-S020 (a `Decimal` is always finite).
+  B128) and D32 D64 D128 take them. With nothing giving a type (`var x = inf`) it is ME-S019, and where a
+  `Decimal`, `Int` or integer type goes it is ME-S020 (a `Decimal` is always finite).
 - A hex float (`0x1.8p3`, `0x1p-23` where a `B32` goes) is binary-float only and exact, and defaults to
   `B64`, never `Decimal`.
-- A literal out of range for its type is a build error (MI-S010): `-1` never fits an unsigned type; write
+- A literal out of range for its type is a build error (ME-S010): `-1` never fits an unsigned type; write
   `U8_MAX`, `U64_MAX`.
 - Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
   `1gb`, `1gib`. A size displays as its byte count grouped in threes by `_`: `{4kib}` is `4_096B`, never split
@@ -277,10 +277,10 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
 - `Pair(first: 1, second: "one")` infers `Pair[Int, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so EmitterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
-- A lambda whose parameter type can't be inferred is MI-S638 (annotate it). `Int` mixed with a fixed-width number
-  is MI-S767. A protocol is not a value or element type (`List[Shape]` is MI-S502). `using` on an entity calls its
+- A lambda whose parameter type can't be inferred is ME-S638 (annotate it). `Int` mixed with a fixed-width number
+  is ME-S767. A protocol is not a value or element type (`List[Shape]` is ME-S502). `using` on an entity calls its
   `enter`/`exit` on that entity. Works giving no value can be gathered.
-- `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or MI-S202 (a `return`
+- `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or ME-S202 (a `return`
   path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
   one-item tuple as `(1,)`. `try sv.to[List[Int]]()` recovers a bad element too. A cancelled job nothing
   started is done (`is_done()` is true).
@@ -314,7 +314,7 @@ var why: Check[S64] = check line.to()
 `Char.from_codepoint(n:)` a character (failable: a surrogate 0xD800..0xDFFF, below 0 or above 0x10FFFF fails).
 `c.to_byte()` is an ASCII character's byte (failable). `c.digit_value()` (`base: 10` default, `base: 16` also takes
 `a-f`/`A-F`) is failable, ASCII only. `b.to[U8]()`, `c.to[U32]()`, `v.to[Byte]()`, `n.to[Char]()` are build errors
-(MI-S646) naming these. A `Byte` is eight bits with no arithmetic: `&`, `|`, `^`, `~` (result `Byte`), `<<` and `>>>`.
+(ME-S646) naming these. A `Byte` is eight bits with no arithmetic: `&`, `|`, `^`, `~` (result `Byte`), `<<` and `>>>`.
 `>>` on a `Byte` is a build error pointing to `>>>`. A bare number where a `Byte` goes is a `Byte` (`b & 0x7F`),
 outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to `Byte(v)` and lists `n.to[Char]()`.
 
@@ -332,18 +332,18 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   same in both. `try big.to[B32]()` recovers. A conversion that can't overflow has only `to[T]()`.
 - `[T]` may be left out where the surrounding code says the type: a declared variable type, the routine's
   return type (`return count.to()`), a parameter (`takes(n: x.to())`), and through `try`/`check`. Where
-  nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is MI-S645: write
+  nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is ME-S645: write
   `.to[S64]()`.
-- A pair with no conversion is MI-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
-  Converting a value to its own type is MI-S646 too (use the value as it is), and so is building a type from a
+- A pair with no conversion is ME-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
+  Converting a value to its own type is ME-S646 too (use the value as it is), and so is building a type from a
   variable of that type (`Int(n)`: `n` is an `Int` already). A number written out is read as the type (`Int(1)`).
 - A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
-  MI-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`. A number
-  written out is different: `S32(3)`, `U8(255)` read that literal as the type (checked against its range, MI-S010
+  ME-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`. A number
+  written out is different: `S32(3)`, `U8(255)` read that literal as the type (checked against its range, ME-S010
   when it does not fit), so `[(Step.CALL, S32(3), 'a')]` is a `List[(Step, S32, Char)]`.
-  In a generic routine `T(x)` is checked per use: `make[U8](x: 300)` with `return T(x)` is MI-S655 naming
+  In a generic routine `T(x)` is checked per use: `make[U8](x: 300)` with `return T(x)` is ME-S655 naming
   `make[U8]` and pointing to `x.to[T]()`. `Char(n)` (bits taken as a codepoint, unchecked) and `Bool(x)` (lowest
-  bit only, `Bool(2)` is `false`) are MI-S655 too, pointing to `Char.from_codepoint(n: n)` (takes an `Int`) and
+  bit only, `Bool(2)` is `false`) are ME-S655 too, pointing to `Char.from_codepoint(n: n)` (takes an `Int`) and
   `x != 0`.
   `migrate --step numbers` rewrites `T(x)` to `x.to[T]()` between binary integer and float types, types
   `var b = U8(200)` as `var b: U8 = 200`, and lists the rest (decimal types, `BF16`, a literal inside an expression).
@@ -352,8 +352,8 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   a value computed from one value of another type is a conversion, `x.to[T]()` (`local.to[Moment]()`,
   `ratio.to[Q128]()` from a `B32`). So `S64(from: x)` is not a routine. A variant's arm comes out
   the same way: `sv.to[S64]()` / `sv.to[Dict]()` is failable (another arm is active → crash, `try` gives
-  `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (MI-S458 /
-  MI-S646 point at `.to[...]()`).
+  `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (ME-S458 /
+  ME-S646 point at `.to[...]()`).
 - Each conversion is its own routine, written with the target type in the bracket:
 
   ```mielia
@@ -373,13 +373,13 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 - `None` (capital) is the type and pattern (`is None`, `isnot None`); `none` (lowercase) is the value.
 - `none` is legal only where the target type can be absent: `T?`, a variant with a `None`
   member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
-- Reading through an `E?` before checking it is MI-S619; check with `if e isnot None` (or return early on
+- Reading through an `E?` before checking it is ME-S619; check with `if e isnot None` (or return early on
   `if e is None`, or a `when e` whose `is None` arm returns) and the name is the `E` after the check, until it is
   given a new value (`cur = cur.next` still reads the checked `cur`). A field path is checked the same way
   (`if info.returns is None` leaving, then `info.returns.name`, any depth) until the path or a name in front of it is
   given a new value. A call in between does not end the check, and if another name set the field to `none` meanwhile,
   the read crashes loudly. An `E?` goes where an `E` is wanted only after
-  the check (`take(b: m)` with `m: Box?` is MI-S502). Putting `none` into a non-optional `E` slot is MI-S252, a type
+  the check (`take(b: m)` with `m: Box?` is ME-S502). Putting `none` into a non-optional `E` slot is ME-S252, a type
   argument included (`List[Box]().add_last(none)`): declare the slot `E?` (`List[Box?]`).
 
 ## 6. Variables, constants and globals
@@ -394,9 +394,9 @@ preset MAX_RETRIES: Int = 5     # constant: explicit type, inlined at each use
 - There is no `let` and no `const`: `var` for variables, `preset` for constants. A `preset` may be an
   f-string built from other presets. A preset is computed when the program is built: one that calls a routine,
   does arithmetic or fills in a text runs once during the build and becomes the value it came to (a number, a
-  Bool, a Text, a Char, or a record, tuple or choice of those; MI-S258 if it fails).
+  Bool, a Text, a Char, or a record, tuple or choice of those; ME-S258 if it fails).
 - **No shadowing inside a routine**: a `var` may not reuse the name of a parameter or of a variable of an
-  enclosing block (MI-S008). Sibling blocks may each declare their own `i`.
+  enclosing block (ME-S008). Sibling blocks may each declare their own `i`.
 - Compound assignment works: `+=`, `-=`, `*=` and the like.
 
 **`global` — module-level mutable state.**
@@ -417,15 +417,15 @@ routine start()
 ```
 
 - The type annotation and the initializer are both required; there is no `var` (a global is mutable by
-  definition). A bare module-level `var` is MI-S435.
+  definition). A bare module-level `var` is ME-S435.
 - A global is read and written by bare name from any routine in the module, and another module can
   `import Mod.hits` and read and write the same storage.
 - Globals are initialized once, before any of your code runs, in **dependency order**: when one global's
   initializer reads another (directly or through free-routine calls), the one it reads goes first, so
-  declaration order does not matter. A cycle, a self-reference included, is MI-S436. A global whose
-  initializer reads another global must be a number, `Text` or `Bool` (MI-S437). A read hidden behind a
+  declaration order does not matter. A cycle, a self-reference included, is ME-S436. A global whose
+  initializer reads another global must be a number, `Text` or `Bool` (ME-S437). A read hidden behind a
   member-routine call (`global a: Int = x.foo()`) is not followed by this ordering.
-- A program with globals needs an entry point (an explicit `start()` or a script) (MI-S438).
+- A program with globals needs an entry point (an explicit `start()` or a script) (ME-S438).
 - **Every global is safe to use from concurrent jobs.** A single-statement read-modify-write
   (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
@@ -433,14 +433,14 @@ routine start()
   is serialized through a lock. A value read earlier and written back later
   (`var t = g`, other statements, then `g = t + 1`) can overwrite a change another job made in between, so
   write an update of a shared value based on itself as one statement (`g += 1`, `g = g + 1`, `e.count += 1`). A global and an entity's member variable are
-  the one way to change a shared value: there is no `Unbroken` (MI-S447 names this way).
+  the one way to change a shared value: there is no `Unbroken` (ME-S447 names this way).
 - Use a global for state the whole process has one of (a log, configuration, a registry); pass per-task
   context as parameters.
 
 ## 7. Operators
 
 - Arithmetic: `+ - * / // % **`. On `Int`, `+ - *` never fail and `/` gives a `Decimal`. On fixed-width
-  integers `/` is MI-S065, whose message points to `a // b` or `a.to[Decimal]() / b.to[Decimal]()`, and `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
+  integers `/` is ME-S065, whose message points to `a // b` or `a.to[Decimal]() / b.to[Decimal]()`, and `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
   `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
   Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
@@ -464,17 +464,17 @@ routine start()
   names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
   (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
-  (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: MI-S706.
+  (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: ME-S706.
 - Containment: `coll.has(x)`, `coll.lacks(x)`, on a dict `d.has_key(k)` / `d.lacks_key(k)`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
   `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
   (`2 to 1` yields nothing, `(2 to 1).has(1)` is `false`). A negative step counts down: `10 to 1 by -1`,
   `10 to 0 by -2`, also on unsigned types (`3 to 0 by -1` over `U64` yields 3 2 1 0). A step held in a variable
-  decides the direction by its sign. A literal `by 0` is MI-S516, and a zero step held in a variable crashes
+  decides the direction by its sign. A literal `by 0` is ME-S516, and a zero step held in a variable crashes
   with `RangeStepZeroError` when the range is iterated. `(0 to 10).has(10)` is `true`, and `has` follows the
   step (`(10 to 0 by -2).has(4)` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
   A type after the loop's name types the bounds of the range written in the loop: `for i: S64 in 1 to 10 ** 10`
-  counts in `S64` instead of `Int`, `for k: U8 in 250 to 255` stops at 255 (a bound that doesn't fit is MI-S010).
-  Only with a range literal: `for x: S64 in xs` is MI-G150 (a collection's elements already have their type).
+  counts in `S64` instead of `Int`, `for k: U8 in 250 to 255` stops at 255 (a bound that doesn't fit is ME-S010).
+  Only with a range literal: `for x: S64 in xs` is ME-G150 (a collection's elements already have their type).
 - Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
 
 **Precedence**, tightest first:
@@ -493,7 +493,7 @@ routine start()
 9. `and` / `or`, one level: mixing them needs parentheses (`a or (b and c)`), a chain of one does not
 10. `??`
 
-Mixing `and` with `or`, or two different bitwise operators, without parentheses is MI-G216.
+Mixing `and` with `or`, or two different bitwise operators, without parentheses is ME-G216.
 
 ## 8. Control flow
 
@@ -533,23 +533,23 @@ the tuple `(key, value)`, `for (k, v) in d` or `e.item0` / `e.item1`) and anythi
 
 Loops are `until c`, `loop` and `for`. `until c` stops when `c` becomes true, tested before each round: write the
 condition that ends the loop. `loop` doesn't end by itself: only a `break`, `return` or `throw` leaves it, so the
-lines after a `loop` without a `break` never run (MI-S786) and a routine whose last statement is such a loop needs no
-`return` after it. `while` is not a keyword: a loop written with it is MI-G224, and `migrate --step until` rewrites it
+lines after a `loop` without a `break` never run (ME-S786) and a routine whose last statement is such a loop needs no
+`return` after it. `while` is not a keyword: a loop written with it is ME-G224, and `migrate --step until` rewrites it
 (`while true` → `loop`, `while not c` → `until c`, an integer comparison turned around, `while i < n` →
 `until i >= n`, a float comparison and anything else → `until not (c)`, listed). `each` is a reserved word: a loop
-written `each x in xs` is MI-G229, and `migrate --step for` rewrites it to `for`. A `for` loop variable (and each
-name of a destructured element) is bound again every round, so assigning it is MI-S251 (over a range too): put the
+written `each x in xs` is ME-G229, and `migrate --step for` rewrites it to `for`. A `for` loop variable (and each
+name of a destructured element) is bound again every round, so assigning it is ME-S251 (over a range too): put the
 new value in a variable of its own, or write the element through the collection (`xs[i] = ...`). An `until`, `for` or `loop` may end
 with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
-(MI-G219): the case where the loop would not run even once is an `if` before the loop.
+(ME-G219): the case where the loop would not run even once is an `if` before the loop.
 A loop may carry values from one round to the next: `until n <= 1 with n: Int = start, steps: Int = 0`
 (`for x in xs with sum: Int = 0` and `loop with i: Int = 0` too). Each carried value is bound anew every round, from what the round's
 `continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
 is stored, so `continue with x: y, y: x % y` swaps). The names are visible in the condition, the body and the
 `then` block, and nowhere after the loop. A body that carries values must not run off its end: every path ends in
-`continue with`, `break` or a `return` (MI-G217), a bare `continue` in such a loop is MI-G218, as is `continue with`
+`continue with`, `break` or a `return` (ME-G217), a bare `continue` in such a loop is ME-G218, as is `continue with`
 in a loop without `with`. `break` takes no values.
 
 ```mielia
@@ -565,8 +565,8 @@ routine collatz_steps(start: Int) -> Int
 loop, and `break to rows` / `continue to rows` act on it from inside loops nested in it. `break to rows` is `rows`' own
 `break`: `rows`' `then` runs and the `then` of the loops inside it is skipped. `continue to rows` starts `rows`' next
 round (with carried values: `continue to rows with total: total + 1`). A plain `break` / `continue` stays with the
-innermost loop. A name no loop around the statement has, or a name an enclosing loop already has, is MI-G231. A loop
-name nothing uses is warning MI-W010.
+innermost loop. A name no loop around the statement has, or a name an enclosing loop already has, is ME-G231. A loop
+name nothing uses is warning ME-W010.
 
 **`when` is the pattern match**, as a statement or an expression:
 
@@ -593,7 +593,7 @@ One arm takes several values after `==`: `== 4, 6, 9, 11 => return 30`.
   binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
   `else as name` last. A failed guard falls through to the next arm. `else as name` is allowed only when one
   type is left after the earlier arms, and `name` has that type (the value of a `T?` after `is None`, the last
-  member type of a variant, every error of a `Check` taken as one type). With more left it is `MI-S359`.
+  member type of a variant, every error of a `Check` taken as one type). With more left it is `ME-S359`.
 - Record patterns, written like construction: `is Monster(hp: 0) as m`, `is Monster(hp: < 5, name)`,
   `is Chest(item: is Weapon as w)`, `is Monster(hp: as health)`. `field` alone names it; a value equals; an arm
   that tests a member variable does not cover its type. Also after `if`: `if c is Monster(hp: 0) as m`.
@@ -608,7 +608,7 @@ var label = when
 
 - In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
   as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
-  `becomes value`, the arm's value (without it, MI-S307). An arm may also be `throw ...` (`else => throw
+  `becomes value`, the arm's value (without it, ME-S307). An arm may also be `throw ...` (`else => throw
   InvalidValueError(message: word)`): it gives no value, so the other arms decide the type. The failure goes to the
   caller (in an `infallible` routine it stops the program on the spot).
 
@@ -622,7 +622,7 @@ when terrain
 ```
 
 - An expression `when` takes one expression per arm after `=>`. Several statements in an arm are a build error
-  (MI-S307): compute the value first, or write a `when` statement that sets a variable.
+  (ME-S307): compute the value first, or write a `when` statement that sets a variable.
 - `if x is T as name` tests and binds in one step; the binding exists only inside that branch.
 - `when` must cover every case of a `choice`, a `variant`, or a carrier's success arm; `else` covers the
   rest.
@@ -645,7 +645,7 @@ routine Account.deposit(amount: Int)                       # member routine, rec
   parameter goes by its name alone, also beside written names: `area(width, height: 4)`. A member routine is
   called on its receiver: `acct.deposit(amount: 5)`.
 - Return types are always written, and a routine with no `->` returns nothing: a `return` with a value in it is
-  MI-S301, and so is a bare `return` in a routine with `-> T` (the value never sets the result type). A parameter may be written
+  ME-S301, and so is a bare `return` in a routine with `-> T` (the value never sets the result type). A parameter may be written
   without a type (`routine describe(shape) -> Text`): the routine is made and checked for each type it is called
   with, and a value that lacks what the body uses is a build error naming that use ("(in 'describe' used with
   shape: Blob)"). A variadic parameter is written `name...: Type`.
@@ -662,10 +662,10 @@ routine Account.deposit(amount: Int)                       # member routine, rec
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
-  `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is MI-G221, and a
+  `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is ME-G221, and a
   misspelling names the close one. `@noinline` keeps a routine out of its callers (its own body is still optimized),
-  and `@inline` with `@noinline` on one routine is MI-G227. A name that starts with a capital is the program's own annotation (§19): a record
-  that obeys `Annotation`, and MI-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
+  and `@inline` with `@noinline` on one routine is ME-G227. A name that starts with a capital is the program's own annotation (§19): a record
+  that obeys `Annotation`, and ME-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
   yet.
 - **Routine tests.** `mielia test` builds a file once per `@test` routine, calling it in place of the program's own
   statements: once per `@case(input: (a, b), output: r)` (arguments in parameter order, the result compared with
@@ -711,16 +711,16 @@ routine start()
   pair). There are no weak-reference annotations, no `destruct` to write or call, and no lifetimes. For a
   resource that must be released at a known point (a file), use `using` (§15).
 - **Identity**: `===` / `!==` compare whether two entity names refer to the same object. On a record or a
-  number they are a build error (MI-S440): values have no identity, use `==`.
+  number they are a build error (ME-S440): values have no identity, use `==`.
 - **Equality and hashing are automatic, order is opt-in.** `==` / `!=` compare values: every record and every
   entity has them, with no `obeys` line, when each of its member variables has `==` (the builder compares
   member by member, a `routine T.eq(you: T) -> Bool` you write takes its place). Two different entities with
   equal contents are `==` and not `===` (`Player("Ada") == Player("Ada")` is true). A member variable without
   `==` (a routine value such as `Callable[(), None]`) means the type has none: `==` on it, or
   passing it where `needs T obeys Equatable` is asked, is a build error naming that member variable
-  (MI-S065 / MI-S150). A record also hashes automatically (a `Dict` key or `Set` element, no `obeys`) when every
+  (ME-S065 / ME-S150). A record also hashes automatically (a `Dict` key or `Set` element, no `obeys`) when every
   member variable hashes. An entity hashes only when it declares `obeys Hashable`, since its member variables
-  can change while a `Set` or `Dict` holds it: `Set[Player]` without it is MI-S150, and so is a record holding
+  can change while a `Set` or `Dict` holds it: `Set[Player]` without it is ME-S150, and so is a record holding
   such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
   `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
   in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Int` and
@@ -757,7 +757,7 @@ variant Number
 
 - **choice**: one of a fixed set, compared with `==` (`c == Color.RED`, `when c` with `== Color.RED =>`
   arms). Cases may carry values (`OK: 200`): every case or none (then 0, 1, 2, ... in order), some with and some
-  without is MI-S417. A flags member may say its bit the same way (`MINE: 0`, 0 to 63, every member or none).
+  without is ME-S417. A flags member may say its bit the same way (`MINE: 0`, 0 to 63, every member or none).
   Equality, order and hashing come with every choice.
   `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
   `Int`); flags have the same two for their members.
@@ -806,8 +806,8 @@ routine find(items: List[Text], name: Text) -> Int
   failure means the program can no longer be trusted. `start()` is not marked: a failure that reaches it ends the
   program with its report. ✗ Marking a routine infallible so you don't have to think about failures: a failure the
   caller could have received becomes a stop at that point.
-- Call sites never write `!` (`parse!(n: 1)` is MI-G211), and a declaration never does (`routine parse!(...)` is
-  MI-G222). `failable` is MI-G230 (`migrate --step failable` removes it).
+- Call sites never write `!` (`parse!(n: 1)` is ME-G211), and a declaration never does (`routine parse!(...)` is
+  ME-G222). `failable` is ME-G230 (`migrate --step failable` removes it).
 
 **Recovering.** Put a keyword in front of the expression:
 
@@ -842,7 +842,7 @@ routine start()
   receiver counts as an `AbsentValueError` failure that the same keyword receives (`try`: `None`, `check`: the
   `AbsentValueError`), otherwise the call runs on the value, and a failure below the call is received as usual. It
   holds for every `T?` and any routine the optional has none of itself. Without a keyword, a call through a `T?` is
-  still MI-S619 or an unknown routine. A chain that ends in a `T?` (`try optionals.first()` over a `List[Int?]`) gives
+  still ME-S619 or an unknown routine. A chain that ends in a `T?` (`try optionals.first()` over a `List[Int?]`) gives
   `T?`, not `T??`: a none end is the one absence, `None` under `try`, an `AbsentValueError` under `check`.
 - **`try`/`check` receive a failure from any depth below them.** Code inside calls plainly (`var l =
   eval(e.left)` in a recursive `eval`), and a failure anywhere under the keyword comes back to it: a `throw`, a
@@ -860,7 +860,7 @@ routine start()
 - **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
   running it crashes with `NotImplementedError` naming the routine, even under `try`/`check`. It ends its path, so
   a body that is only `todo` needs no `return`. The build warns once per routine
-  that still has one (MI-W303). `nothing` is an empty body on purpose, a different thing.
+  that still has one (ME-W303). `nothing` is an empty body on purpose, a different thing.
 - Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
   the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
@@ -883,15 +883,15 @@ routine start()
   absent state: "not found" in a `Check` is `is AbsentValueError`.
 - A routine may return `T?`, and it should only when having nothing is a normal result (a find, a lookup):
   `routine find_index(items: List[Text], name: Text) -> Int?` says `return none`, and the caller takes it apart with
-  `when`. Something gone wrong is a `throw`. Users never write `Check` as a return type (MI-S806), only `check` makes one.
+  `when`. Something gone wrong is a `throw`. Users never write `Check` as a return type (ME-S806), only `check` makes one.
   `Check` is meant to be taken apart where it is made: they cannot be a parameter type
-  (MI-S754), a member variable type (MI-S755), or copied from one variable to another (MI-S758). `Optional` is
+  (ME-S754), a member variable type (ME-S755), or copied from one variable to another (ME-S758). `Optional` is
   an ordinary optional value and may be stored.
 
 **Crashables.** `crashable X` declares an error type. It is a record (a value, no identity) with its own
 category: only a crashable can be thrown.
 
-- It **must** write `routine X.crash_message() -> Text` (MI-S704).
+- It **must** write `routine X.crash_message() -> Text` (ME-S704).
 - `crash_title()` comes from the name in sentence case (`NopeError` → "Nope error",
   `AbsentValueError` → "Absent value error"); write it only to say something else.
 - `Crashables` (plural) is the standard record for "any caught error". On it, `crash_title()`,
@@ -910,7 +910,7 @@ category: only a crashable can be thrown.
   goes back into the mold of the flow that throws it.
 - The builder collects the errors each routine can throw (its own `throw`s and those of the routines it
   calls). `@throws([NopeError, AbsentValueError])` above a routine fixes that list: an error the routine can
-  throw that the list leaves out is MI-S712, and the annotation on an `infallible` routine is MI-S713.
+  throw that the list leaves out is ME-S712, and the annotation on an `infallible` routine is ME-S713.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
   `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
@@ -972,8 +972,8 @@ needs T obeys Greetable
   with `Me` for the conforming type. Writing `obeys` is optional: a type that has the routines (same names,
   parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
   Write it to ask the builder for derived routines (`obeys Comparable`, an entity's `obeys Hashable`) or to hear about a missing routine at the
-  declaration. A type that does not fit is MI-S150 where it is passed, naming the missing or mismatched routine.
-  The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is MI-S150.
+  declaration. A type that does not fit is ME-S150 where it is passed, naming the missing or mismatched routine.
+  The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is ME-S150.
 - Common protocols: `Equatable`, `Comparable`, `Hashable`, `Emittable[T]`, `Copyable`.
 - Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
 
@@ -1057,15 +1057,15 @@ for (name, age) in ages
   on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
   `{1: "a"}` given to an `Emittable[(U16, Text)]` builds a `Dict[U16, Text]`. With nothing to go by,
   `[1, 2]` is a `List[Int]`. The empty set literal is `{}` and the empty dict literal `{:}`
-  (`s[b] = {:}` on a `List[Dict[Int, Int]]`). A `{}` where a dict is expected is MI-S558.
+  (`s[b] = {:}` on a `List[Dict[Int, Int]]`). A `{}` where a dict is expected is ME-S558.
 - `sv.to[List[Int]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
   `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Int]]()`). A type rebuilds itself in
   `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
-  builder's own: a program that writes or calls `from_serial` gets MI-S809 and uses `sv.to[T]()` instead. Every
+  builder's own: a program that writes or calls `from_serial` gets ME-S809 and uses `sv.to[T]()` instead. Every
   collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `RotatableList`), a dictionary's keys
   from their text (`sv.to[Dict[Int, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
-  read back: naming it in `sv.to[T]()` is MI-S813.
-- A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is MI-G250, which names that spelling.
+  read back: naming it in `sv.to[T]()` is ME-S813.
+- A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is ME-G250, which names that spelling.
 - An entity goes into a variant parameter or variable as itself (`add_point(seat: ada)` with `variant Seat` holding
   `Player`), and a list literal whose type the context gives takes values of every member type
   (`var keys: List[Int | Text] = [1, "two"]`). Inside a `when` arm the matched variable may take a new value
@@ -1130,14 +1130,14 @@ for (name, age) in ages
   `Memory[T]`).
 - **Emitters.** An emitter reads a source (a collection, a range, the step before it) and gives the next value each
   time it is asked. An adapter is an emitter whose source is the step before it. So changing the source's shape while
-  it walks crashes, and one that handed out everything cannot be used again (MI-S517).
+  it walks crashes, and one that handed out everything cannot be used again (ME-S517).
   What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
   with `emitter()`. `for` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
   for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `for x in it`,
   which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
   yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An emitter hands out each value once: a `for` over a named
   emitter after one that ended by itself (no `break`), or a `for` inside a loop over an emitter made outside it, is
-  MI-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `for x in nums` /
+  ME-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `for x in nums` /
   `for x in nums.emitter()`. An entity a program writes that obeys `Emitter[T]` (it has a
   failable `emit()`) is walked as it is: `for n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
   An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
@@ -1173,7 +1173,7 @@ routine start()
     return
 ```
 
-- Writing `nums.add_last(...)` directly in the loop body is a build error (MI-S625).
+- Writing `nums.add_last(...)` directly in the loop body is a build error (ME-S625).
 - A dictionary's `d[k] = v` may add the key, so writing a key of the dictionary being looped over crashes with
   `ReshapingWhileInUseError`, even when the key is already there. A list's `xs[i] = v` only replaces an
   element and is fine.
@@ -1315,7 +1315,7 @@ routine start()
 - Free routines: `waitfor(duration)` pauses (parks a job), `yield_now()` lets other jobs run,
   `cancellation_requested()` tells a long loop to stop early. Cancellation is cooperative.
 - A Work that nothing starts never runs. `f.to[Work]()` as a statement is warning
-  MI-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
+  ME-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
 - Jobs that talk to each other (over a channel) must all be started before you wait on one:
   `producer.start_now()` first, then `consumer.retrieve()`.
 - **Shared entities are safe to share between jobs.** The runtime may run jobs on several cores. An entity
@@ -1447,8 +1447,8 @@ routine start()
 
 ## 18. C and other machine-level code
 
-A Mielia program never handles memory directly and never calls C directly. `danger` blocks (MI-S800),
-`dangerous` routines (MI-S800) and foreign `C::` / `LLVM::` routines (MI-S810) are build errors in a program's
+A Mielia program never handles memory directly and never calls C directly. `danger` blocks (ME-S800),
+`dangerous` routines (ME-S800) and foreign `C::` / `LLVM::` routines (ME-S810) are build errors in a program's
 `.mie` files. The words `danger` and `dangerous` stay reserved.
 
 To use a C library, write a small `.rvr` module that declares and wraps it, and import that module:
@@ -1525,7 +1525,7 @@ routine start()
   is the kept value's hash, so `Unknown` works as a `Set`/`Dict` key. A kept type with no `==` or no hash fails
   loudly when compared or hashed (`UnknownOperationError`, naming the type).
 - `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program can't import
-  `BuilderQuery`, MI-S116). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
+  `BuilderQuery`, ME-S116). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
   (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
   (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
   ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Int` obeys `Comparable`, so
@@ -1553,7 +1553,7 @@ routine start()
   object: another object of the type is not hooked, and a record has none (a value). A hook keeps its object alive
   until it is removed. A build that imports `ObjectHacker` tests for hooks at every member variable change (about
   0.3 ns per change while no object has hooks), a build that does not pays nothing. Annotate the lambda's
-  parameters (MI-S638 otherwise). Hooks and implants may be added, removed and used from several jobs at once: the
+  parameters (ME-S638 otherwise). Hooks and implants may be added, removed and used from several jobs at once: the
   program's hooks are looked at and changed by one job at a time, and a hook runs on the job that made the change,
   after that look. A change pairs with the old value its own job saw: two jobs changing one hooked object at once
   each hand their hooks their own old value.
@@ -1561,7 +1561,7 @@ routine start()
   that one object: its calls run the replacement, given the object first and then the arguments. The member routine
   is named by its type and name (`Hero.attack`, an entity's routine that is not common, has no type parameters and
   types every parameter, and is not overloaded by name), and a replacement of another signature is a build error
-  where `implant` is written (MI-S201, naming `implant`, the routine and both signatures). Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
+  where `implant` is written (ME-S201, naming `implant`, the routine and both signatures). Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
   gives it back (`false` when there was none). An implant keeps its object alive until it is removed. In a build
   that imports `ObjectHacker` every member routine of an entity starts with the test for a replacement.
 - **The program's own annotations.** A record that obeys `Annotation` is an annotation of that name, written on a
@@ -1572,7 +1572,7 @@ routine start()
   call of the routine, recursive calls too: `call.routine_info`, `call.args` (`List[Unknown]`, parameter order) and
   `call.proceed()` (runs the routine, any number of times, and gives its result as an `Unknown`, one keeping `none`
   for a routine that returns nothing). What `around` returns must be of the routine's return type (else a loud
-  failure). A routine takes at most one annotation with an `around` (MI-S706), and neither goes on a routine or type
+  failure). A routine takes at most one annotation with an `around` (ME-S706), and neither goes on a routine or type
   with type parameters. A failure of the routine passes on through the `around` to the caller (an `infallible`
   `around` stops the program there). `RoutineInfo.annotations` and `TypeInfo.annotations` give the values back (`List[Unknown]`: `a.is[Route]()`,
   `try a.to[Route]()`). An annotated routine stays in the build even when nothing calls it.
@@ -1636,12 +1636,12 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 
 - A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
 - **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
-  (`--step extensions` does only that, with the `MI-` spelling of diagnostic codes in comments and `mielia-version`
+  (`--step extensions` does only that, with the `ME-` spelling of diagnostic codes in comments and `mielia-version`
   in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4
   (`migrate --step indent` does only that, text literals keep their lines), renames the 0.1 manifest file to
   `config.toml` (the old file alone is a build error that names `config.toml`), and then rewrites the old
   spellings: `try_f(x)` → `try f(x)`, `check_f(x)` / `lookup_f(x)` → `check f(x)`, `routine T.create(...)` →
-  `routine T(...)` (a member routine `create` that gives back its own type is MI-W104), `-x ** n` → `(-x) ** n`
+  `routine T(...)` (a member routine `create` that gives back its own type is ME-W104), `-x ** n` → `(-x) ** n`
   (the old meaning), and `C64` / `C128` → `C128` / `C256` in a project with a manifest. It lists what it cannot
   decide (a range whose start is not a literal may have counted down). Run the named steps after it and
   `--step suffix` last. A build error on an old name (`Result`, `Indexable`, `try_f`, `gather`, `IO/FileSystem`,
@@ -1649,33 +1649,33 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 
 ## 21. Reading build errors
 
-Format: `error[MI-S###]: file:line:col: message`, then the source line with a caret. Families: `MI-G###`
-grammar, `MI-S###` semantic, `MI-W###` warning (warnings print as `warning[MI-W###]`). The prefix follows
+Format: `error[ME-S###]: file:line:col: message`, then the source line with a caret. Families: `ME-G###`
+grammar, `ME-S###` semantic, `ME-W###` warning (warnings print as `warning[ME-W###]`). The prefix follows
 the file the diagnostic points into (an error inside an imported `.rvr` module is spelled `RV-` with the same
 number). At most 20 are shown per batch.
 
 | Code          | Usual cause                                         | Fix                                               |
 |---------------|-----------------------------------------------------|---------------------------------------------------|
-| MI-S510/S512  | positional arguments in a multi-parameter call      | name every argument                               |
-| MI-S010       | literal out of range for its type                   | use the right constant (`U8_MAX`)                 |
-| MI-G010       | a number names its type (`5_u8`)                    | `var x: U8 = 5`, or let the place it goes type it |
-| MI-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
-| MI-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
-| MI-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
-| MI-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
-| MI-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
-| MI-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
-| MI-G230       | `failable` written on a routine                     | remove it: every routine passes its failures on   |
-| MI-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
-| MI-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
-| MI-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
-| MI-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
-| MI-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
-| MI-G229       | a loop written `each x in xs`                       | `for x in xs` (`migrate --step for`)              |
-| MI-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
-| MI-S517       | `for` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `for x in xs` |
-| MI-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
-| MI-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
+| ME-S510/S512  | positional arguments in a multi-parameter call      | name every argument                               |
+| ME-S010       | literal out of range for its type                   | use the right constant (`U8_MAX`)                 |
+| ME-G010       | a number names its type (`5_u8`)                    | `var x: U8 = 5`, or let the place it goes type it |
+| ME-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
+| ME-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
+| ME-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
+| ME-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
+| ME-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
+| ME-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
+| ME-G230       | `failable` written on a routine                     | remove it: every routine passes its failures on   |
+| ME-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
+| ME-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
+| ME-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
+| ME-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
+| ME-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
+| ME-G229       | a loop written `each x in xs`                       | `for x in xs` (`migrate --step for`)              |
+| ME-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
+| ME-S517       | `for` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `for x in xs` |
+| ME-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
+| ME-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
 ## 22. Keywords
 
@@ -1701,7 +1701,7 @@ Every reserved word in Mielia. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Concurrency**: `f.to[Work](args)`
 - **Reserved, not usable in a program**: `danger` `dangerous`
 
-Nothing marks a routine that can fail (`failable` is MI-G230, `routine parse!(...)` is MI-G222), and a call never
+Nothing marks a routine that can fail (`failable` is ME-G230, `routine parse!(...)` is ME-G222), and a call never
 writes `!`. `steal` and `expand` are not Mielia words.
 
 The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
@@ -1727,7 +1727,7 @@ A Mielia program may import Revare (`.rvr`) modules; a Revare program may not im
   (`new_counter(start: 5)`) is received by name, and it is released when nothing holds it. The `.rvr`
   routines' own bodies keep Revare's rules.
 - **A Revare library entity (`RV::List`) keeps one original.** It may not cross a Mielia routine
-  signature by value (MI-S439), and keeping it under a second name is MI-S413.
+  signature by value (ME-S439), and keeping it under a second name is ME-S413.
 - `RV::Name` and `MI::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Mielia's `List` is not Revare's (`RV::List`, counted with `U64`).
   Convert at the boundary: `rf_list.to[List]()` makes a Mielia list from a Revare one, and

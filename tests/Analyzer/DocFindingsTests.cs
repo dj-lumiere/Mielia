@@ -216,7 +216,7 @@ public class DocFindingsTests
 
     /// <summary>The builder writes a record's `compare` and `hash` only when every member variable has them: an entity
     /// whose declaration doesn't ask for `Comparable` or `Hashable` has neither, so the record's `obeys` line is
-    /// MI-S702 for each.</summary>
+    /// ME-S702 for each.</summary>
     [Fact]
     public void Analyze_RecordHoldingEntity_ComparableAndHashableNeedTheEntitysOwn()
     {

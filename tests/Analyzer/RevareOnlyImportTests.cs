@@ -7,7 +7,7 @@ namespace Mielia.Tests.Analyzer;
 
 /// <summary>
 /// A Mielia file may import only the modules the Mielia standard library declares: a module that only the Revare
-/// standard library has (BuilderQuery, Simd) is MI-S116 at the import, through the real build driver.
+/// standard library has (BuilderQuery, Simd) is ME-S116 at the import, through the real build driver.
 /// </summary>
 public class RevareOnlyImportTests
 {
@@ -30,7 +30,7 @@ public class RevareOnlyImportTests
         }
     }
 
-    /// <summary><c>import BuilderQuery</c> and <c>import Simd</c> in a Mielia file are each an MI-S116 that names the module.</summary>
+    /// <summary><c>import BuilderQuery</c> and <c>import Simd</c> in a Mielia file are each an ME-S116 that names the module.</summary>
     [Theory]
     [InlineData("BuilderQuery")]
     [InlineData("Simd")]

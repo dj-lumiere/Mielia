@@ -5,7 +5,7 @@ namespace Mielia.Tests.Analyzer;
 
 using static TestHelpers;
 
-/// <summary>A construction with no arguments of a type whose member variables have no defaults names them (MI-S455).</summary>
+/// <summary>A construction with no arguments of a type whose member variables have no defaults names them (ME-S455).</summary>
 public class MissingConstructorArgumentTests
 {
     /// <summary><c>throw IndexOutOfBoundsError()</c> names <c>index</c> and <c>count</c> and the whole call.</summary>

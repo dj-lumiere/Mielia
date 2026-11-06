@@ -6,7 +6,7 @@ namespace Mielia.Tests.Analyzer;
 
 /// <summary>
 /// A Mielia entity is a shared handle and Mielia's library binds no <c>PoolManager</c> or <c>Stamped</c>, so setting a
-/// pool up in a Mielia program is a build error at the call (MI-S447), never a crash when it runs.
+/// pool up in a Mielia program is a build error at the call (ME-S447), never a crash when it runs.
 /// </summary>
 public class StampedNotInMieliaTests
 {

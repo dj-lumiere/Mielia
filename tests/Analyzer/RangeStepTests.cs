@@ -7,7 +7,7 @@ using static TestHelpers;
 
 /// <summary>
 /// The sign of a range's step sets its direction (`10 to 0 by -1` counts down), so only a literal step of zero is a
-/// build error (MI-S516) instead of a loop that never ends. A step held in a variable is checked when the range is
+/// build error (ME-S516) instead of a loop that never ends. A step held in a variable is checked when the range is
 /// iterated (tests/Fixtures/ExitCode/range_step_zero.rvr).
 /// </summary>
 public sealed class RangeStepTests

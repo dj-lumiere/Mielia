@@ -99,7 +99,7 @@ routine Items[T, COUNT].lacks(value: T) -> Bool
 needs T obeys Equatable
 
 ### Returns an emitter over the elements in ascending index order. It reads each element where the array holds it,
-### so the array must stay where it is while the loop runs (the builder keeps it from being reshaped, MI-S625).
+### so the array must stay where it is while the loop runs (the builder keeps it from being reshaped, ME-S625).
 @rv("Items.emitter")
 routine Items[T, COUNT].emitter() -> ItemsEmitter[T, COUNT]
 

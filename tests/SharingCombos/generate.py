@@ -295,7 +295,7 @@ def main():
             for value in a.value or VALUES:
                 if value in ("variant", "nested") and dest in ORDERED_ELEMENTS:
                     # A variant has no hash and no order, and a record with a tuple member variable has none either
-                    # (MI-S150), so a Set or Sorted container refuses them.
+                    # (ME-S150), so a Set or Sorted container refuses them.
                     continue
                 cases.append((f"{site}_{dest}_{value}", program(site, dest, value, a.rounds)))
     if a.wait is not None or not (a.site or a.dest or a.value):

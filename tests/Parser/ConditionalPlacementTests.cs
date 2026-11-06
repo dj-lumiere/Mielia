@@ -8,7 +8,7 @@ using static TestHelpers;
 /// <summary>
 /// A conditional value <c>if c then a else b</c> stands only as the whole value of <c>var x =</c>, <c>x =</c> or
 /// <c>return</c>. Every other position (inside parentheses, an argument, an operand, a subscript, an f-text slot, a
-/// branch of another conditional, after <c>try</c>/<c>check</c>) is MI-G112 with a message that points at a named
+/// branch of another conditional, after <c>try</c>/<c>check</c>) is ME-G112 with a message that points at a named
 /// value or <c>when</c>.
 /// </summary>
 public sealed class ConditionalPlacementTests
@@ -77,7 +77,7 @@ public sealed class ConditionalPlacementTests
 }
 
 /// <summary>
-/// <c>@noinline</c> is a routine annotation in Mielia too, and together with <c>@inline</c> it is MI-G227.
+/// <c>@noinline</c> is a routine annotation in Mielia too, and together with <c>@inline</c> it is ME-G227.
 /// </summary>
 public sealed class NoinlineAnnotationTests
 {
@@ -94,12 +94,12 @@ public sealed class NoinlineAnnotationTests
     {
         (_, Builder.Parser.Parser parser) =
             ParseMieliaWithErrors(source: "@inline\n@noinline\nroutine cold(x: S64) -> S64\n    return x * 3\n");
-        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "MI-G227"));
+        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "ME-G227"));
     }
 }
 
 /// <summary>
-/// The loop over a range or a collection is <c>for</c>. A loop written with <c>each</c> is MI-G229, whose quick fix
+/// The loop over a range or a collection is <c>for</c>. A loop written with <c>each</c> is ME-G229, whose quick fix
 /// writes <c>for</c>, and the parser reads it as that loop.
 /// </summary>
 public sealed class ForLoopKeywordTests
@@ -120,6 +120,6 @@ public sealed class ForLoopKeywordTests
         Builder.Diagnostics.GrammarException error = Assert.Single(collection: parser.GetStructuredErrors());
         Assert.Equal(expected: Builder.Diagnostics.GrammarDiagnosticCode.EachKeyword, actual: error.Code);
         Assert.Equal(expected: "for", actual: error.Fix?.Edits[index: 0].NewText);
-        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "MI-G229"));
+        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "ME-G229"));
     }
 }

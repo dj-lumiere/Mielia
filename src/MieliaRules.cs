@@ -34,6 +34,8 @@ public sealed class MieliaRules : LanguageRules
     public override string FileExtension => Builder.Frontends.SourceExtensions.Mielia;
     public override IReadOnlyList<string> PreviousFileExtensions => Builder.Frontends.SourceExtensions.PreviousMielia;
     public override string ShortName => "MI";
+
+    public override string DiagnosticPrefix => "ME";
     public override bool HasOwnStandardLibrary => true;
 
     /// <summary>

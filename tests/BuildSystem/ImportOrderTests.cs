@@ -103,7 +103,7 @@ public sealed class ImportOrderTests
             assertResult: (exit, text) =>
             {
                 Assert.NotEqual(expected: 0, actual: exit);
-                Assert.Contains(expectedSubstring: "MI-S513", actualString: text);
+                Assert.Contains(expectedSubstring: "ME-S513", actualString: text);
                 Assert.Contains(expectedSubstring: "'twin' is in", actualString: text);
                 Assert.Contains(expectedSubstring: "'pick' is in", actualString: text);
             });

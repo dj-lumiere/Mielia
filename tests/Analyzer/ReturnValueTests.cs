@@ -7,8 +7,8 @@ using static TestHelpers;
 
 /// <summary>
 /// The declaration states what a routine gives back. A routine without <c>-&gt; T</c> gives nothing back, so a
-/// <c>return</c> with a value in it is MI-S301, and a bare <c>return</c> in a routine that gives back a value is
-/// MI-S301 too. The value never sets the result type.
+/// <c>return</c> with a value in it is ME-S301, and a bare <c>return</c> in a routine that gives back a value is
+/// ME-S301 too. The value never sets the result type.
 /// </summary>
 public class ReturnValueTests
 {
@@ -83,7 +83,7 @@ public class ReturnValueTests
             filter: e => e.Code is SemanticDiagnosticCode.ReturnTypeMismatch or SemanticDiagnosticCode.MissingReturn);
     }
 
-    /// <summary>A lambda's value that does not fit the <c>Callable</c> it goes to is MI-S502.</summary>
+    /// <summary>A lambda's value that does not fit the <c>Callable</c> it goes to is ME-S502.</summary>
     [Fact]
     public void Analyze_LambdaValueIntoNoneCallable_ReportsError()
     {

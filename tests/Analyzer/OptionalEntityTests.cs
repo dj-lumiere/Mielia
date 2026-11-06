@@ -83,7 +83,7 @@ public class OptionalEntityTests
         Assert.Empty(collection: result.Errors);
     }
 
-    /// <summary>Reading through an <c>E?</c> before checking it is MI-S619.</summary>
+    /// <summary>Reading through an <c>E?</c> before checking it is ME-S619.</summary>
     [Fact]
     public void Analyze_ReadThroughUncheckedOptionalEntity_Fails()
     {

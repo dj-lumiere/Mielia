@@ -222,7 +222,7 @@ public partial class MieliaLexer
             [key: "is"] = TokenType.Is,
             [key: "loop"] = TokenType.Loop,
             [key: "for"] = TokenType.For,
-            // Reserved: a loop over a range or a collection is written `for` (MI-G229).
+            // Reserved: a loop over a range or a collection is written `for` (ME-G229).
             [key: "each"] = TokenType.Each,
             [key: "break"] = TokenType.Break,
             [key: "continue"] = TokenType.Continue,

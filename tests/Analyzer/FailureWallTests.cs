@@ -7,8 +7,8 @@ using static TestHelpers;
 
 /// <summary>
 /// Failures rise only through failable routines: a <c>throw</c> in a routine that is not failable crashes where it
-/// stands, <c>try</c>/<c>check</c> over an expression that reaches no failable call is MI-S760, a routine value that
-/// may fail goes only to a <c>Callable[...]</c> (MI-S761), and <c>pierce</c> is an ordinary name.
+/// stands, <c>try</c>/<c>check</c> over an expression that reaches no failable call is ME-S760, a routine value that
+/// may fail goes only to a <c>Callable[...]</c> (ME-S761), and <c>pierce</c> is an ordinary name.
 /// </summary>
 public sealed class FailureWallTests
 {

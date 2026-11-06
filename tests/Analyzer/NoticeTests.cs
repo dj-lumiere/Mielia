@@ -53,7 +53,7 @@ public class NoticeTests
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment);
         Assert.DoesNotContain(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksReturns);
         Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentLacksParam &&
-                                                       n.Message.Contains(value: "'b'") && n.CodeString == "MI-W306");
+                                                       n.Message.Contains(value: "'b'") && n.CodeString == "ME-W306");
         Assert.Contains(collection: alone, filter: n => n.Code == SemanticWarningCode.DocCommentNamesUnknownParam &&
                                                        n.Message.Contains(value: "'c'"));
     }
@@ -69,7 +69,7 @@ public class NoticeTests
         AnalysisResult result = analyzer.AnalyzeMultiple(files: [(libProgram, lib), (entryProgram, entry)]);
         List<SemanticWarning> notes = DocNotes(notices: result.Notices);
         Assert.Contains(collection: notes, filter: n => n.Code == SemanticWarningCode.RoutineHasNoDocComment &&
-                                                       n.Location.FileName == lib && n.CodeString == "MI-W305");
+                                                       n.Location.FileName == lib && n.CodeString == "ME-W305");
         Assert.DoesNotContain(collection: notes, filter: n => n.Location.FileName == entry);
     }
 }

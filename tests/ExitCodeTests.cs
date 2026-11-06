@@ -238,7 +238,7 @@ public sealed class ExitCodeTests
         Assert.Equal(expected: "2\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary><c>Int(n)</c> builds an <c>Int</c> from a variable that is one already: MI-S646, which says to use the
+    /// <summary><c>Int(n)</c> builds an <c>Int</c> from a variable that is one already: ME-S646, which says to use the
     /// value as it is, where the LLVM emitter used to stop.</summary>
     [Fact]
     public void IntBuiltFromAnInt_IsS646()
@@ -246,23 +246,23 @@ public sealed class ExitCodeTests
         (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "MI-S646", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "ME-S646", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "from a value that is an 'Int' already", actualString: stdout + stderr);
     }
 
     /// <summary><c>U8(x)</c> with an <c>S64</c> <c>x</c> would read the bits of <c>x</c> and change the number:
-    /// MI-S655, which points to <c>x.to[U8]()</c>.</summary>
+    /// ME-S655, which points to <c>x.to[U8]()</c>.</summary>
     [Fact]
     public void NumberBuiltFromBits_IsS655()
     {
         (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "ME-S655", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'x.to[U8]()'", actualString: stdout + stderr);
     }
 
-    /// <summary><c>T(x)</c> in a generic routine reads bits once <c>make[U8]</c> makes <c>T</c> a <c>U8</c>: MI-S655
+    /// <summary><c>T(x)</c> in a generic routine reads bits once <c>make[U8]</c> makes <c>T</c> a <c>U8</c>: ME-S655
     /// names the instance and points to <c>x.to[T]()</c>.</summary>
     [Fact]
     public void GenericNumberBuiltFromBits_IsS655()
@@ -270,12 +270,12 @@ public sealed class ExitCodeTests
         (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.mie", verb: "check");
 
         Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "MI-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "ME-S655", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'T(x)' in 'make[U8]'", actualString: stdout + stderr);
         Assert.Contains(expectedSubstring: "'x.to[T]()'", actualString: stdout + stderr);
     }
 
-    /// <summary><c>Char(n)</c> and <c>Bool(x)</c> read bits too: MI-S655, pointing to <c>Char.from_codepoint</c>
+    /// <summary><c>Char(n)</c> and <c>Bool(x)</c> read bits too: ME-S655, pointing to <c>Char.from_codepoint</c>
     /// and to a comparison.</summary>
     [Fact]
     public void CharAndBoolBuiltFromBits_AreS655()
