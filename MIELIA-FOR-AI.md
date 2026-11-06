@@ -286,8 +286,8 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
   started is done (`is_done()` is true).
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
-  braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
-  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes). A `Byte` shows
+  braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits, a real code point: a surrogate or a value above `\u10FFFF` is a build error). Text has NO `\x` escape (any `\x` in `"..."`, `'...'` or `f"..."` is a build error that points at `\u`). Characters:
+  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (one byte: ASCII or an `\xHH` escape). In `b"..."`, `\x00`..`\xFF` are single bytes and a non-ASCII character is its UTF-8 bytes (`b"한국어"` is 9 bytes). A `Byte` shows
   (alone or in a `List[Byte]`) as the byte literal that makes it, always two uppercase hex digits: `b'\x4C'`,
   `b'\x0A'`. `Bytes` shows as the bytes literal that makes it, `\xHH` per byte: `b"\x47\x45\x54"`. `show`/`alert`
   print that form too. Raw bytes go out through `stdout().push(data:)`.
