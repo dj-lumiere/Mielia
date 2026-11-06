@@ -44,6 +44,6 @@ public class ReleaseDiagnosticsTests
                                                                    return
                                                                """,
             expectedErrorSubstring: "no conversion from 'List[");
-        Assert.DoesNotContain(collection: result.Errors, filter: e => e.Message.Contains(value: "MI::"));
+        Assert.DoesNotContain(collection: result.Errors, filter: e => e.Message.Contains(value: "ME::"));
     }
 }

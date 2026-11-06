@@ -70,24 +70,24 @@ routine CallTargetError.crash_message() -> Text
 ### the same tables.
 secret record TypeHandle
     ### The reached member routines and common routines (or the modules' routines).
-    secret make_routines: Callable[(), MI::System.List[RoutineFact]]
+    secret make_routines: Callable[(), ME::System.List[RoutineFact]]
     ### Calls the routine at an index of `make_routines()`, on a target for a member routine.
-    secret do_invoke: Callable[(Unknown, U64, Roamed[MI::System.Dict[Text, Unknown]]), Unknown]
+    secret do_invoke: Callable[(Unknown, U64, Roamed[ME::System.Dict[Text, Unknown]]), Unknown]
     ### The creators.
-    secret make_creators: Callable[(), MI::System.List[RoutineFact]]
+    secret make_creators: Callable[(), ME::System.List[RoutineFact]]
     ### Calls the creator at an index of `make_creators()`.
-    secret do_create: Callable[(U64, Roamed[MI::System.Dict[Text, Unknown]]), Unknown]
+    secret do_create: Callable[(U64, Roamed[ME::System.Dict[Text, Unknown]]), Unknown]
     ### The values of the program's own annotations on the type, in the order they are written.
-    secret make_annotations: Callable[(), MI::System.List[Unknown]]
+    secret make_annotations: Callable[(), ME::System.List[Unknown]]
 
 ### The tables of the program's modules' own routines.
 ### :returns: The handle.
 secret routine module_handle() -> TypeHandle
     return TypeHandle(
         make_routines: () => reached_routines(),
-        do_invoke: (target: Unknown, index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) => reached_invoke(index: index, args: args),
+        do_invoke: (target: Unknown, index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) => reached_invoke(index: index, args: args),
         make_creators: () => new_routine_facts(),
-        do_create: (index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) => unknown_nothing(),
+        do_create: (index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) => unknown_nothing(),
         make_annotations: () => new_unknown_list(),
     )
 
@@ -125,13 +125,13 @@ secret record RoutineFact
     ### Whether it has type parameters of its own.
     secret is_generic: Bool
     ### Its parameters, `me` left out.
-    secret parameters: MI::System.List[ParameterFact]
+    secret parameters: ME::System.List[ParameterFact]
     ### Whether it returns a value.
     secret has_returns: Bool
     ### The description of what it returns (of `Bool` when it returns nothing).
     secret make_returns: Callable[(), TypeFact]
     ### The values of the program's own annotations on it, in the order they are written.
-    secret annotations: MI::System.List[Unknown]
+    secret annotations: ME::System.List[Unknown]
 
 ### One parameter, for the builder's tables.
 ### :param name: The name of the parameter.
@@ -172,8 +172,8 @@ secret routine routine_fact[R](
     is_failable: Bool,
     is_generic: Bool,
     has_returns: Bool,
-    parameters: MI::System.List[ParameterFact],
-    annotations: MI::System.List[Unknown],
+    parameters: ME::System.List[ParameterFact],
+    annotations: ME::System.List[Unknown],
 ) -> RoutineFact
     return RoutineFact(
         name: name,
@@ -192,70 +192,70 @@ secret routine routine_fact[R](
 
 ### An empty list of routine facts, for the builder's tables.
 ### :returns: The empty list.
-secret routine new_routine_facts() -> MI::System.List[RoutineFact]
-    return MI::System.List[RoutineFact]()
+secret routine new_routine_facts() -> ME::System.List[RoutineFact]
+    return ME::System.List[RoutineFact]()
 
 ### An empty list of parameter facts, for the builder's tables.
 ### :returns: The empty list.
-secret routine new_parameter_facts() -> MI::System.List[ParameterFact]
-    return MI::System.List[ParameterFact]()
+secret routine new_parameter_facts() -> ME::System.List[ParameterFact]
+    return ME::System.List[ParameterFact]()
 
 ### An empty list of `Unknown`s, for the builder's tables.
 ### :returns: The empty list.
-secret routine new_unknown_list() -> MI::System.List[Unknown]
-    return MI::System.List[Unknown]()
+secret routine new_unknown_list() -> ME::System.List[Unknown]
+    return ME::System.List[Unknown]()
 
 ### An empty list of type facts, for the builder's tables.
 ### :returns: The empty list.
-secret routine new_type_facts() -> MI::System.List[TypeFact]
-    return MI::System.List[TypeFact]()
+secret routine new_type_facts() -> ME::System.List[TypeFact]
+    return ME::System.List[TypeFact]()
 
 ### The reached member routines and common routines of `T`. The builder writes this body.
 ### :returns: The descriptions.
-secret routine reflected_routines[T]() -> MI::System.List[RoutineFact]
-    return MI::System.List[RoutineFact]()
+secret routine reflected_routines[T]() -> ME::System.List[RoutineFact]
+    return ME::System.List[RoutineFact]()
 
 ### Calls the routine of `T` at `index` of `reflected_routines[T]()`. The builder writes this body.
 ### :param target: The object to call it on.
 ### :param index: The position in `reflected_routines[T]()`.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: What the routine gave back (an `Unknown` keeping none for no result).
-secret routine reflected_invoke[T](target: Unknown, index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Unknown
+secret routine reflected_invoke[T](target: Unknown, index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Unknown
     return unknown_nothing()
 
 ### The reached creators of `T`. The builder writes this body.
 ### :returns: The descriptions.
-secret routine reflected_creators[T]() -> MI::System.List[RoutineFact]
-    return MI::System.List[RoutineFact]()
+secret routine reflected_creators[T]() -> ME::System.List[RoutineFact]
+    return ME::System.List[RoutineFact]()
 
 ### Calls the creator of `T` at `index` of `reflected_creators[T]()`. The builder writes this body.
 ### :param index: The position in `reflected_creators[T]()`.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: The new object.
-secret routine reflected_create[T](index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Unknown
+secret routine reflected_create[T](index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Unknown
     return unknown_nothing()
 
 ### The values of the program's own annotations on `T`, in the order they are written. The builder writes this body.
 ### :returns: The annotation values.
-secret routine reflected_annotations[T]() -> MI::System.List[Unknown]
-    return MI::System.List[Unknown]()
+secret routine reflected_annotations[T]() -> ME::System.List[Unknown]
+    return ME::System.List[Unknown]()
 
 ### The types of the program's own modules that the build reached. The builder writes this body.
 ### :returns: The descriptions.
-secret routine reached_types() -> MI::System.List[TypeFact]
-    return MI::System.List[TypeFact]()
+secret routine reached_types() -> ME::System.List[TypeFact]
+    return ME::System.List[TypeFact]()
 
 ### The free routines of the program's own modules, reached ones and the names of the others. The builder writes
 ### this body.
 ### :returns: The descriptions.
-secret routine reached_routines() -> MI::System.List[RoutineFact]
-    return MI::System.List[RoutineFact]()
+secret routine reached_routines() -> ME::System.List[RoutineFact]
+    return ME::System.List[RoutineFact]()
 
 ### Calls the free routine at `index` of `reached_routines()`. The builder writes this body.
 ### :param index: The position in `reached_routines()`.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: What the routine gave back (an `Unknown` keeping none for no result).
-secret routine reached_invoke(index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Unknown
+secret routine reached_invoke(index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Unknown
     return unknown_nothing()
 
 ### One argument of a call, as the parameter's type.
@@ -263,7 +263,7 @@ secret routine reached_invoke(index: U64, args: Roamed[MI::System.Dict[Text, Unk
 ### :param name: The name of the parameter.
 ### :param routine_name: The name of the routine, for the error.
 ### :returns: The argument.
-secret routine unknown_argument[P](args: Roamed[MI::System.Dict[Text, Unknown]], name: Text, routine_name: Text) -> P
+secret routine unknown_argument[P](args: Roamed[ME::System.Dict[Text, Unknown]], name: Text, routine_name: Text) -> P
     when try args[name]
         is None => throw ArgumentError(routine_name: routine_name, problem: f"the argument '{name}' is missing")
         else as supplied =>
@@ -275,7 +275,7 @@ secret routine unknown_argument[P](args: Roamed[MI::System.Dict[Text, Unknown]],
 ### :param args: The arguments of the call, by parameter name.
 ### :param name: The name of the parameter.
 ### :returns: true when the call gives it.
-secret routine has_argument(args: Roamed[MI::System.Dict[Text, Unknown]], name: Text) -> Bool
+secret routine has_argument(args: Roamed[ME::System.Dict[Text, Unknown]], name: Text) -> Bool
     when try args[name]
         is None => return false
         else => return true
@@ -302,7 +302,7 @@ secret routine unknown_nothing() -> Unknown
 ### :param fact: The description of the routine.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: true when the call fits.
-secret routine arguments_fit(fact: RoutineFact, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Bool
+secret routine arguments_fit(fact: RoutineFact, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Bool
     var matched: U64 = 0
     for parameter in fact.parameters
         when try args[parameter.name]
@@ -322,7 +322,7 @@ secret routine arguments_fit(fact: RoutineFact, args: Roamed[MI::System.Dict[Tex
 ### :param fact: The description of the routine.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: The reason as text.
-secret routine argument_problem(fact: RoutineFact, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Text
+secret routine argument_problem(fact: RoutineFact, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Text
     for parameter in fact.parameters
         when try args[parameter.name]
             is None =>
@@ -357,7 +357,7 @@ secret record RoutineChoice
 ### :param name: The name of the routine, short or full.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: The choice.
-secret routine choose_routine(facts: MI::System.List[RoutineFact], name: Text, args: Roamed[MI::System.Dict[Text, Unknown]]) -> RoutineChoice
+secret routine choose_routine(facts: ME::System.List[RoutineFact], name: Text, args: Roamed[ME::System.Dict[Text, Unknown]]) -> RoutineChoice
     var any_named = false
     var any_built = false
     var left_out = name
@@ -386,7 +386,7 @@ secret routine choose_routine(facts: MI::System.List[RoutineFact], name: Text, a
 ### :param index: The `index` of the routine in the list.
 ### :param args: The arguments of the call, by parameter name.
 ### :returns: The reason as text, or empty text.
-secret routine listed_argument_problem(facts: MI::System.List[RoutineFact], index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) -> Text
+secret routine listed_argument_problem(facts: ME::System.List[RoutineFact], index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) -> Text
     for fact in facts
         if fact.index == index and not arguments_fit(fact: fact, args: args)
             return argument_problem(fact: fact, args: args)

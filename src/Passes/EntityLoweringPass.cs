@@ -1772,7 +1772,7 @@ internal sealed class EntityLoweringPass
                declaredIn != null && IsStdlibPath(file: declaredIn);
     }
 
-    // An entity of Mielia's own realm (`MI::System.List`) is always held through a handle, whichever world's value the
+    // An entity of Mielia's own realm (`ME::System.List`) is always held through a handle, whichever world's value the
     // routine giving it back was called on (a Revare list's crossing `rf_list.to[List]()`).
     private static bool IsMieliaRealmEntity(EntityTypeSymbol entity)
     {

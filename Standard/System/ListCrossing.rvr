@@ -6,8 +6,8 @@ module System
 ### Makes a Mielia list of the elements of a list from Revare code (a Revare library routine's result):
 ### `rf_list.to[List]()`.
 ### :returns: A new Mielia list of copies of the elements.
-routine List[T].to[MI::System.List[T]]() -> MI::System.List[T]
-    var result = MI::System.List[T](capacity: me.count.to[Int]())
+routine List[T].to[ME::System.List[T]]() -> ME::System.List[T]
+    var result = ME::System.List[T](capacity: me.count.to[Int]())
     for element in me
         result.add_last(value: element)
     return steal result

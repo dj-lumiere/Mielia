@@ -1728,7 +1728,7 @@ A Mielia program may import Revare (`.rvr`) modules; a Revare program may not im
   routines' own bodies keep Revare's rules.
 - **A Revare library entity (`RV::List`) keeps one original.** It may not cross a Mielia routine
   signature by value (ME-S439), and keeping it under a second name is ME-S413.
-- `RV::Name` and `MI::Name` name a type in a specific language when both have one with that name.
+- `RV::Name` and `ME::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Mielia's `List` is not Revare's (`RV::List`, counted with `U64`).
   Convert at the boundary: `rf_list.to[List]()` makes a Mielia list from a Revare one, and
   `xs.to[RV::List]()` makes a Revare list from a Mielia one.

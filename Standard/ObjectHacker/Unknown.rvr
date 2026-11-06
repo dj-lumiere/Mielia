@@ -38,13 +38,13 @@ secret record TypeFact
     ### What kind of type it is, as the case name of `TypeKind` (`"ENTITY"`).
     secret kind: Text
     ### The member variables of a record or an entity, in declaration order.
-    secret memvars: MI::System.List[MemberFact]
+    secret memvars: ME::System.List[MemberFact]
     ### The protocols the type obeys.
-    secret protocols: MI::System.List[Text]
+    secret protocols: ME::System.List[Text]
     ### The case names of a choice or a flags type, in declaration order.
-    secret cases: MI::System.List[Text]
+    secret cases: ME::System.List[Text]
     ### A variant's arms, in declaration order (each `make_fact` gives the arm's type).
-    secret arms: MI::System.List[MemberFact]
+    secret arms: ME::System.List[MemberFact]
     ### The type's routine tables, for `call` and `create`.
     secret handle: TypeHandle
 
@@ -273,7 +273,7 @@ needs AnyType T
 ### records, entities, choices, flags types and variants.
 ### :returns: The description.
 secret routine type_fact_of[T]() -> TypeFact
-    var memvars = MI::System.List[MemberFact]()
+    var memvars = ME::System.List[MemberFact]()
     expand m in allmemvarof(T)
         memvars.add_last(value: MemberFact(
             name: nameof(m),
@@ -281,10 +281,10 @@ secret routine type_fact_of[T]() -> TypeFact
             is_secret: visibilityof(m) == Visibility.SECRET,
             make_fact: $typeof(m).type_fact_maker(),
         ))
-    var cases = MI::System.List[Text]()
+    var cases = ME::System.List[Text]()
     expand c in caseof(T)
         cases.add_last(value: nameof(c))
-    var arms = MI::System.List[MemberFact]()
+    var arms = ME::System.List[MemberFact]()
     expand a in branchof(T)
         arms.add_last(value: MemberFact(
             name: nameof(a),
@@ -292,7 +292,7 @@ secret routine type_fact_of[T]() -> TypeFact
             is_secret: false,
             make_fact: $typeof(a).type_fact_maker(),
         ))
-    var protocols = MI::System.List[Text]()
+    var protocols = ME::System.List[Text]()
     expand p in protocolof(T)
         protocols.add_last(value: nameof(p))
     return TypeFact(
@@ -307,9 +307,9 @@ secret routine type_fact_of[T]() -> TypeFact
         arms: arms,
         handle: TypeHandle(
             make_routines: () => reflected_routines[T](),
-            do_invoke: (target: Unknown, index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) => reflected_invoke[T](target: target, index: index, args: args),
+            do_invoke: (target: Unknown, index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) => reflected_invoke[T](target: target, index: index, args: args),
             make_creators: () => reflected_creators[T](),
-            do_create: (index: U64, args: Roamed[MI::System.Dict[Text, Unknown]]) => reflected_create[T](index: index, args: args),
+            do_create: (index: U64, args: Roamed[ME::System.Dict[Text, Unknown]]) => reflected_create[T](index: index, args: args),
             make_annotations: () => reflected_annotations[T](),
         ),
     )

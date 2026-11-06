@@ -33,9 +33,7 @@ public sealed class MieliaRules : LanguageRules
     public override string Version => RevareRules.VersionOf(assembly: typeof(MieliaRules).Assembly);
     public override string FileExtension => Builder.Frontends.SourceExtensions.Mielia;
     public override IReadOnlyList<string> PreviousFileExtensions => Builder.Frontends.SourceExtensions.PreviousMielia;
-    public override string ShortName => "MI";
-
-    public override string DiagnosticPrefix => "ME";
+    public override string ShortName => "ME";
     public override bool HasOwnStandardLibrary => true;
 
     /// <summary>
@@ -107,7 +105,7 @@ public sealed class MieliaRules : LanguageRules
             }
 
             // The handle's module qualifier (`System.` of `System.Roamed[...]`, as a type argument is named) goes
-            // with it, or the entity would read `System.MI::System.List`.
+            // with it, or the entity would read `System.ME::System.List`.
             int start = QualifierStart(text: text, at: at);
             text = text[..start] + text[(at + wrapper.Length)..close] + text[(close + 1)..];
             at = FindWrapper(text: text, wrapper: wrapper, from: start);
