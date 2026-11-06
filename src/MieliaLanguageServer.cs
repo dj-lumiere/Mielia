@@ -21,7 +21,7 @@ internal sealed class MieliaLanguageServer : LanguageServerProfile
     public override string CodeBlockLanguage => "mielia";
 
     /// <inheritdoc/>
-    public override IReadOnlyList<string> Keywords => MieliaLexer.KeywordSpellings;
+    public override IReadOnlyList<string> Keywords => MieliaKeywords.KeywordSpellings;
 
     /// <inheritdoc/>
     /// <remarks>From the improvement plan: `until` loops, `becomes` in an expression `when`.</remarks>

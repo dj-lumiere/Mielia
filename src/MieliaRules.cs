@@ -47,7 +47,7 @@ public sealed class MieliaRules : LanguageRules
 
     public override List<Token> Tokenize(string source, string fileName)
     {
-        return new MieliaLexer(source: source, fileName: fileName).Tokenize();
+        return new SourceLexer(source: source, fileName: fileName, language: Language.Mielia, keywords: MieliaKeywords.TableFor(fileName: fileName)).Tokenize();
     }
 
     /// <inheritdoc/>
@@ -57,7 +57,7 @@ public sealed class MieliaRules : LanguageRules
     public override (List<Token> Tokens, List<CommentTrivia> Comments) TokenizeWithComments(string source,
         string fileName)
     {
-        var lexer = new MieliaLexer(source: source, fileName: fileName);
+        var lexer = new SourceLexer(source: source, fileName: fileName, language: Language.Mielia, keywords: MieliaKeywords.TableFor(fileName: fileName));
         return (lexer.Tokenize(), lexer.Comments);
     }
 
