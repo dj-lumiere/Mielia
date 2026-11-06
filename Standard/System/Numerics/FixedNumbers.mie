@@ -84,8 +84,8 @@ routine S8.rotate_left(bits: Int) -> S8
 routine S8.rotate_right(bits: Int) -> S8
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine S8.to_text(radix: Int) -> Text
@@ -171,8 +171,8 @@ routine S16.rotate_left(bits: Int) -> S16
 routine S16.rotate_right(bits: Int) -> S16
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine S16.to_text(radix: Int) -> Text
@@ -258,8 +258,8 @@ routine S32.rotate_left(bits: Int) -> S32
 routine S32.rotate_right(bits: Int) -> S32
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine S32.to_text(radix: Int) -> Text
@@ -345,8 +345,8 @@ routine S64.rotate_left(bits: Int) -> S64
 routine S64.rotate_right(bits: Int) -> S64
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine S64.to_text(radix: Int) -> Text
@@ -432,8 +432,8 @@ routine S128.rotate_left(bits: Int) -> S128
 routine S128.rotate_right(bits: Int) -> S128
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine S128.to_text(radix: Int) -> Text
@@ -514,8 +514,8 @@ routine U8.rotate_left(bits: Int) -> U8
 routine U8.rotate_right(bits: Int) -> U8
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine U8.to_text(radix: Int) -> Text
@@ -596,8 +596,8 @@ routine U16.rotate_left(bits: Int) -> U16
 routine U16.rotate_right(bits: Int) -> U16
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine U16.to_text(radix: Int) -> Text
@@ -678,8 +678,8 @@ routine U32.rotate_left(bits: Int) -> U32
 routine U32.rotate_right(bits: Int) -> U32
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine U32.to_text(radix: Int) -> Text
@@ -760,8 +760,8 @@ routine U64.rotate_left(bits: Int) -> U64
 routine U64.rotate_right(bits: Int) -> U64
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine U64.to_text(radix: Int) -> Text
@@ -842,8 +842,8 @@ routine U128.rotate_left(bits: Int) -> U128
 routine U128.rotate_right(bits: Int) -> U128
     return me.rotate_right(bits: bits.to_shift_amount())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine U128.to_text(radix: Int) -> Text

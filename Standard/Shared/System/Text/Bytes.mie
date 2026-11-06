@@ -148,13 +148,13 @@ routine Bytes.ends_with(suffix: Bytes) -> Bool
 @rv("Bytes.reverse")
 routine Bytes.reverse() -> Bytes
 
-### Returns this byte as exactly two lowercase hexadecimal digits, high nibble first (`0x0F` is `0f`), the
+### Returns this byte as exactly two uppercase hexadecimal digits, high nibble first (`0x0F` is `0F`), the
 ### per-byte form of `Bytes.to_hex`.
 ### :returns: The two-digit hexadecimal `Text`.
 @rv("Byte.to_hex")
 routine Byte.to_hex() -> Text
 
-### Returns the lowercase hexadecimal encoding of this sequence.
+### Returns the uppercase hexadecimal encoding of this sequence.
 ### Each byte becomes exactly two hex digits (high nibble first), so the result is
 ### always `2 * count()` characters. The inverse is `Bytes.from_hex!`.
 ### :returns: The resulting `Text` value.

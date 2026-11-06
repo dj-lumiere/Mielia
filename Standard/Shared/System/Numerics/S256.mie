@@ -349,8 +349,8 @@ routine S256.signum() -> S256
 @rv("S256.represent")
 routine S256.represent() -> Text
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
-### when negative (`255.to_text(radix: 16)` is `ff`).
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `FF`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 @rv("S256.to_text")

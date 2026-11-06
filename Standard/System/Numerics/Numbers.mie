@@ -60,7 +60,7 @@ routine Int.bit_length() -> Int
 routine Int.represent_radix(radix: Int) -> Text
     return me.represent_radix(radix: radix.to[S64]().to[S32]())
 
-### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### Renders this value in base `radix` (2 to 36), digits past 9 as uppercase letters, with a leading `-`
 ### when negative. Crashes on any other radix (unlike `represent_radix`, which renders an empty text).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
