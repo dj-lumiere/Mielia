@@ -4,9 +4,20 @@ module IO/Console
 # of the Revare routines of the same names.
 
 ### Reads all remaining input and splits it into lines. Windows line endings count as one.
+### :throws: {MalformedUtf8Error} when the input is not well-formed UTF-8.
 routine ask_lines() -> List[Text]
     return ask_lines().to[List[Text]]()
 
+### Reads all remaining input and splits it into lines, as {ask_lines} does, replacing malformed UTF-8 with U+FFFD.
+routine ask_lines_lossy() -> List[Text]
+    return ask_lines_lossy().to[List[Text]]()
+
 ### Reads all remaining input and splits it into the words between runs of whitespace.
+### :throws: {MalformedUtf8Error} when the input is not well-formed UTF-8.
 routine ask_words() -> List[Text]
     return ask_words().to[List[Text]]()
+
+### Reads all remaining input and splits it into the words between runs of whitespace, replacing malformed UTF-8
+### with U+FFFD.
+routine ask_words_lossy() -> List[Text]
+    return ask_words_lossy().to[List[Text]]()

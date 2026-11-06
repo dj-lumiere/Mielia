@@ -1,8 +1,8 @@
 module Tests/StdlibMi/FileMalformedUtf8Mi
 
-# Malformed UTF-8 fails by default: `read_text`, and a FileSource's `read_line`, `read_word`, `read_all` and `read_lines`,
-# throw `MalformedUtf8Error` naming the byte. The `_lossy` twin of each reads the same file with U+FFFD in place of
-# each malformed byte. The file holds the bytes of "ok ", FF, FE and " bad".
+# Malformed UTF-8 fails by default: `read_text`, and a FileSource's `read_line`, `read_word`, `read_all`,
+# `read_lines` and `read_words`, throw `MalformedUtf8Error` naming the byte. The `_lossy` twin of each reads the
+# same file with U+FFFD in place of each malformed byte. The file holds the bytes of "ok ", FF, FE and " bad".
 
 routine receive_text(file: File) -> Text
     when check FileManager.read_text(at: file)
@@ -68,4 +68,8 @@ routine start()
         show(r.read_word_lossy())
     using FileManager.open_read(at: file) as r
         show(r.read_all_lossy().count())
+    using FileManager.open_read(at: file) as r
+        show(r.read_lines_lossy().count())
+    using FileManager.open_read(at: file) as r
+        show(r.read_words_lossy().count())
     return

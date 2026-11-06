@@ -1200,11 +1200,11 @@ routine start()
   `ask_lines()`, `ask_words()`. A blank line is `""`. At the end of the input `ask_line()`/`ask_word()` crash with
   `EndOfInputError` (`IO/Errors`): read until the end with `when check ask_line()` + `is EndOfInputError => break`.
   An `ask_line()` right after `ask_word()` skips the line end the word left.
-- **Malformed UTF-8 fails by default.** Reading text from outside (`ask_line`/`ask_word`/`ask_all`, `FileManager.read_text`,
-  a file's `read_line`/`read_word`/`read_all`/`read_lines`, `Bytes.decode_as_utf8`) throws `MalformedUtf8Error` saying which
-  byte ("Malformed UTF-8 at byte 3: invalid leading byte."). The replacement character U+FFFD is asked for by name
-  with the `_lossy` twin: `ask_line_lossy()`, `ask_word_lossy()`, `ask_all_lossy()`, `FileManager.read_text_lossy(at:)`,
-  `read_line_lossy()`, `read_word_lossy()`, `read_all_lossy()`, `decode_as_utf8_lossy()`.
+- **Malformed UTF-8 fails by default.** Reading text from outside (`ask_line`/`ask_word`/`ask_all`/`ask_lines`/`ask_words`,
+  `FileManager.read_text`, a file's `read_line`/`read_word`/`read_all`/`read_lines`/`read_words`, `Bytes.decode_as_utf8`)
+  throws `MalformedUtf8Error` saying which byte ("Malformed UTF-8 at byte 3: invalid leading byte."). The replacement
+  character U+FFFD is asked for by name with the `_lossy` twin of each: `ask_line_lossy()`, `ask_lines_lossy()`,
+  `FileManager.read_text_lossy(at:)`, `read_words_lossy()`, `decode_as_utf8_lossy()` and so on.
 - Files: `FileManager` (the operating system's file manager) is the one place that touches the disk, its routines
   called on the type. Storage has three layers: `StorageManager` (one storage device), `PartitionManager` (one
   partition of it) and the file system on one partition, which the operating system manages (a partition has exactly
