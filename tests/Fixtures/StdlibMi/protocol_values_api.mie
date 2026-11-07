@@ -1,0 +1,170 @@
+module Tests/StdlibMi/ProtocolValuesApi
+
+# A place that stores a value of a protocol (a variable, a member variable, a list element, a `P?`) holds a value of any
+# type that obeys it, and a call of the protocol's routines on it runs that type's routine. An entity there is the same
+# entity as everywhere else. A record goes in as a copy, and a copy of the place copies it. `when` takes the value apart
+# by its type. A routine that takes `e: Enemy` is made for the stored value too.
+
+protocol Enemy
+    routine Me.update()
+    routine Me.hp() -> Int
+
+protocol Attackable
+    routine Me.attack() -> Int
+
+protocol Combatant
+obeys Enemy, Attackable
+
+entity Slime
+obeys Combatant
+    life: Int
+
+routine Slime.update()
+    me.life -= 1
+
+routine Slime.hp() -> Int
+    return me.life
+
+routine Slime.attack() -> Int
+    return 2
+
+entity Boss
+obeys Combatant
+    life: Int
+    rage: Int
+
+routine Boss.update()
+    me.life -= me.rage
+
+routine Boss.hp() -> Int
+    return me.life
+
+routine Boss.attack() -> Int
+    return me.rage * 3
+
+protocol Shape
+    routine Me.area() -> Int
+    routine Me.label() -> Text
+
+record Square
+obeys Shape
+    side: Int
+
+routine Square.area() -> Int
+    return me.side * me.side
+
+routine Square.label() -> Text
+    return "square"
+
+record Tag
+obeys Shape
+    w: Int
+    h: Int
+    name: Text
+
+routine Tag.area() -> Int
+    return me.w * me.h
+
+routine Tag.label() -> Text
+    return me.name
+
+entity Arena
+    boss: Enemy
+    spare: Enemy?
+
+routine show_hp(e: Enemy)
+    show(f"hp {e.hp()}")
+
+routine total_area(shapes: List[Shape]) -> Int
+    var total = 0
+    for s in shapes
+        total += s.area()
+    return total
+
+routine entities()
+    var enemies = List[Enemy]()
+    enemies.add_last(value: Slime(life: 10))
+    var boss = Boss(life: 100, rage: 7)
+    enemies.add_last(value: boss)
+    for e in enemies
+        e.update()
+    for e in enemies
+        show(e.hp())
+    show(f"the same boss: {boss.life}")
+    boss.update()
+    show(f"seen in the list: {enemies[1].hp()}")
+    show_hp(e: enemies[0])
+    var x: Enemy = Slime(life: 77)
+    var y = x
+    y.update()
+    show(f"one slime under two names: {x.hp()}")
+    show("entities done")
+
+routine members()
+    var arena = Arena(boss: Boss(life: 50, rage: 5), spare: none)
+    arena.boss.update()
+    show(arena.boss.hp())
+    show(try arena.spare.hp() ?? -1)
+    arena.spare = Slime(life: 3)
+    show(try arena.spare.hp() ?? -1)
+    arena.boss = Slime(life: 8)
+    show(arena.boss.hp())
+    show("members done")
+
+routine take_apart()
+    var enemies = List[Enemy]()
+    enemies.add_last(value: Slime(life: 4))
+    enemies.add_last(value: Boss(life: 60, rage: 2))
+    for e in enemies
+        when e
+            is Boss as b =>
+                b.rage = 30
+                show(f"a boss at {b.life}")
+            else =>
+                show("not a boss")
+    enemies[1].update()
+    show(enemies[1].hp())
+    var shape: Shape = Tag(w: 2, h: 3, name: "plate")
+    when shape
+        is Tag as t =>
+            show(f"{t.name} {t.w}x{t.h}")
+        else =>
+            show("another shape")
+    show(shape is Square)
+    show("take_apart done")
+
+routine records()
+    var shapes = List[Shape]()
+    shapes.add_last(value: Square(side: 3))
+    var plate = Tag(w: 2, h: 5, name: f"plate {3}")
+    shapes.add_last(value: plate)
+    shapes.add_last(value: Tag(w: 1, h: 1, name: "unit"))
+    for s in shapes
+        show(f"{s.label()} {s.area()}")
+    show(total_area(shapes: shapes))
+    var one: Shape = shapes[1]
+    var two = one
+    show(two.label())
+    show(plate.name)
+
+routine party()
+    var fighters = List[Combatant]()
+    fighters.add_last(value: Slime(life: 5))
+    fighters.add_last(value: Boss(life: 80, rage: 10))
+    var damage = 0
+    for c in fighters
+        c.update()
+        damage += c.attack()
+    show(f"damage {damage}")
+    when fighters[1]
+        is Boss as b =>
+            show(f"boss at {b.life}")
+        else =>
+            show("other")
+
+routine start()
+    entities()
+    members()
+    take_apart()
+    records()
+    party()
