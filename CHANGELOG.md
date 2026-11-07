@@ -22,12 +22,12 @@ file only once its other old spellings are gone.
 ### Breaking changes
 
 - The language is renamed: Suflae is **Mielia**. Sources end in `.mie` (a `.sf` file given to the builder is a build error that names the new
-  extension), diagnostic codes start with `MI-` (`MI-S625`), the command is `mielia`, and the manifest key is
+  extension), diagnostic codes start with `ME-` (`ME-S625`), the command is `mielia`, and the manifest key is
   `mielia-version`. `mielia migrate --step extensions <folder>` renames the files, rewrites the manifest's
   `executable` and version key, and old diagnostic codes in comments.
 
 **Source layout and tools**
-- Indentation is a multiple of 4 spaces. Any other indent is `MI-G053`. 0.1 sources used 2 spaces: default
+- Indentation is a multiple of 4 spaces. Any other indent is `ME-G053`. 0.1 sources used 2 spaces: default
   `migrate` doubles the leading spaces of each line of such a file first (`migrate --step indent` does only that,
   and leaves the lines inside a text literal as they are).
 - The project manifest is `config.toml`. The 0.1 manifest file with no `config.toml` next to it is a build error
@@ -39,29 +39,24 @@ file only once its other old spellings are gone.
 - Every runtime crash exits with code 82.
 
 **Failure and recovery**
-- A routine that can fail says so on its declaration: `failable routine parse(...)`. `routine parse!(...)` is
-  `MI-G222` (`migrate --step failable`). A call never writes `!` (`MI-G211`).
+- Every routine passes its failures to its caller. Nothing marks a routine that can fail: `failable` written on a
+  routine is `ME-G230` and `routine parse!(...)` is `ME-G222` (`migrate --step failable` removes both). A call never
+  writes `!` (`ME-G211`). A failure nobody receives stops the program with its message where it happened.
 - Recovery is a keyword at the call: `try f(x)` gives a `T?` (`Optional[T]`), `check f(x)` gives a `Check[T]`. The
   `try_f` / `check_f` / `lookup_f` routines are gone. Default `migrate` writes `try f(x)` for `try_f(x)` (and
   `try r.f(x)` for `r.try_f(x)`) and `check f(x)` for `check_f(x)` and `lookup_f(x)`, and the build error on an old
   name names the keyword.
 - `Maybe[T]` is `Optional[T]`, written `T?`. `Maybe` is an unknown type whose error names `Optional[T]` and `T?`,
   and `migrate --step type-names` renames it.
-- Failures rise only through failable routines. A `throw` in a routine that is not `failable` crashes there with the
-  crashable's message, so `pierce` is gone and is an ordinary name: `migrate --step pierce` writes `throw` for each
-  `pierce` in a routine that is not failable and lists the ones in failable routines, where a `throw` goes to the
-  caller instead.
-- A routine that is not failable is a wall: a failure inside it crashes there, even under a `try` or `check` above
-  its caller. Declare the routine `failable` to let its failures go up.
-- `try` or `check` in front of an expression that reaches no failable call is `MI-S760`. Remove the keyword, or
-  declare the routine `failable`.
-- A lambda that can fail goes only to a parameter of type `failable Callable[...]`: handing one to a plain
-  `Callable[...]` is `MI-S761`. The call that hands it over can fail through it
-  (`try items.select(transform: x => 10 // x).to[List]()`). The standard library routines that take a lambda
-  (`select`, `where`, `any`, `all`, `sort_by`, ...) take it as `failable Callable[...]`.
+- `infallible routine` is the only wall: a failure inside it stops the program there, even under a `try` or `check`
+  above its caller. `destruct`, external routines and builder bodies are walls too.
+- `pierce` is gone and is an ordinary name. `migrate --step pierce` rewrites the old statement and lists the ones to
+  fix by hand.
+- A lambda that can fail goes to any `Callable[...]`, and the call that hands it over passes its failure on
+  (`try xs.select(transform: x => 10 // x).to[List]()`).
 - `Result[T]` is `Check[T]`. `Lookup[T]` is gone. The build errors say so.
 - `absent` is gone: a routine with nothing to give throws, `throw AbsentValueError()` (default `migrate`).
-- The `Crashable` protocol is the `Crashables` record. Every crashable writes its own `crash_message()` (`MI-S704`).
+- The `Crashable` protocol is the `Crashables` record. Every crashable writes its own `crash_message()` (`ME-S704`).
 - `MemoryAllocationError` is `OutOfMemoryError` (default `migrate`, `migrate --step type-names`).
 - `Integer` is `Int` (default `migrate`, `migrate --step type-names`). There is no alias: `Integer` is a build
   error that names `Int`. An `Int` is 16 bytes: a value in the `S64` range is held in the value itself, and a
@@ -71,29 +66,29 @@ file only once its other old spellings are gone.
 
 **Syntax**
 - A loop is `until c` (it stops when `c` becomes true) or `loop` (it ends only with `break`, `return` or `throw`).
-  `while` is not a keyword: `while c` is `MI-G224` (`migrate --step until`). `until false` warns (`MI-W304`, quick
-  fix `loop`). A loop takes no `else` (`MI-G219`). A loop's `then` block runs after `break` too.
-- The loop over a range or a collection is `for x in xs`. `each` is a reserved word: `each x in xs` is `MI-G229`
+  `while` is not a keyword: `while c` is `ME-G224` (`migrate --step until`). `until false` warns (`ME-W304`, quick
+  fix `loop`). A loop takes no `else` (`ME-G219`). A loop's `then` block runs after `break` too.
+- The loop over a range or a collection is `for x in xs`. `each` is a reserved word: `each x in xs` is `ME-G229`
   (default `migrate`, `migrate --step for`).
-- A line with no work is `nothing`. `pass` is `MI-G225` (`migrate --step nothing`). A type declaration with an empty
-  body is `MI-S211` (write `nothing` under the header).
+- A line with no work is `nothing`. `pass` is `ME-G225` (`migrate --step nothing`). A type declaration with an empty
+  body is `ME-S211` (write `nothing` under the header).
 - A number takes its type from where it goes or from its declaration (`var x: U8 = 5`). Type suffixes (`5_u8`,
-  `10n`, `2.5dn`) are `MI-G010` (`migrate --step suffix`). `inf` and `nan` are literals.
+  `10n`, `2.5dn`) are `ME-G010` (`migrate --step suffix`). `inf` and `nan` are literals.
 - Fixed-width numbers are visible without an import. Default `migrate` removes `import Numerics`.
 - Binary floats are `B16`, `B32`, `B64`, `B128` (the build error names the `B` type for an `F` name). Complex types
   are named by their total bits: 0.1's `C64` is `C128` and 0.1's `C128` is `C256`, and `C64` is now two `B32`
   parts. Default `migrate` renames them in a project it moves (a file with no `config.toml` above it gets them
   listed instead, because the old names still build).
-- `S64 / S64` is `MI-S065`. Write `a // b`, or `a.to[Decimal]() / b.to[Decimal]()`.
+- `S64 / S64` is `ME-S065`. Write `a // b`, or `a.to[Decimal]() / b.to[Decimal]()`.
 - Containment is a call on the collection: `xs.has(x)`, `xs.lacks(x)`, `d.has_key(k)`, `d.lacks_key(k)`. The
   `have` / `lack` operators are gone (`migrate --step have`), `contains` is `has` (default `migrate`), `x in xs` as
-  a test is `MI-G212`, and `notin` is gone.
+  a test is `ME-G212`, and `notin` is gone.
 - `x but y` is `x.without(y)`, `unless c` is `if not (c)` (default `migrate`). `disobeys` is gone.
 - A pattern binds with `as`: `is T as x`, `else as p` (default `migrate`). `else as x` needs exactly one type left
-  (`MI-S359`).
+  (`ME-S359`).
 - `Character` is `Char` and `Routine[...]` is `Callable[...]` (default `migrate`).
 - Operator levels: `and` and `or` share one level, and so do the bitwise operators, so mixing them needs
-  parentheses (`MI-G216`). A range binds looser than arithmetic and tighter than comparisons. `**` binds tighter
+  parentheses (`ME-G216`). A range binds looser than arithmetic and tighter than comparisons. `**` binds tighter
   than a leading `-`: `-2 ** 2` is `-4`. Default `migrate` writes `(-x) ** n` for each `-x ** n`, which keeps what
   the line computed in 0.1, and lists each one.
 - A range counts down only with a negative step: `10 to 1` is empty, write `10 to 1 by -1`. Default `migrate` adds
@@ -101,32 +96,32 @@ file only once its other old spellings are gone.
 - A chained comparison goes one way. There is no `<<<`.
 - A conditional value `if c then a else b` stands only as the whole value of `var x =`, `x =`, `preset`, `global`
   or `return`. Inside parentheses, an argument, an operand, a subscript, an f-text slot, a branch of another
-  conditional or right after `try` / `check` it is `MI-G112`: give it a name first, or choose the value with `when`.
+  conditional or right after `try` / `check` it is `ME-G112`: give it a name first, or choose the value with `when`.
 - A routine's `return` matches its `->`: a `return` with a value in a routine without `->` (or with `-> None`), and a
-  bare `return` in a routine with `-> T`, is `MI-S301`. The return type is never taken from the returned values.
+  bare `return` in a routine with `-> T`, is `ME-S301`. The return type is never taken from the returned values.
 - A constructor is `routine T(...)`. `routine T.create(...)` declares an ordinary member routine named `create`.
   Default `migrate` rewrites it to `routine T(...)` (and a call `T.create(...)` to `T(...)`), and a member routine
-  `create` that gives back its own type is warning `MI-W104`.
-- A `var` that hides a parameter or an outer local is `MI-S008`. An unknown annotation is `MI-G221`.
-- The right side of a compound assignment is checked like a binary expression (`Int += S64` is `MI-S502`).
+  `create` that gives back its own type is warning `ME-W104`.
+- A `var` that hides a parameter or an outer local is `ME-S008`. An unknown annotation is `ME-G221`.
+- The right side of a compound assignment is checked like a binary expression (`Int += S64` is `ME-S502`).
 - `==` compares values and `===` tells whether two names refer to the same entity. Two entities with equal member
   variables are `==` (`Player("Ada") == Player("Ada")` is true) and not `===`. `===` and `!==` take entities only.
 - `discard` is gone. A result you do not need takes no marker: write the call on its own line (`discard` and
-  `drop` are `MI-G150`, default `migrate` removes `discard`).
-- A program does not write `destruct` (`MI-S821`). An entity ends when the last name that refers to it goes away or
+  `drop` are `ME-G150`, default `migrate` removes `discard`).
+- A program does not write `destruct` (`ME-S821`). An entity ends when the last name that refers to it goes away or
   when the cycle collector finds it unreachable. Default `migrate` renames `destroy`.
-- `@readonly` and `@reshaping` are gone (`MI-S706`).
+- `@readonly` and `@reshaping` are gone (`ME-S706`).
 - A program's own files cannot use `danger`, `dangerous` or foreign routines. Code that calls C goes into a library
   the program imports (default `migrate` lists these lines).
 - Choice values (`OK: 200`) and flags bits (`MINE: 0`) are written on every member or on none, and with none the
-  members count 0, 1, 2, ... in order. Some with and some without is `MI-S417`.
+  members count 0, 1, 2, ... in order. Some with and some without is `ME-S417`.
 - The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
   `all_off()` is gone, and its build error names `none`.
-- A number type built from one number with `T(x)` (`U8(x)`, `S64(ratio)`) is `MI-S655`, because it reads the bits
+- A number type built from one number with `T(x)` (`U8(x)`, `S64(ratio)`) is `ME-S655`, because it reads the bits
   of `x` and gives another number. Convert with `x.to[T]()`, or write a number where the type is expected
   (`var level: U8 = 200`). `migrate --step numbers` rewrites the calls between binary integer and float types and
   lists the rest.
-- A `for` over an emitter that has run out is `MI-S517`: a second `for` over a named emitter after one that ended
+- A `for` over an emitter that has run out is `ME-S517`: a second `for` over a named emitter after one that ended
   by itself, or a `for` inside a loop over an emitter made outside it. Such a loop ran zero times. Make a new
   `xs.emitter()` just before the loop, or write `for x in xs`.
 
@@ -142,7 +137,7 @@ file only once its other old spellings are gone.
 - Float operations and math routines crash on an inf or NaN result. The raw result is `+! -! *! /! **!` and the
   `_unchecked` routines.
 - A conversion is `x.to[T]()`: `S32(from: x)` and `x.S32()` are rewritten by default `migrate`, and a missing
-  conversion is `MI-S458`. Collecting is a conversion too: `xs.List()` is `xs.to[List]()` (`MI-S458` names it).
+  conversion is `ME-S458`. Collecting is a conversion too: `xs.List()` is `xs.to[List]()` (`ME-S458` names it).
 - What walks a value is an emitter: `Iterable[T]` is `Emittable[T]`, 0.1's `Emittable[T]` is `Emitter[T]`, and
   `iter()` is `emitter()`. The build error on an old name names the new one.
 - `x.type_name()` is `type_name(of: x)`.
@@ -191,7 +186,7 @@ file only once its other old spellings are gone.
   the Work list: `jobs.gather()`. When the last name that refers to a Work goes away, the work is cancelled and
   waited for, and a failure its work came to crashes the program there. `job.cancel()` throws the failure away.
 - A number several jobs change is a `global` or an entity's member variable: the builder makes each change safe.
-  There is no `Atomic` (`MI-S447` names these two ways).
+  There is no `Atomic` (`ME-S447` names these two ways).
 - Byte flows (`FileSource`, `FileSink`, `stdin()`, `stdout()`) read with `pull(max:)` and write with `push(data:)`
   (`migrate --step verbs`).
 
@@ -212,7 +207,7 @@ file only once its other old spellings are gone.
 - Backtick names, tuple swap `(a, b) = (b, a)`, record patterns, inline variants `A | B`, `define` type aliases,
   generic variants, `@infix` routines, named and short arguments mixed (`area(width, height: 4)`), `todo`.
 - `@noinline` keeps a routine out of its callers (its own body is still optimized). `@inline` with `@noinline` on one
-  routine is `MI-G227`.
+  routine is `ME-G227`.
 - Presets are computed at buildtime. Hex float literals (`0x1.8p3`) for binary floats.
 - `@throws([...])` lists what a routine throws and the builder checks it.
 - A crashable has no size limit. A `Check` bound to a name keeps its own error after later failures, and a failure
@@ -236,7 +231,7 @@ file only once its other old spellings are gone.
 - `when_changed(target:, handler:)` calls a handler after each change of one object's member variables, with the
   name and the old and new values as `Unknown`s, and `remove_hook` takes it off.
 - `implant(target:, replacing: Hero.attack, with: ...)` replaces a member routine for one object, checked against the
-  routine's signature (`MI-S201`), and `remove_implant` gives it back.
+  routine's signature (`ME-S201`), and `remove_implant` gives it back.
 - Hooks and implants may be added, removed and used from several jobs at once.
 
 **Standard library**
@@ -339,7 +334,7 @@ file only once its other old spellings are gone.
 - A stack overflow crashes with exit code 82 and reports that the program ran out of memory.
 - A crash inside the standard library points to the caller's line.
 - `Int ** -n` crashes with `NumericDomainError`.
-- `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (`MI-S502`).
+- `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (`ME-S502`).
 - A syntax error inside a value `when` no longer reports the rest of the routine as top-level statements.
 - Converting the smallest `S128` or `S256` to `B128` crashed. `B128.rem` crashed on operands near the top of the
   range.
