@@ -8,7 +8,7 @@ namespace Mielia.Tests.Meta;
 /// shape as in use, and a change hidden behind a call (which Mielia cannot trace at build time, its list
 /// being a shared <c>Roamed</c> handle) crashes with ReshapingWhileInUseError instead of leaving the loop
 /// reading moved memory. Revare rejects the same program at build time (ShapeEffectTests). Builds and
-/// runs <c>tests/Fixtures/ShapeUse/*.mie</c> through <c>buildandrun</c>. The paths that must NOT crash are
+/// runs <c>tests/Fixtures/ShapeUse/*.mie</c> through <c>run</c>. The paths that must NOT crash are
 /// covered by the StdlibMi fixture <c>shape_use_sf.mie</c>.
 /// </summary>
 public sealed class ContainerShapeUseTests
@@ -70,7 +70,7 @@ public sealed class ContainerShapeUseTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "buildandrun", rvPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "run", rvPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,

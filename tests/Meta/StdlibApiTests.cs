@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Mielia.Tests.Meta;
 
 /// <summary>
-/// Runs each <c>tests/Fixtures/Stdlib/*.rvr</c> fixture through <c>buildandrun</c> and
+/// Runs each <c>tests/Fixtures/Stdlib/*.rvr</c> fixture through <c>run</c> and
 /// diffs its stdout against the sibling <c>.expected.txt</c> snapshot. Provides
 /// end-to-end behavior coverage for stdlib types/routines that <c>validate-stdlib</c>
 /// (parse-and-typecheck only) does not catch.
@@ -164,7 +164,7 @@ public sealed partial class StdlibApiTests
         FixtureRun run = RunHarness(harnessRa: harnessSrc);
         Assert.True(condition: run is { ExitCode: 0, TimedOut: false },
             userMessage:
-            $"Harness buildandrun failed (exit={run.ExitCode}, timedOut={run.TimedOut}).\n" +
+            $"Harness run failed (exit={run.ExitCode}, timedOut={run.TimedOut}).\n" +
             $"--- stdout ---\n{run.Stdout}\n--- stderr ---\n{run.Stderr}");
 
         // 2b) stderr must be CLEAN. The build's own progress banners go to stdout; anything on stderr is
@@ -391,13 +391,13 @@ public sealed partial class StdlibApiTests
         return sections;
     }
 
-    /// <summary>Runs <c>buildandrun</c> on the harness program with the harness dir as cwd.</summary>
+    /// <summary>Runs <c>run</c> on the harness program with the harness dir as cwd.</summary>
     private static FixtureRun RunHarness(string harnessRa)
     {
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: harnessRa), "buildandrun", harnessRa },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: harnessRa), "run", harnessRa },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             // The compiled program writes UTF-8 (e.g. an em-dash in a fixture string). Without pinning
@@ -408,7 +408,7 @@ public sealed partial class StdlibApiTests
             UseShellExecute = false,
             // Run from the repo root so fixtures that read repo-relative resource paths (e.g.
             // coro_async_read_api reads "tests/Fixtures/Stdlib/…") resolve. The manifest is still
-            // found: buildandrun locates razorforge.toml by walking UP from the entry file's
+            // found: run locates razorforge.toml by walking UP from the entry file's
             // directory (HarnessDir), not from the working directory.
             WorkingDirectory = RepoRoot,
             Environment =
@@ -497,7 +497,7 @@ public sealed partial class StdlibApiTests
 
     /// <summary>
     /// Builds and runs a fixture, returning its stdout. Retries a SPURIOUS external kill — a
-    /// `buildandrun` process terminated mid-compile by the environment (SIGTERM/SIGKILL under
+    /// `run` process terminated mid-compile by the environment (SIGTERM/SIGKILL under
     /// transient memory/scheduling pressure during a long sequential run), recognisable by a
     /// non-zero exit with NO stdout AND NO stderr (no builder diagnostic, no program output).
     /// Genuine failures are NOT retried: a real build error prints diagnostics to stderr and a
@@ -520,7 +520,7 @@ public sealed partial class StdlibApiTests
                 // A hang is a real defect, never an environmental blip — surface it immediately.
                 throw new Xunit.Sdk.XunitException(
                     userMessage:
-                    $"buildandrun timed out after {last.TimeoutMs / 1000}s for {fixture}.\n" +
+                    $"run timed out after {last.TimeoutMs / 1000}s for {fixture}.\n" +
                     $"--- stdout (partial) ---\n{last.Stdout}\n--- stderr (partial) ---\n{last.Stderr}");
             }
 
@@ -534,7 +534,7 @@ public sealed partial class StdlibApiTests
             {
                 // Real failure (compile diagnostic or runtime output present) — fail fast.
                 throw new Xunit.Sdk.XunitException(
-                    userMessage: $"buildandrun failed for {fixture} (exit={last.ExitCode}).\n" +
+                    userMessage: $"run failed for {fixture} (exit={last.ExitCode}).\n" +
                                  $"--- stdout ---\n{last.Stdout}\n--- stderr ---\n{last.Stderr}");
             }
 
@@ -559,7 +559,7 @@ public sealed partial class StdlibApiTests
 
         throw new Xunit.Sdk.XunitException(
             userMessage:
-            $"buildandrun for {fixture} was killed with no output (exit={last.ExitCode}) on all " +
+            $"run for {fixture} was killed with no output (exit={last.ExitCode}) on all " +
             $"{MaxRunAttempts} attempts — likely sustained environmental resource pressure, not a " +
             $"fixture failure (it produced no builder diagnostic and no program output).");
     }
@@ -580,12 +580,12 @@ public sealed partial class StdlibApiTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "buildandrun", rvPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: rvPath), "run", rvPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             WorkingDirectory = RepoRoot,
-            // Each buildandrun child compiles the entire (~180-file) stdlib and runs opt -O2/-O3 on a
+            // Each run child compiles the entire (~180-file) stdlib and runs opt -O2/-O3 on a
             // large module — the heaviest memory user in the e2e suite. By default .NET uses SERVER GC,
             // which reserves a managed heap PER CORE; multiplied across ~150 sequential children plus the
             // test host, that peak exhausts memory on constrained machines and the OS OOM-kills processes

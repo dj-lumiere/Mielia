@@ -25,7 +25,7 @@
 Mielia (`.mie`) is a natively compiled language for building applications without managing memory by
 hand. It is the sibling of [Revare](https://github.com/dj-lumiere/Revare): the same grammar,
 the same standard library, the same loud failures, and every entity shared for you. A file
-can be just its statements, and running it is one command: `mielia buildandrun hello.mie`.
+can be just its statements, and running it is one command: `mielia run hello.mie`.
 
 ```mielia
 import IO/Console
@@ -146,10 +146,10 @@ show("Hello from Mielia!")
 ```
 
 ```bash
-mielia buildandrun hello.mie
+mielia run hello.mie
 ```
 
-`buildandrun` builds the file and runs it. `mielia build hello.mie` stops after building
+`run` builds the file and runs it. `mielia build hello.mie` stops after building
 and leaves `hello.exe` next to the source.
 
 ### Using an AI assistant?
@@ -163,17 +163,17 @@ that does not build. Point yours at [`MIELIA-FOR-AI.md`](MIELIA-FOR-AI.md) toget
 ## Command line
 
 ```
-mielia new [folder]                    Start a project (config.toml, main.mie, editor files)
-mielia migrate [--check] <paths>...    Move sources from the previous release to this one
-mielia check [--json] [entry-file]     Check the program without building it
-mielia build [entry-file]              Build a native executable for this OS (no run)
-mielia buildandrun [entry-file]        Build the program and run it
-mielia codegen [entry-file] [out.ll]   Write the program's LLVM IR without building it
-mielia test <dir-or-file>...           Run test programs against their expected output
-mielia fmt [--check] <file-or-dir>...  Format sources in place
-mielia lint <file-or-dir>...           Report code that is not in the canonical style
-mielia docs <source-dir> <output-dir>  Write the API reference pages of a library
-mielia lsp                             Run the language server (for an editor)
+mielia new [folder]                       Start a project (config.toml, main.mie, editor files)
+mielia migrate [--check] <paths>...       Move sources from the previous release to this one
+mielia check [--json] [entry-file]        Check the program without building it
+mielia check <folder>...                  Check every source in the folders: canonical layout, hints and notes
+mielia build [entry-file]                 Build a native executable for this OS (no run)
+mielia run [entry-file]                   Build the program and run it
+mielia codegen [entry-file] [out.ll]      Write the program's LLVM IR without building it
+mielia test <dir-or-file>...              Run test programs against their expected output
+mielia format [--check] <file-or-dir>...  Format sources in place
+mielia docs <source-dir> <output-dir>     Write the API reference pages of a library
+mielia lsp                                Run the language server (for an editor)
 mielia help | version
 ```
 

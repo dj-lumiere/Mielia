@@ -30,7 +30,7 @@ public sealed class ObjectHackerCrashTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: miPath), "buildandrun", miPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: miPath), "run", miPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,

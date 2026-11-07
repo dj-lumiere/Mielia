@@ -21,6 +21,7 @@ file only once its other old spellings are gone.
 
 ### Breaking changes
 
+- `fmt` is `format`, and `lint` is `check` given folders.
 - The language is renamed: Suflae is **Mielia**. Sources end in `.mie` (a `.sf` file given to the builder is a build error that names the new
   extension), diagnostic codes start with `ME-` (`ME-S625`), the command is `mielia`, and the manifest key is
   `mielia-version`. `mielia migrate --step extensions <folder>` renames the files, rewrites the manifest's
@@ -34,8 +35,8 @@ file only once its other old spellings are gone.
   that names `config.toml`, and default `migrate` renames it. Settings that were environment variables are
   `[target]` and `[debug]` keys in it: when the old deadlock variable is still set, every command prints a warning
   that names `deadlock-check` under `[debug]`.
-- The commands are `check`, `build`, `buildandrun`, `codegen`, `test`, `fmt`, `lint`, `lsp`, `new`, `migrate` and `docs`. A bare file
-  name is not a command: the error shows `mielia buildandrun <file>`.
+- The commands are `check`, `build`, `run`, `codegen`, `test`, `lsp`, `format`, `docs`, `migrate`, `help`, `version` and `new`. A bare file
+  name is not a command: the error shows `mielia run <file>`.
 - Every runtime crash exits with code 82.
 
 **Failure and recovery**
@@ -307,7 +308,7 @@ file only once its other old spellings are gone.
 **Tools**
 - A resident build daemon and a JIT mode for the edit loop: `[target] mode = "debug-jit"`, `use-daemon` and
   `incremental`.
-- `new`, `migrate`, `docs`, `fmt`, `lint`, `test`, `lsp` and `check --json`.
+- `new`, `migrate`, `docs`, `format`, `test`, `lsp`, `check --json` and `check <folder>` (canonical layout, hints and notes).
 - `migrate --step indent` (indent in steps of 4 spaces). Default `migrate` and the `have` and `until` steps read a
   file whose numbers still have type suffixes, and leave the suffixes for `--step suffix`.
 - The language server: diagnostics, formatting, hover, go to definition, rename and quick fixes.

@@ -6,7 +6,7 @@ namespace Mielia.Tests.Meta;
 /// <summary>
 /// End-to-end check of <c>set_exit_code</c>: a program that returns from <c>start</c> normally ends with the status
 /// it set last, which the builder's <c>main</c> returns after <c>start</c>. Builds and runs
-/// <c>tests/Fixtures/ExitCode/set_exit_code.mie</c> through <c>buildandrun</c>.
+/// <c>tests/Fixtures/ExitCode/set_exit_code.mie</c> through <c>run</c>.
 /// </summary>
 public sealed class ExitCodeTests
 {
@@ -288,7 +288,7 @@ public sealed class ExitCodeTests
     }
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
-        string verb = "buildandrun")
+        string verb = "run")
     {
         return RunSource(miPath: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]), name: fixture,
             verb: verb);
@@ -298,7 +298,7 @@ public sealed class ExitCodeTests
     /// time (a hang) with what the build and the program wrote until then.</summary>
     /// <param name="timeoutBaseMs">The time limit before <see cref="TestHelpers.ChildTimeoutMs"/> scales it.</param>
     private static (int Exit, string Stdout, string Stderr) RunSource(string miPath, string name,
-        string verb = "buildandrun", int timeoutBaseMs = 300_000)
+        string verb = "run", int timeoutBaseMs = 300_000)
     {
         var psi = new ProcessStartInfo
         {

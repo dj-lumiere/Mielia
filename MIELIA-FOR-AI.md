@@ -93,7 +93,7 @@ through a `.rvr` module the program imports (section 18).
    `ReshapingWhileInUseError`. Change it after the loop.
 10. **A result you do not need takes no marker** (`drop` and `discard` are ME-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[ME-W007]`,
-    from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
+    from `check` and the language server (never from a build). The stdlib marks by-product results
     `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`), which get none.
     Doc comment notes: ME-W305 a routine with no `###` doc comment, only for a routine of a module another file
     imports (not the entry file, a script or the REPL), ME-W306 a parameter with no `:param` line, ME-W307 a `:param`
@@ -191,7 +191,7 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
 - Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
 - Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
-- No kind or scope prefixes on names (`m_pos`, `_count`, `p_node`, `bDone`, `IComparable`): `lint` hints them.
+- No kind or scope prefixes on names (`m_pos`, `_count`, `p_node`, `bDone`, `IComparable`): `check <folder>` hints them.
 - Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
   (`List[T]`, `Set[T]`, `Work[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
   `select[TResult]`, `zip[TFirst, TSecond, ...]`), never another single letter (`K`, `V`, `U`, ...). A const generic
@@ -1630,18 +1630,20 @@ routine fib(n: Int) -> Int
 
 ```
 mielia new [folder]          # start a project: config.toml, main.mie, .gitignore, .vscode/ (keeps existing files)
-mielia buildandrun hello.mie  # build and run
+mielia run hello.mie         # build and run
 mielia codegen hello.mie      # write the program's LLVM IR without building it
 mielia build hello.mie        # build a native executable, don't run it
 mielia check hello.mie        # check the program without building it
+mielia check <folder>...      # check every source in the folders: canonical layout (style errors), hints, notes
 mielia test <dir-or-file>... # build and run each .mie against <name>.expected / .exit / .error / .input
-mielia fmt [--check] <paths> # rewrite sources in the canonical layout
-mielia lint <paths>          # report code that is not in the canonical layout
+mielia format [--check] <paths> # rewrite sources in the canonical layout
+mielia docs <source-dir> <output-dir> # write the API reference pages of a library
+mielia migrate [--check] <paths> # move sources from the previous release to this one
 mielia lsp                   # language server, for an editor
 mielia help | version
 ```
 
-- A bare file is not a command: `mielia hello.mie` is an error that points to `mielia buildandrun hello.mie`.
+- A bare file is not a command: `mielia hello.mie` is an error that points to `mielia run hello.mie`.
 - **There are no build flags.** Configuration lives in `config.toml`; with no entry file, the CLI walks up
   from the current directory to find it.
 
@@ -1657,7 +1659,7 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 
 - A section or key `config.toml` does not read is a build error naming it, and the key meant when there is one (`module-paths` →
   "Did you mean module_paths?"). The multi-word keys are `module_paths`, `c_libraries`, `library_paths` and the hyphenated rest.
-- A single script needs no manifest: `mielia buildandrun script.mie`. Without a manifest the build mode is `debug`.
+- A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
 - **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
   (`--step extensions` does only that, with the `ME-` spelling of diagnostic codes in comments and `mielia-version`
   in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4
