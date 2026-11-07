@@ -974,6 +974,8 @@ needs T obeys Greetable
     return thing.greet()
 ```
 
+A member routine written outside a generic type names its parameters on the receiver: `routine Pair[TFirst, TSecond].swap()`. `routine Pair.swap()` is ME-S165.
+
 - Type parameters go in `[...]` after the name; constraints go on a `needs` line under the signature
   (several are comma-separated), or inline: `routine f[T obeys Comparable](...)`.
 - `obeys` lines sit under the type's header. A protocol lists the routines a conforming type must have,
