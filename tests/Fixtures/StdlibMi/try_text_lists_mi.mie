@@ -3,7 +3,8 @@ module Tests/StdlibMi/TryTextListsMi
 import IO/Console
 
 # A routine that calls a Text method giving a list (`lines`, `words`, `split`) is called under `try` and `check`:
-# the recovery variants of the library routines hand back the same shared list handle as the plain call.
+# the recovery variants of the library routines hand back the same shared list handle as the plain call, and the
+# plain call still works when the variants exist.
 
 routine count_lines(text: Text) -> Int
     return text.lines().count()
@@ -16,6 +17,9 @@ routine count_parts(text: Text) -> Int
     return text.split(separator: ' ').count()
 
 routine start() -> None
+    # A plain call of the same library routines, next to their recovering forms.
+    show("first second".words()[0])
+    show("a\nb\nc".lines().count())
     show(try count_lines(text: "a\nb"))
     show(try second_word(line: "a 15"))
     show(try count_parts(text: "a b c"))
