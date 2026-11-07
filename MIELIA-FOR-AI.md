@@ -1630,7 +1630,8 @@ routine fib(n: Int) -> Int
 
 ```
 mielia new [folder]          # start a project: config.toml, main.mie, .gitignore, .vscode/ (keeps existing files)
-mielia run hello.mie          # build and run
+mielia buildandrun hello.mie  # build and run
+mielia codegen hello.mie      # write the program's LLVM IR without building it
 mielia build hello.mie        # build a native executable, don't run it
 mielia check hello.mie        # check the program without building it
 mielia test <dir-or-file>... # build and run each .mie against <name>.expected / .exit / .error / .input
@@ -1640,7 +1641,7 @@ mielia lsp                   # language server, for an editor
 mielia help | version
 ```
 
-- A bare file is not a command: `mielia hello.mie` is an error that points to `mielia run hello.mie`.
+- A bare file is not a command: `mielia hello.mie` is an error that points to `mielia buildandrun hello.mie`.
 - **There are no build flags.** Configuration lives in `config.toml`; with no entry file, the CLI walks up
   from the current directory to find it.
 
@@ -1656,7 +1657,7 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 
 - A section or key `config.toml` does not read is a build error naming it, and the key meant when there is one (`module-paths` →
   "Did you mean module_paths?"). The multi-word keys are `module_paths`, `c_libraries`, `library_paths` and the hyphenated rest.
-- A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
+- A single script needs no manifest: `mielia buildandrun script.mie`. Without a manifest the build mode is `debug`.
 - **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
   (`--step extensions` does only that, with the `ME-` spelling of diagnostic codes in comments and `mielia-version`
   in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4

@@ -25,7 +25,7 @@
 Mielia (`.mie`) is a natively compiled language for building applications without managing memory by
 hand. It is the sibling of [Revare](https://github.com/dj-lumiere/Revare): the same grammar,
 the same standard library, the same loud failures, and every entity shared for you. A file
-can be just its statements, and running it is one command: `mielia run hello.mie`.
+can be just its statements, and running it is one command: `mielia buildandrun hello.mie`.
 
 ```mielia
 import IO/Console
@@ -146,10 +146,10 @@ show("Hello from Mielia!")
 ```
 
 ```bash
-mielia run hello.mie
+mielia buildandrun hello.mie
 ```
 
-`run` builds the file and runs it. `mielia build hello.mie` stops after building
+`buildandrun` builds the file and runs it. `mielia build hello.mie` stops after building
 and leaves `hello.exe` next to the source.
 
 ### Using an AI assistant?
@@ -167,7 +167,8 @@ mielia new [folder]                    Start a project (config.toml, main.mie, e
 mielia migrate [--check] <paths>...    Move sources from the previous release to this one
 mielia check [--json] [entry-file]     Check the program without building it
 mielia build [entry-file]              Build a native executable for this OS (no run)
-mielia run [entry-file]                Build the program and run it
+mielia buildandrun [entry-file]        Build the program and run it
+mielia codegen [entry-file] [out.ll]   Write the program's LLVM IR without building it
 mielia test <dir-or-file>...           Run test programs against their expected output
 mielia fmt [--check] <file-or-dir>...  Format sources in place
 mielia lint <file-or-dir>...           Report code that is not in the canonical style

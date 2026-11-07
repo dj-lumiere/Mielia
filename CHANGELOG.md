@@ -34,8 +34,8 @@ file only once its other old spellings are gone.
   that names `config.toml`, and default `migrate` renames it. Settings that were environment variables are
   `[target]` and `[debug]` keys in it: when the old deadlock variable is still set, every command prints a warning
   that names `deadlock-check` under `[debug]`.
-- The commands are `check`, `build`, `run`, `test`, `fmt`, `lint`, `lsp`, `new`, `migrate` and `docs`. A bare file
-  name is not a command: the error shows `mielia run <file>`.
+- The commands are `check`, `build`, `buildandrun`, `codegen`, `test`, `fmt`, `lint`, `lsp`, `new`, `migrate` and `docs`. A bare file
+  name is not a command: the error shows `mielia buildandrun <file>`.
 - Every runtime crash exits with code 82.
 
 **Failure and recovery**
