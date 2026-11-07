@@ -278,7 +278,7 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
   reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so EmitterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
 - A lambda whose parameter type can't be inferred is ME-S638 (annotate it). `Int` mixed with a fixed-width number
-  is ME-S767. A protocol is not a value or element type (`List[Shape]` is ME-S502). `using` on an entity calls its
+  is ME-S767. `using` on an entity calls its
   `enter`/`exit` on that entity. Works giving no value can be gathered.
 - `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or ME-S202 (a `return`
   path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
@@ -985,7 +985,24 @@ A member routine written outside a generic type names its parameters on the rece
   declaration. A type that does not fit is ME-S150 where it is passed, naming the missing or mismatched routine.
   The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is ME-S150.
 - Common protocols: `Equatable`, `Comparable`, `Hashable`, `Emittable[T]`, `Copyable`.
-- Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
+- **Two kinds of protocol place.** A parameter written `thing: Greetable` is a hidden type parameter: the routine is
+  made once per type it is called with, at build time. A place that stores a value written with a protocol type holds
+  a value of any type that obeys it, chosen at run time: a local `var g: Greetable`, a member variable, an element type
+  (`List[Shape]`, `Dict[Text, Shape]`), `Shape?`, a result `-> Shape`.
+  - The stored value is a type hash and an address. The type hash is FNV-1a (32 bits, never 0) of the type's name with
+    its module. Two types a protocol place is given with the same hash are ME-S714.
+  - An entity there is the same entity as under every other name. A record goes in as a copy, and copying the place
+    (`var b = a`) copies the record (an entity stays shared).
+  - `g.greet()` runs the routine of the value's own type: the builder switches on the type hash over the types the
+    program puts into places of that protocol. A routine of the protocol that takes or gives `Me` can't be called on a
+    stored value (ME-S715).
+  - Passing a stored value to a `thing: Greetable` parameter makes that routine's copy for the stored value.
+  - `when g` with `is Cat as c =>` takes it apart (`c` is the same entity, or a copy of a record), `g is Cat` tests it.
+    Such a `when` needs `else` (ME-S356). An `is T` arm whose `T` doesn't obey the protocol is ME-S357.
+  - A place needing the routines of several protocols uses a protocol that obeys them all (`protocol Combatant` with
+    `obeys Enemy, Attackable`). A type obeys such a protocol, which has no routines of its own, only by writing
+    `obeys Combatant`.
+  - A value of a type parameter going into a stored place is ME-S716: put it in where its type is known.
 
 ## 13. Text and formatting
 
