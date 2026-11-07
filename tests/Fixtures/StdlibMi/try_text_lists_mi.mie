@@ -1,0 +1,26 @@
+module Tests/StdlibMi/TryTextListsMi
+
+import IO/Console
+
+# A routine that calls a Text method giving a list (`lines`, `words`, `split`) is called under `try` and `check`:
+# the recovery variants of the library routines hand back the same shared list handle as the plain call.
+
+routine count_lines(text: Text) -> Int
+    return text.lines().count()
+
+routine second_word(line: Text) -> Text
+    var parts = line.words()
+    return parts[1]
+
+routine count_parts(text: Text) -> Int
+    return text.split(separator: ' ').count()
+
+routine start() -> None
+    show(try count_lines(text: "a\nb"))
+    show(try second_word(line: "a 15"))
+    show(try count_parts(text: "a b c"))
+    when check count_lines(text: "x\ny\nz")
+        is Crashables as e => show("failed")
+        else as n => show(n)
+    show("DONE")
+    return

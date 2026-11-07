@@ -209,6 +209,8 @@ internal sealed class EntityLoweringPass
         }
 
         _roamedLocals.Clear();
+        _bareEntityCarriers.Clear();
+        _bareEntityArms.Clear();
         _borrowNames.Clear();
         _inLibraryRoutine = IsStdlibPath(file: r.Location.FileName);
         _borrowNames.Add(item: "me");
@@ -248,6 +250,8 @@ internal sealed class EntityLoweringPass
         }
 
         _roamedLocals.Clear();
+        _bareEntityCarriers.Clear();
+        _bareEntityArms.Clear();
         _borrowNames.Clear();
         _inLibraryRoutine = routine.Location?.FileName is { } variantFile && IsStdlibPath(file: variantFile);
         _borrowNames.Add(item: "me");
@@ -781,6 +785,19 @@ internal sealed class EntityLoweringPass
             lowered = WrapInRoam(inner: lowered, entity: element);
         }
 
+        // A recovery variant of a routine of Mielia's library takes the entity a Revare routine gave out of its
+        // carrier (`var x = steal __rf_prop_1.value`): the call was made bare, so the value is moved into a handle
+        // here, as the call's result is where the call stands alone.
+        if (vd.Name.StartsWith(value: "__rf_", comparisonType: StringComparison.Ordinal) &&
+            CarriedEntityToWrap(expr: lowered) is { } carriedEntity)
+        {
+            lowered = WrapInRoam(inner: lowered, entity: carriedEntity);
+        }
+        else
+        {
+            NoteCarrierCall(name: vd.Name, init: vd.Initializer!);
+        }
+
         Expression init = MaybeRoamCopy(expr: lowered);
         // Track the local as Roamed[E] when its initializer resolved to a Roamed wrapper, so
         // later references (aliasing / access) retype consistently. `var` locals infer their
@@ -793,6 +810,56 @@ internal sealed class EntityLoweringPass
         return ReferenceEquals(objA: init, objB: vd.Initializer)
             ? stmt
             : ds with { Declaration = vd with { Initializer = init } };
+    }
+
+    /// <summary>The calls a recovery variant keeps in a carrier (<c>var __rf_prop_1 = recv.f()</c>, an
+    /// <c>Optional[E]</c> or <c>Check[E]</c> of a bare entity), by the carrier's variable.</summary>
+    private readonly Dictionary<string, Expression> _bareEntityCarriers = new(comparer: StringComparer.Ordinal);
+
+    /// <summary>The variables a <c>when</c> arm binds to the bare entity a carrier in
+    /// <see cref="_bareEntityCarriers"/> holds.</summary>
+    private readonly Dictionary<string, Expression> _bareEntityArms = new(comparer: StringComparer.Ordinal);
+
+    /// <summary>Remembers <paramref name="init"/> when it is a call whose carrier holds an entity that Mielia code
+    /// holds through a handle.</summary>
+    private void NoteCarrierCall(string name, Expression init)
+    {
+        if (init is CallExpression or GenericMemberRoutineCallExpression &&
+            init.ResolvedType is { TypeArguments: [EntityTypeSymbol entity, ..] } &&
+            CarrierCallProducesBareEntity(call: init, entity: entity))
+        {
+            _bareEntityCarriers[key: name] = init;
+        }
+    }
+
+    private bool CarrierCallProducesBareEntity(Expression call, EntityTypeSymbol entity)
+    {
+        (Expression? callee, RoutineInfo? routine) = call switch
+        {
+            CallExpression c => (c.Callee, c.ResolvedRoutine),
+            GenericMemberRoutineCallExpression g => (g.Object, g.ResolvedRoutine),
+            _ => (null, null)
+        };
+        return callee != null && HeldThroughHandle(entity: entity) &&
+               (IsMieliaRealmEntity(entity: entity) || !IsRvRealmRef(callee: callee, routine: routine)) &&
+               !IsRevareEntity(entity: entity);
+    }
+
+    /// <summary>The entity <paramref name="expr"/> takes out of a carrier whose call made it bare, or null.</summary>
+    private EntityTypeSymbol? CarriedEntityToWrap(Expression expr)
+    {
+        Expression inner = expr is StealExpression { Operand: var operand } ? operand : expr;
+        if (inner.ResolvedType is not EntityTypeSymbol entity)
+        {
+            return null;
+        }
+
+        bool fromCarrier = inner is MemberExpression
+                           {
+                               Object: IdentifierExpression carrier, MemberName: RuntimeContract.Carrier.ValueField
+                           } && _bareEntityCarriers.ContainsKey(key: carrier.Name);
+        bool fromArm = inner is IdentifierExpression arm && _bareEntityArms.ContainsKey(key: arm.Name);
+        return fromCarrier || fromArm ? entity : null;
     }
 
     private Statement LowerAssignmentStatement(Statement stmt, AssignmentStatement assign)
@@ -869,6 +936,12 @@ internal sealed class EntityLoweringPass
             // The name an arm binds (`is Dict as d`, `else as item`, a `for` loop's element) reads the value the
             // subject holds, so it is borrowed like a parameter: returning it hands the caller a holder of its own.
             string? bound = ArmBindingName(pattern: cl.Pattern);
+            if (bound != null && cl.Pattern is ElsePattern && whenStmt.Expression is IdentifierExpression carrierSubject &&
+                _bareEntityCarriers.TryGetValue(key: carrierSubject.Name, value: out Expression? carrierCall))
+            {
+                _bareEntityArms[key: bound] = carrierCall;
+            }
+
             bool added = bound != null && _borrowNames.Add(item: bound);
             Statement nb = LowerStatement(stmt: cl.Body);
             if (added)
