@@ -145,6 +145,13 @@ routine U8.widening_mul(you: U8) -> (U8, U8)
 @rv("U8.carrying_mul")
 routine U8.carrying_mul(you: U8, carry: U8) -> (U8, U8)
 
+### Returns the exact product `me * you` as one `U16` value.
+### It never overflows, because the product of two `U8` values needs 16 bits at most.
+### :param you: The right operand.
+### :returns: The product as a `U16`.
+@rv("U8.mul_wide")
+routine U8.mul_wide(you: U8) -> U16
+
 ### Returns `me ** exp` and a flag indicating whether the result wrapped around.
 ### :param exp: The exponent.
 ### :returns: A tuple of `(wrapped_result, overflowed)`.

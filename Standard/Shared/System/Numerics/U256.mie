@@ -176,6 +176,22 @@ routine U256.sub_clamp(you: U256) -> U256
 @rv("U256.mul_clamp")
 routine U256.mul_clamp(you: U256) -> U256
 
+### Returns the full product `me * you` as `(low, high)` halves.
+### Both halves are `U256` words, so the product is exact in 512 bits.
+### :param you: The right operand.
+### :returns: A tuple of `(low 256 bits, high 256 bits)`.
+@rv("U256.widening_mul")
+routine U256.widening_mul(you: U256) -> (U256, U256)
+
+### Returns `me * you + carry` as `(low, high)` halves.
+### Never overflows, because the largest result is below 2⁵¹². The `carry` accumulates the
+### high word carried out of the previous column of a schoolbook multiplication.
+### :param you: The right operand.
+### :param carry: The value to add to the product.
+### :returns: A tuple of `(low 256 bits, high 256 bits)`.
+@rv("U256.carrying_mul")
+routine U256.carrying_mul(you: U256, carry: U256) -> (U256, U256)
+
 ### Returns `me ** exp` and a flag indicating whether the result wrapped around.
 ### :param exp: The exponent.
 ### :returns: A tuple of `(wrapped_result, overflowed)`.

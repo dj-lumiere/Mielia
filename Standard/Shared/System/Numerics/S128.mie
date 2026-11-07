@@ -213,6 +213,21 @@ routine S128.carrying_add(you: S128, carry: Bool) -> (S128, Bool)
 @rv("S128.borrowing_sub")
 routine S128.borrowing_sub(you: S128, borrow: Bool) -> (S128, Bool)
 
+### Returns the exact product `me * you` as one `S256` value.
+### It never overflows, because the product of two `S128` values fits in 256 bits.
+### :param you: The right operand.
+### :returns: The product as an `S256`.
+@rv("S128.mul_wide")
+routine S128.mul_wide(you: S128) -> S256
+
+### Returns the full product `me * you` as `(low, high)` halves.
+### `low` is the lower 128 bits as a `U128`, `high` is the upper 128 bits as an `S128`
+### (the sign of the product is in `high`).
+### :param you: The right operand.
+### :returns: A tuple of `(low 128 bits, high 128 bits)`.
+@rv("S128.widening_mul")
+routine S128.widening_mul(you: S128) -> (U128, S128)
+
 ### Returns `me ** exp` and a flag indicating whether the result overflowed.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: A tuple of `(wrapped_result, overflowed)`.

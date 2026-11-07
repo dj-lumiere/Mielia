@@ -144,6 +144,13 @@ routine U64.widening_mul(you: U64) -> (U64, U64)
 @rv("U64.carrying_mul")
 routine U64.carrying_mul(you: U64, carry: U64) -> (U64, U64)
 
+### Returns the exact product `me * you` as one `U128` value.
+### It never overflows, because the product of two `U64` values needs 128 bits at most.
+### :param you: The right operand.
+### :returns: The product as a `U128`.
+@rv("U64.mul_wide")
+routine U64.mul_wide(you: U64) -> U128
+
 ### Returns `me ** exp` and an overflow flag.
 ### Uses repeated squaring. `0 ** 0 == 1` (the empty product).
 ### :param exp: The exponent.

@@ -193,6 +193,21 @@ routine S16.carrying_add(you: S16, carry: Bool) -> (S16, Bool)
 @rv("S16.borrowing_sub")
 routine S16.borrowing_sub(you: S16, borrow: Bool) -> (S16, Bool)
 
+### Returns the exact product `me * you` as one `S32` value.
+### It never overflows, because the product of two `S16` values fits in 32 bits.
+### :param you: The right operand.
+### :returns: The product as an `S32`.
+@rv("S16.mul_wide")
+routine S16.mul_wide(you: S16) -> S32
+
+### Returns the full product `me * you` as `(low, high)` halves.
+### `low` is the lower 16 bits as a `U16`, `high` is the upper 16 bits as an `S16`
+### (the sign of the product is in `high`).
+### :param you: The right operand.
+### :returns: A tuple of `(low 16 bits, high 16 bits)`.
+@rv("S16.widening_mul")
+routine S16.widening_mul(you: S16) -> (U16, S16)
+
 ### Returns `me ** exp` and a flag indicating whether the result overflowed.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: A tuple of `(wrapped_result, overflowed)`.

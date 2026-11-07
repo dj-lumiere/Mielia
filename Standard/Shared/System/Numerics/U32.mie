@@ -146,6 +146,13 @@ routine U32.widening_mul(you: U32) -> (U32, U32)
 @rv("U32.carrying_mul")
 routine U32.carrying_mul(you: U32, carry: U32) -> (U32, U32)
 
+### Returns the exact product `me * you` as one `U64` value.
+### It never overflows, because the product of two `U32` values needs 64 bits at most.
+### :param you: The right operand.
+### :returns: The product as a `U64`.
+@rv("U32.mul_wide")
+routine U32.mul_wide(you: U32) -> U64
+
 ### Returns `me ** exp` and a flag indicating whether the result wrapped around.
 ### :param exp: The exponent.
 ### :returns: A tuple of `(wrapped_result, overflowed)`.

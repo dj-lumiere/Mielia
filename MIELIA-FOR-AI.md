@@ -450,6 +450,9 @@ routine start()
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
   Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
   and the complex types, `0 / 0` crashes with `NumericDomainError` instead.
+- Whole product of fixed-width integers: `a.mul_wide(you: b)` is one value of the next wider type (`U8`..`U128`,
+  `S8`..`S128`), `a.widening_mul(you: b)` is `(low, high)` on every width `U8`..`U256` and `S8`..`S256` (signed:
+  `low` unsigned, `high` signed), `a.carrying_mul(you: b, carry: c)` is `a * b + c` as `(low, high)` on every unsigned width.
 - Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. A chain goes one way: `<`, `<=`,
   `==` together or `>`, `>=`, `==` together (`a < b > c`, `!=` and `<=>` in a chain are errors). Every operand of a chain is
   evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`
