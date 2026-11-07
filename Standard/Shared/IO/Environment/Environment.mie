@@ -12,21 +12,41 @@ record Environment
 
 ### The arguments the program was started with, its own name left out.
 ### :returns: The arguments, in order.
+### :throws: {MalformedUtf8Error} when an argument is not UTF-8.
 @rv("Environment.arguments")
 common routine Environment.arguments() -> List[Text]
+
+### The arguments the program was started with, its own name left out, with U+FFFD in place of each malformed UTF-8
+### sequence.
+### :returns: The arguments, in order.
+@rv("Environment.arguments_lossy")
+common routine Environment.arguments_lossy() -> List[Text]
 
 ### The value of the environment variable `name`, asked of the operating system now (on Windows the name's case
 ### doesn't matter).
 ### :param name: The variable's name.
 ### :returns: Its value, or `none` when it isn't set.
+### :throws: {MalformedUtf8Error} when the value is not UTF-8.
 @rv("Environment.variable")
 common routine Environment.variable(name: Text) -> Text?
+
+### The value of the environment variable `name`, with U+FFFD in place of each malformed UTF-8 sequence.
+### :param name: The variable's name.
+### :returns: Its value, or `none` when it isn't set.
+@rv("Environment.variable_lossy")
+common routine Environment.variable_lossy(name: Text) -> Text?
 
 ### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
 ### when it changes.
 ### :returns: The variables by name.
+### :throws: {MalformedUtf8Error} when a name or value is not UTF-8.
 @rv("Environment.to")
 common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
+
+### Every environment variable with its value, with U+FFFD in place of each malformed UTF-8 sequence.
+### :returns: The variables by name.
+@rv("Environment.variables_lossy")
+common routine Environment.variables_lossy() -> Dict[Text, Text]
 
 ### The program's working directory, which relative paths start from.
 ### :returns: The resulting `Directory`.

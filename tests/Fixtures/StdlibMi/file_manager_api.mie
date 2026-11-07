@@ -37,5 +37,7 @@ routine start()
             path_listed = true
     show(f"PATH in the snapshot: {path_listed}")
     show(Environment.arguments().count())
+    show(Environment.arguments_lossy().count())
+    show(f"PATH lossy: {Environment.variable_lossy(name: "PATH").is_present()} {Environment.variables_lossy().count() == Environment.to[Dict[Text, Text]]().count()}")
     FileManager.delete_all(at: root)
     show(FileManager.exists(at: root))

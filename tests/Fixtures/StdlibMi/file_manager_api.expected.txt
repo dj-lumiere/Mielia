@@ -10,4 +10,6 @@ hello
 PATH set: true
 PATH in the snapshot: true
 0
+0
+PATH lossy: true true
 false

@@ -486,7 +486,8 @@ common routine FileManager.open_append(at: File) -> FileSink
 ### `Directory.file(name:)` / `go_to(name:)` to turn one into a path.
 ### :param at: The directory.
 ### :returns: The entry names.
-### :throws: {NotFoundError} when the directory doesn't exist, or the crashable for why it cannot be listed.
+### :throws: {NotFoundError} when the directory doesn't exist, {MalformedUtf8Error} when an entry's name is not
+###   UTF-8, or the crashable for why it cannot be listed.
 @rv("FileManager.list")
 common routine FileManager.list(at: Directory) -> List[Text]
 
@@ -496,7 +497,8 @@ common routine FileManager.list(at: Directory) -> List[Text]
 ### stat per entry for the mtime). `.` and `..` are left out.
 ### :param at: The directory.
 ### :returns: The entries.
-### :throws: {NotFoundError} when the directory doesn't exist, or the crashable for why it cannot be listed.
+### :throws: {NotFoundError} when the directory doesn't exist, {MalformedUtf8Error} when an entry's name is not
+###   UTF-8, or the crashable for why it cannot be listed.
 @rv("FileManager.entries")
 common routine FileManager.entries(at: Directory) -> List[DirEntry]
 

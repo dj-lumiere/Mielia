@@ -12,10 +12,32 @@ record ProcessResult
     ### The signal that killed the child (POSIX), or absent if it exited normally. Always absent on
     ### Windows, which has no signals.
     signal: S32?
-    ### The captured stdout ("show" stream), decoded as lossy UTF-8.
-    output: Text
-    ### The captured stderr ("alert" stream), decoded as lossy UTF-8.
-    errors: Text
+    ### The captured stdout ("show" stream) as the child wrote it. `output()` decodes it.
+    output_bytes: Bytes
+    ### The captured stderr ("alert" stream) as the child wrote it. `errors()` decodes it.
+    errors_bytes: Bytes
+
+### The captured stdout as UTF-8 text.
+### :returns: The text.
+### :throws: {MalformedUtf8Error} if the child wrote bytes that are not well-formed UTF-8.
+@rv("ProcessResult.output")
+routine ProcessResult.output() -> Text
+
+### The captured stdout as UTF-8 text, with U+FFFD in place of each malformed sequence.
+### :returns: The text.
+@rv("ProcessResult.output_lossy")
+routine ProcessResult.output_lossy() -> Text
+
+### The captured stderr as UTF-8 text.
+### :returns: The text.
+### :throws: {MalformedUtf8Error} if the child wrote bytes that are not well-formed UTF-8.
+@rv("ProcessResult.errors")
+routine ProcessResult.errors() -> Text
+
+### The captured stderr as UTF-8 text, with U+FFFD in place of each malformed sequence.
+### :returns: The text.
+@rv("ProcessResult.errors_lossy")
+routine ProcessResult.errors_lossy() -> Text
 
 ### Whether the command finished cleanly: exited normally (no signal) with exit code 0.
 ### :returns: true if not signalled and `exit_code == 0`.

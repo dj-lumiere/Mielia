@@ -1208,6 +1208,11 @@ routine start()
   throws `MalformedUtf8Error` saying which byte ("Malformed UTF-8 at byte 3: invalid leading byte."). The replacement
   character U+FFFD is asked for by name with the `_lossy` twin of each: `ask_line_lossy()`, `ask_lines_lossy()`,
   `FileManager.read_text_lossy(at:)`, `read_words_lossy()`, `decode_as_utf8_lossy()` and so on.
+  The same holds for `Environment.arguments()`/`variable(name:)`/`to[Dict[Text, Text]]()` (twins `arguments_lossy()`,
+  `variable_lossy(name:)`, `variables_lossy()`) and `ProcessResult.output()`/`errors()` (twins `output_lossy()`/
+  `errors_lossy()`, raw `output_bytes`/`errors_bytes` fields). Paths have no lossy twin: a directory listing
+  (`list`/`entries`/`walk`) or a path from the system that is not UTF-8 throws, since text with U+FFFD would name
+  another file.
 - Files: `FileManager` (the operating system's file manager) is the one place that touches the disk, its routines
   called on the type. Storage has three layers: `StorageManager` (one storage device), `PartitionManager` (one
   partition of it) and the file system on one partition, which the operating system manages (a partition has exactly

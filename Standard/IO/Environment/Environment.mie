@@ -8,14 +8,32 @@ module IO/Environment
 common routine Environment.arguments() -> List[Text]
     return Environment.arguments().to[List[Text]]()
 
-### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
-### when it changes.
+### The arguments the program was started with, its own name left out, with U+FFFD in place of each malformed UTF-8
+### sequence.
+### :returns: The arguments, in order.
+common routine Environment.arguments_lossy() -> List[Text]
+    return Environment.arguments_lossy().to[List[Text]]()
+
+### The names and values in pairs as a dictionary.
+### :param lossy: Whether a malformed UTF-8 sequence becomes U+FFFD instead of failing.
 ### :returns: The variables by name.
-common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
-    var parts = environment_parts().to[List[Text]]()
+secret routine environment_dict(lossy: Bool) -> Dict[Text, Text]
+    var parts = environment_parts(lossy: lossy).to[List[Text]]()
     var result = Dict[Text, Text]()
     var i = 0
     until i + 1 >= parts.count()
         result[parts[i]] = parts[i + 1]
         i += 2
     return result
+
+### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
+### when it changes.
+### :returns: The variables by name.
+### :throws: {MalformedUtf8Error} when a name or value is not UTF-8.
+common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
+    return environment_dict(lossy: false)
+
+### Every environment variable with its value, with U+FFFD in place of each malformed UTF-8 sequence.
+### :returns: The variables by name.
+common routine Environment.variables_lossy() -> Dict[Text, Text]
+    return environment_dict(lossy: true)
