@@ -104,6 +104,10 @@ through a `.rvr` module the program imports (section 18).
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `mielia check --json`
     writes all diagnostics as a JSON array (`file`, `line`, `column`, `severity`, `code`, `message`, `endLine?`,
     `fix?` with 1-based edits).
+    The language server also offers three `refactor.rewrite` actions on an `if` line: invert it (needs an `else`), exit
+    early (`if not c` with `return`, or `continue` in a loop, and the body one level out, only when nothing but the end
+    of the routine, its final `return`, or the end of the loop round follows), and merge a nested `if` into `if a and b`.
+    A float comparison is wrapped in `not (...)`, an integer or `Decimal` one flips.
 11. **A module-level `var` is an error (ME-S435).** Module-level mutable state is `global name: Type = init`
     (§6). Constants are `preset`.
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
