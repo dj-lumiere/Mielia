@@ -24,3 +24,6 @@ plate 3
 plate 3
 damage 32
 boss at 70
+kept 5
+elements 2 11
+plain tally 4

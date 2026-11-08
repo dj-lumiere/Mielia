@@ -162,9 +162,53 @@ routine party()
         else =>
             show("other")
 
+# A routine that changes a record kept in a protocol place changes the kept record, in a variable and in a list
+# element. A plain record element changes the same way.
+protocol Counting
+    routine Me.bump(by: Int)
+    routine Me.total() -> Int
+
+record Tally
+obeys Counting
+    label: Text
+    n: Int
+
+routine Tally.bump(by: Int)
+    me.n += by
+    me.label = f"tally {me.n}"
+
+routine Tally.total() -> Int
+    return me.n
+
+record Score
+obeys Counting
+    n: Int
+
+routine Score.bump(by: Int)
+    me.n += by * 10
+
+routine Score.total() -> Int
+    return me.n
+
+routine changing()
+    var c: Counting = Tally(label: "tally 0", n: 0)
+    c.bump(by: 2)
+    c.bump(by: 3)
+    show(f"kept {c.total()}")
+    var cs = List[Counting]()
+    cs.add_last(Tally(label: "tally 1", n: 1))
+    cs.add_last(Score(n: 1))
+    cs[0].bump(by: 1)
+    cs[1].bump(by: 1)
+    show(f"elements {cs[0].total()} {cs[1].total()}")
+    var plain = [Tally(label: "tally 0", n: 0)]
+    plain[0].bump(by: 4)
+    show(f"plain {plain[0].label}")
+
 routine start()
     entities()
     members()
     take_apart()
     records()
     party()
+    changing()
