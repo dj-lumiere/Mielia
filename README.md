@@ -99,14 +99,13 @@ build time when you do it directly, at run time when a called routine does it.
 ### 1. Install
 
 Download the package for your platform from the
-[releases page](https://github.com/dj-lumiere/Mielia/releases). Mielia and Revare ship in one
-package, so the file name starts with `revare-`:
+[releases page](https://github.com/dj-lumiere/Mielia/releases):
 
 | Platform              | File                                 |
 |-----------------------|--------------------------------------|
-| Windows x64           | `revare-v<version>-win-x64.zip`    |
-| Linux x64             | `revare-v<version>-linux-x64.tar.gz` |
-| macOS (Apple Silicon) | `revare-v<version>-osx-arm64.tar.gz` |
+| Windows x64           | `mielia-v<version>-win-x64.zip`      |
+| Linux x64             | `mielia-v<version>-linux-x64.tar.gz` |
+| macOS (Apple Silicon) | `mielia-v<version>-osx-arm64.tar.gz` |
 
 The package is self-contained: the builder, the standard library, the runtime, and the LLVM
 toolchain are all inside it. Unpack it anywhere and run the installer from that folder:
