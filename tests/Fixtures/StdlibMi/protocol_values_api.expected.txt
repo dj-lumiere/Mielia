@@ -28,4 +28,5 @@ kept 5
 elements 2 11
 plain tally 4
 plain loop tally 5
+tuple loop tally 2 3
 loops 3 21

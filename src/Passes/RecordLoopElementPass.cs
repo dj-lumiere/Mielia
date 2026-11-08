@@ -11,7 +11,7 @@ namespace Mielia.Passes;
 /// that read, and releasing an old member value through it would release the element's own value. Two cases:
 /// <list type="bullet">
 /// <item><b>In place.</b> A loop that walks the places of a memory (<c>MemoryEmitter[T]</c>: <c>List</c>,
-/// <c>RotatableList</c>, <c>Memory</c>, <c>Span</c>) over records, whose body changes the loop variable. The round
+/// <c>RotatableList</c>, <c>Memory</c>, <c>Span</c>) over records or tuples, whose body changes the loop variable. The round
 /// binds the place the step read (<c>var _lf_place_N = _lf_iter_N.emitted_place()</c>), and every use of the loop
 /// variable in the body becomes the record at that place (a <c>RecordAddress</c> projection). A member write and a
 /// changing routine act on the element. A use as a value (a new variable, a stored or returned value) copies the
@@ -167,7 +167,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
 
         int n = _count++;
         Statement? body = null;
-        if (element is not TupleTypeSymbol && MemoryWalkOf(emitter: emitter) is { } walk &&
+        if (MemoryWalkOf(emitter: emitter) is { } walk &&
             !AstWalker.BoundNames(node: arm.Body).Contains(item: name))
         {
             body = InPlace(body: arm.Body, name: name, element: element, emitter: emitter, walk: walk,
@@ -209,8 +209,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
     }
 
     /// <summary>Whether <paramref name="type"/> is a record or a tuple of member variables a program can change: not a
-    /// handle, a pointer or a carrier, not an entity kind, and concrete. A tuple (a <c>Dict</c> entry) is only ever
-    /// copied.</summary>
+    /// handle, a pointer or a carrier, not an entity kind, and concrete.</summary>
     private bool IsChangeableValue(RecordTypeSymbol type)
     {
         return type.BackendType == null &&

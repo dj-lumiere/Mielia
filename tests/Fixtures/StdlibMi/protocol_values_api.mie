@@ -207,6 +207,11 @@ routine changing()
     for t in plain
         t.bump(by: 1)
     show(f"plain loop {plain[0].label}")
+    var pairs = [(Tally(label: "pair 0", n: 0), 2)]
+    for p in pairs
+        p.item0.bump(by: p.item1)
+        p.item1 = 3
+    show(f"tuple loop {pairs[0].item0.label} {pairs[0].item1}")
     for x in cs
         x.bump(by: 1)
     show(f"loops {cs[0].total()} {cs[1].total()}")
