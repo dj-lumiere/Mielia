@@ -14,6 +14,31 @@ routine Counter.adder() -> Callable[(S64,), S64]
 routine Counter.checked_adder() -> Callable[(S64,), S64]
     return (k: S64) => me.n + k
 
+# A lambda kept in a list, a record and an entity, copied, replaced and returned holds what it captured. A lambda kept
+# in the entity it captured is collected with that entity.
+record Ops
+    apply: Callable[(S64,), Text]
+
+entity Node
+    name: Text
+    cb: Callable[(), Text]
+
+routine labeler(tag: Text) -> Callable[(S64,), Text]
+    return (x: S64) => f"{tag}{x}"
+
+routine keep_round(i: Int) -> Text
+    var f = labeler(tag: f"k{i}-")
+    var g = f
+    var fs = List[Callable[(S64,), Text]]()
+    fs.add_last(g)
+    fs.add_last(labeler(tag: "z"))
+    var ops = Ops(apply: fs[0])
+    var copied = ops
+    var node = Node(name: f"n{i}", cb: () => "none")
+    node.cb = () => f"{node.name} {copied.apply(3)}"
+    g = (x: S64) => f"{f(x)}!"
+    return f"{f(1)} {fs[1](2)} {node.cb()} {g(5)}"
+
 routine start()
     var c = Counter(n: 10)
     var add = c.adder()
@@ -22,3 +47,6 @@ routine start()
     show(f"20 + 5: {add(5)}")
     var checked = c.checked_adder()
     show(f"checked 20 + 1: {checked(1)}")
+    for i in 0 til 3
+        show(keep_round(i))
+    show(f"collected: {cyclic_collect()}")

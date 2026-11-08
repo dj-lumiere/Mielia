@@ -277,7 +277,8 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
   routines only: a standard library routine has no frame on it, and a crash inside one reports the line where the
   program called it. `[debug] trace-stdlib = true` (for work on the library) puts the library routines the program can
   name on the trace too, as `(standard library)` frames. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
-  one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
+  one more handle). What a lambda captured is let go when the last copy of the lambda goes, and a lambda kept in the
+  entity it captured is collected with that entity. A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Int, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so EmitterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
