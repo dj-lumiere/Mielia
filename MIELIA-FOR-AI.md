@@ -1000,8 +1000,8 @@ A member routine written outside a generic type names its parameters on the rece
   - `when g` with `is Cat as c =>` takes it apart (`c` is the same entity, or a copy of a record), `g is Cat` tests it.
     Such a `when` needs `else` (ME-S356). An `is T` arm whose `T` doesn't obey the protocol is ME-S357.
   - A place needing the routines of several protocols uses a protocol that obeys them all (`protocol Combatant` with
-    `obeys Enemy, Attackable`). A type obeys such a protocol, which has no routines of its own, only by writing
-    `obeys Combatant`.
+    `obeys Enemy, Attackable`). A type obeys such a protocol by obeying every parent (`obeys`, or having their
+    routines), or by writing `obeys Combatant`.
   - A value of a type parameter going into a stored place is ME-S716: put it in where its type is known.
 
 ## 13. Text and formatting
