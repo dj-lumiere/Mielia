@@ -126,7 +126,7 @@ Open a new terminal and check that it works:
 mielia version
 ```
 
-The short alias `mi` works as well.
+The short alias `me` works as well.
 
 > **Linux:** linking needs the C library's development files. Most machines have them. Otherwise
 > install `libc6-dev` (Debian/Ubuntu) or `glibc-devel` (Fedora) once.
