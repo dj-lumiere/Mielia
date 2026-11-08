@@ -798,7 +798,11 @@ internal sealed class EntityLoweringPass
             NoteCarrierCall(name: vd.Name, init: vd.Initializer!);
         }
 
-        Expression init = MaybeRoamCopy(expr: lowered);
+        // A name a pattern binds (a `for` element, a `when` arm) reads the matched value, which still holds it, and
+        // scope teardown never releases it. A share here would be a hold nothing gives back.
+        Expression init = vd.IsPatternBinding
+            ? lowered
+            : MaybeRoamCopy(expr: lowered);
         // Track the local as Roamed[E] when its initializer resolved to a Roamed wrapper, so
         // later references (aliasing / access) retype consistently. `var` locals infer their
         // type from the initializer at codegen, so no declared-type rewrite is needed here.

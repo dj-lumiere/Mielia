@@ -1,0 +1,22 @@
+module Tests/StdlibMi/WorkGatherFreeApi
+
+# Jobs gathered from a list, and jobs let go before anything started them (their arguments are freed with them),
+# many rounds over: the results stay right and nothing is freed twice.
+
+import Collections
+import IO/Console
+
+routine measure(label: Text, extra: Int) -> Int
+    return label.count() + extra
+
+routine start()
+    var total = 0
+    for i in 1 to 3000
+        var jobs = [measure.to[Work](label: f"job {i}", extra: 1), measure.to[Work](label: "ab", extra: 2)]
+        for r in jobs.gather()
+            total += r
+        var unused = measure.to[Work](label: f"never {i}", extra: 5)
+        var more = [measure.to[Work](label: "x", extra: 1), measure.to[Work](label: "y", extra: 2)]
+        more.cancel_all()
+    show(f"total: {total}")
+    show("DONE")
