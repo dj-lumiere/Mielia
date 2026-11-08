@@ -27,3 +27,4 @@ boss at 70
 kept 5
 elements 2 11
 plain tally 4
+loops 3 21
