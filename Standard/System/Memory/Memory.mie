@@ -578,6 +578,16 @@ routine MemoryEmitter[T].emit() -> T
         me.index = me.index +% 1
         return result
 
+### The place the last `emit` read. The builder binds it in a `for` loop over records, so a change to the loop's
+### element changes the record in its place. Called only after an `emit` that returned a value.
+### :returns: The memory of that place.
+secret routine MemoryEmitter[T].emitted_place() -> Hijacked[T]
+    var place = me.first + (me.index -% 1)
+    if place >= me.room
+        place = place - me.room
+    danger
+        return place_at[T](base: me.block.data, position: me.base + place)
+
 ### Moves the walk past its next place without reading it. Does nothing once the walk is over.
 routine MemoryEmitter[T].skip()
     if me.index < me.count

@@ -204,6 +204,9 @@ routine changing()
     var plain = [Tally(label: "tally 0", n: 0)]
     plain[0].bump(by: 4)
     show(f"plain {plain[0].label}")
+    for t in plain
+        t.bump(by: 1)
+    show(f"plain loop {plain[0].label}")
     for x in cs
         x.bump(by: 1)
     show(f"loops {cs[0].total()} {cs[1].total()}")

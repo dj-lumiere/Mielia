@@ -551,7 +551,11 @@ lines after a `loop` without a `break` never run (ME-S786) and a routine whose l
 `until i >= n`, a float comparison and anything else → `until not (c)`, listed). `each` is a reserved word: a loop
 written `each x in xs` is ME-G229, and `migrate --step for` rewrites it to `for`. A `for` loop variable (and each
 name of a destructured element) is bound again every round, so assigning it is ME-S251 (over a range too): put the
-new value in a variable of its own, or write the element through the collection (`xs[i] = ...`). An `until`, `for` or `loop` may end
+new value in a variable of its own, or write the element through the collection (`xs[i] = ...`). Over a `List`,
+`RotatableList`, `Memory` or span of records, the loop variable is the element: a member write (`t.n += 1`) or a routine
+that changes `me` (`t.bump(by: 1)`) changes the element in place, and a use as a value (`var u = t`, `ys.add_last(t)`,
+`return t`) copies it. Over a `Set`, a `Dict` or an adapter (`where`, ...) each record is a copy, so a change to the loop
+variable stays with it (a set element changed in place would no longer match its hash). An `until`, `for` or `loop` may end
 with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`

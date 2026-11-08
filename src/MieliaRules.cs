@@ -203,16 +203,21 @@ public sealed class MieliaRules : LanguageRules
 
     public override void LowerEntities(Program program, TypeRegistry registry)
     {
+        // A record loop element is reached in its place (or copied) first, while the loop's emitter still has its
+        // own type, and before scope teardown releases old member values.
+        new RecordLoopElementPass(registry: registry).Run(program: program);
         new EntityLoweringPass(registry: registry).Run(program: program);
     }
 
     public override RoutineDeclaration LowerEntitiesInRoutine(RoutineDeclaration routine, TypeRegistry registry)
     {
+        routine = new RecordLoopElementPass(registry: registry).LowerRoutine(r: routine);
         return new EntityLoweringPass(registry: registry).LowerRoutine(r: routine);
     }
 
     public override Statement LowerEntitiesInVariantBody(Statement body, RoutineInfo routine, TypeRegistry registry)
     {
+        body = new RecordLoopElementPass(registry: registry).LowerVariantBody(body: body, routine: routine);
         return new EntityLoweringPass(registry: registry).LowerVariantBody(body: body, routine: routine);
     }
 
