@@ -989,7 +989,7 @@ A member routine written outside a generic type names its parameters on the rece
   made once per type it is called with, at build time. A place that stores a value written with a protocol type holds
   a value of any type that obeys it, chosen at run time: a local `var g: Greetable`, a member variable, an element type
   (`List[Shape]`, `Dict[Text, Shape]`), `Shape?`, a result `-> Shape`.
-  - The stored value is a type hash and an address. The type hash is FNV-1a (32 bits, never 0) of the type's name with
+  - The stored value is a type hash and an address. The type hash is FNV-1a (64 bits, never 0) of the type's name with
     its module. Two types a protocol place is given with the same hash are ME-S714.
   - An entity there is the same entity as under every other name. A record goes in as a copy, and copying the place
     (`var b = a`) copies the record (an entity stays shared).
