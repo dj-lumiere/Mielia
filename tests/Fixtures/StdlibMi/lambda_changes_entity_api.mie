@@ -1,0 +1,21 @@
+module Tests/StdlibMi/LambdaChangesEntityApi
+
+# A lambda whose body changes a member variable of an entity it reads (`() => c.n += 1`) changes that entity: the
+# entity is the same one under every name. A value it reads is its own copy, so a change to it stays in the lambda.
+
+entity Counter
+    n: Int
+
+routine start()
+    var c = Counter(n: 7)
+    var bump = () => c.n += 1
+    bump()
+    bump()
+    show(f"counter {c.n}")
+    var set = (to: Int) => c.n = to
+    set(40)
+    show(f"counter {c.n}")
+    var total = 3
+    var add = () => total += 1
+    show(f"lambda sees {add()}")
+    show(f"total {total}")
