@@ -30,3 +30,11 @@ plain tally 4
 plain loop tally 5
 tuple loop tally 2 3
 loops 3 21
+dict 2
+5
+32
+dict record 6
+made 86
+-1
+12
+more_places done
