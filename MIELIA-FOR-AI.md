@@ -677,6 +677,11 @@ routine Account.deposit(amount: Int)                       # member routine, rec
   always a tuple: `()`, `(T,)`, `(A, B)`), for a routine value that may fail too (§11). A free routine's bare
   name is a value:
   `nums.select(transform: double)`.
+- **`ErasedCallable`** holds a routine value whose signature is known only at run time: the routine value and a
+  signature hash (FNV-1a 64 of `Callable[(params), result]` with full type names). `f.to[ErasedCallable]()` makes
+  one, `e.to[Callable[(Int,), Int]]()` gives it back and fails with `RoutineSignatureError` on another signature
+  (`try` gives `none`, no keyword stops the program there), `e.fits[Callable[...]]()` asks without failing. Routine
+  values of different signatures fit in one `List[ErasedCallable]` (an event bus).
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
   `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is ME-G221, and a

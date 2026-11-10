@@ -1,0 +1,43 @@
+module System
+
+# Each declaration below creates nothing: `@rv` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A routine value whose signature is known only at run time: the routine value and a hash of its signature (its
+### parameter and result types, each with its module). Values of different signatures fit in one place
+### (`List[ErasedCallable]`). `f.to[ErasedCallable]()` makes one, and `e.to[Callable[(Int,), Int]]()` gives the routine
+### value back when the signatures match. What a lambda captured is let go when the last copy goes, as for a routine
+### value.
+@rv("ErasedCallable")
+record ErasedCallable
+    nothing
+
+### Makes an `ErasedCallable` of a routine value. The routine value stays usable.
+### :returns: The routine value with its signature hash.
+@rv("T.to")
+routine T.to[ErasedCallable]() -> ErasedCallable
+needs RoutineType T
+
+### Gives the routine value back as the routine type `T` it was made from.
+### :returns: The routine value.
+### :throws: {RoutineSignatureError} if the routine value has another signature than `T`.
+@rv("ErasedCallable.to")
+routine ErasedCallable.to[T]() -> T
+needs RoutineType T
+
+### Whether the routine value has the signature of the routine type `T`.
+### :returns: True when `to[T]()` would give it back.
+@rv("ErasedCallable.fits")
+routine ErasedCallable.fits[T]() -> Bool
+needs RoutineType T
+
+### An `ErasedCallable` was asked for a routine type its routine value doesn't have.
+@rv("RoutineSignatureError")
+crashable RoutineSignatureError
+    ### The routine type that was asked for.
+    asked: Text
+
+### Returns the message naming the routine type that was asked for.
+### :returns: The message.
+@rv("RoutineSignatureError.crash_message")
+routine RoutineSignatureError.crash_message() -> Text

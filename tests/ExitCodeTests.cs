@@ -119,6 +119,21 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "Range step zero error", actualString: stdout + stderr);
     }
 
+    /// <summary>Asking an <c>ErasedCallable</c> for another signature than its routine value has, with no <c>try</c>
+    /// above, stops the program right there with status 82 and names the routine type asked for.</summary>
+    [Fact]
+    public void ErasedCallableMismatch_CrashesLoudly()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "erased_callable_mismatch.mie");
+
+        Assert.True(condition: exit == 82,
+            userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Contains(expectedSubstring: "asking for the wrong signature", actualString: stdout);
+        Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+        Assert.Contains(expectedSubstring: "Routine signature error: The erased routine value is not a Callable[(Text,), None].",
+            actualString: stdout + stderr);
+    }
+
     /// <summary>Calls deeper than the memory for them holds crash with the out of memory report and status 82, never
     /// a segmentation fault.</summary>
     [Fact]

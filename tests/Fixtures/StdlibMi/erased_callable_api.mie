@@ -1,0 +1,60 @@
+module Tests/StdlibMi/ErasedCallableApi
+
+# An `ErasedCallable` keeps a routine value whose signature is known only at run time: `f.to[ErasedCallable]()` makes
+# one, `e.to[Callable[(Int,), Int]]()` gives the routine value back when the signatures match, and under `try` a
+# mismatch gives none. A list of them holds routine values of different signatures (an event bus).
+
+entity Counter
+    n: Int
+
+routine Counter.bump()
+    me.n += 1
+
+routine twice(n: Int) -> Int
+    return n * 2
+
+routine shout(text: Text)
+    show(f"shout {text}")
+
+routine round_trip()
+    var f: Callable[(Int,), Int] = twice
+    var e = f.to[ErasedCallable]()
+    var back = e.to[Callable[(Int,), Int]]()
+    show(back(21))
+    show(e.fits[Callable[(Int,), Int]]())
+    show(e.fits[Callable[(Text,), None]]())
+    when try e.to[Callable[(Text,), None]]()
+        is None => show("not a Callable[(Text,), None]")
+        else as g => g("x")
+    when check e.to[Callable[(), Int]]()
+        is Callable[(), Int] as h => show(h())
+        is RoutineSignatureError as wrong => show(wrong.crash_message())
+        is Crashables => show("other")
+
+routine captured()
+    var c = Counter(n: 7)
+    var bump = () => c.bump()
+    var e = bump.to[ErasedCallable]()
+    var copy = e
+    copy.to[Callable[(), None]]()()
+    e.to[Callable[(), None]]()()
+    show(f"counter {c.n}")
+
+routine event_bus()
+    var base = 100
+    var add = (n: Int) => n + base
+    var bus = List[ErasedCallable]()
+    bus.add_last(shout.to[ErasedCallable]())
+    bus.add_last(add.to[ErasedCallable]())
+    bus.add_last(twice.to[ErasedCallable]())
+    for e in bus
+        when try e.to[Callable[(Text,), None]]()
+            is None => nothing
+            else as said => said("hello")
+        if e.fits[Callable[(Int,), Int]]()
+            show(f"number {e.to[Callable[(Int,), Int]]()(5)}")
+
+routine start()
+    round_trip()
+    captured()
+    event_bus()

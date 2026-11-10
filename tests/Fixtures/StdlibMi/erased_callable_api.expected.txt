@@ -1,0 +1,9 @@
+42
+true
+false
+not a Callable[(Text,), None]
+The erased routine value is not a Callable[(), Int].
+counter 9
+shout hello
+number 105
+number 10
