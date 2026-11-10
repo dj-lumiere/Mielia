@@ -1,0 +1,38 @@
+module Tests/StdlibMi/FileEnvThreadsApi
+
+# Several jobs read files and an environment variable at the same time, yielding between the reads so they move
+# between threads. What a call returns carries its own length: every job sees the length of its own file and of the
+# variable on every read, never another job's. The paths use the gitignored `.out` extension.
+
+routine read_many(path: Text, size: Int, expected_env: Int) -> Int
+    var wrong = 0
+    var file = File(at: path)
+    for _ in 1 to 300
+        if FileManager.read_bytes(at: file).count() != size
+            wrong += 1
+        yield_now()
+        var value = Environment.variable(name: "PATH") ?? ""
+        if value.count() != expected_env
+            wrong += 1
+        yield_now()
+        if FileManager.read_text(at: file).count() != size
+            wrong += 1
+    return wrong
+
+routine start()
+    var sizes = [1, 7, 100, 4096, 70000, 5, 33, 2048]
+    var jobs = List[Work[Int]]()
+    var expected_env = (Environment.variable(name: "PATH") ?? "").count()
+    for index in 0 til sizes.count()
+        var path = f"tests/Fixtures/StdlibMi/file_env_threads_{index}.out"
+        var file = FileManager.make_file(at: File(at: path), replacing: true)
+        FileManager.write_text(at: file, content: "x".repeat(sizes[index]))
+        jobs.add_last(read_many.to[Work](path: path, size: sizes[index], expected_env: expected_env))
+    var results = jobs.gather()
+    var total = 0
+    for wrong in results
+        total += wrong
+    show(f"jobs: {results.count()}")
+    show(f"reads with a wrong length: {total}")
+    for index in 0 til sizes.count()
+        FileManager.delete(at: File(at: f"tests/Fixtures/StdlibMi/file_env_threads_{index}.out"))
