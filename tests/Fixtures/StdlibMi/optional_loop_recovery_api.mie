@@ -1,0 +1,44 @@
+module Tests/StdlibMi/OptionalLoopRecoveryApi
+
+# A `for` element over a `List[T?]` takes `try` and `check` calls the way a `T?` local does: a present element runs the
+# call, an absent one makes `try` give none and `check` give AbsentValueError.
+
+entity Slime
+    life: Int
+
+routine Slime.hp() -> Int
+    return me.life
+
+routine Slime.hit()
+    me.life -= 1
+
+record Coin
+    n: Int
+
+routine Coin.worth() -> Int
+    return me.n * 5
+
+routine start()
+    var slimes = List[Slime?]()
+    slimes.add_last(value: Slime(life: 3))
+    slimes.add_last(value: none)
+    slimes.add_last(value: Slime(life: 8))
+    for s in slimes
+        try s.hit()
+        show(try s.hp() ?? -1)
+        when check s.hp()
+            is Int as n => show(f"check {n}")
+            is AbsentValueError => show("check: absent")
+            is Crashables => show("check: other")
+    for s in slimes
+        show(try s.hp() ?? -1)
+    var coins = List[Coin?]()
+    coins.add_last(value: none)
+    coins.add_last(value: Coin(n: 2))
+    for c in coins
+        show(try c.worth() ?? 0)
+        when check c.worth()
+            is Int as w => show(f"check worth {w}")
+            is AbsentValueError => show("check worth: absent")
+            is Crashables => show("check worth: other")
+    show("loops done")
