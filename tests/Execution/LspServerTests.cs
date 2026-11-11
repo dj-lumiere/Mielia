@@ -161,6 +161,71 @@ public sealed class LspServerTests
         Assert.NotNull(@object: LspTestHarness.ReplyWithId(replies: replies, id: 21));
     }
 
+    [Fact]
+    public void MieliaScript_CallsAreFunctionsAndInferredTypeArgumentsAreHinted()
+    {
+        const string script =
+            "import IO/Console\n" +
+            "\n" +
+            "show(\"값\" == \"값\")\n" +
+            "show(\"값\".count())\n";
+        string dir = Directory.CreateTempSubdirectory(prefix: "lsp_script_").FullName;
+        string path = Path.Combine(path1: dir, path2: "main.mie");
+        File.WriteAllText(path: path, contents: script);
+        string uri = new System.Uri(uriString: path).AbsoluteUri;
+        IReadOnlyList<JsonDocument> replies;
+        try
+        {
+            replies = LspTestHarness.Run(
+                JsonSerializer.Serialize(value: new
+                {
+                    jsonrpc = "2.0", id = 1, method = "initialize",
+                    @params = new { processId = (int?)null, rootUri = new System.Uri(uriString: dir).AbsoluteUri, capabilities = new { } }
+                }),
+                LspTestHarness.DidOpen(uri: uri, text: script, languageId: "mielia"),
+                LspTestHarness.DocRequest(id: 60, method: "textDocument/semanticTokens/full", uri: uri),
+                JsonSerializer.Serialize(value: new
+                {
+                    jsonrpc = "2.0", id = 70, method = "textDocument/inlayHint",
+                    @params = new
+                    {
+                        textDocument = new { uri },
+                        range = new { start = new { line = 0, character = 0 }, end = new { line = 50, character = 0 } }
+                    }
+                }),
+                Exit);
+        }
+        finally
+        {
+            Directory.Delete(path: dir, recursive: true);
+        }
+
+        List<string> kinds = LspTestHarness.ReplyWithId(replies: replies, id: 1)!.Value.GetProperty(propertyName: "result")
+            .GetProperty(propertyName: "capabilities").GetProperty(propertyName: "semanticTokensProvider")
+            .GetProperty(propertyName: "legend").GetProperty(propertyName: "tokenTypes").EnumerateArray()
+            .Select(selector: k => k.GetString()!).ToList();
+        int[] data = LspTestHarness.ReplyWithId(replies: replies, id: 60)!.Value.GetProperty(propertyName: "result")
+            .GetProperty(propertyName: "data").EnumerateArray().Select(selector: n => n.GetInt32()).ToArray();
+        string[] lines = script.Split(separator: '\n');
+        var found = new List<(int Line, string Text, string Kind)>();
+        int row = 0;
+        int col = 0;
+        for (int i = 0; i + 4 < data.Length; i += 5)
+        {
+            row += data[i];
+            col = data[i] == 0 ? col + data[i + 1] : data[i + 1];
+            found.Add(item: (row + 1, lines[row].Substring(startIndex: col, length: data[i + 2]), kinds[data[i + 3]]));
+        }
+
+        Assert.Equal(expected: "function", actual: found.Single(predicate: t => t.Line == 3 && t.Text == "show").Kind);
+        Assert.Equal(expected: "function", actual: found.Single(predicate: t => t.Line == 4 && t.Text == "count").Kind);
+
+        List<string> hints = LspTestHarness.ReplyWithId(replies: replies, id: 70)!.Value.GetProperty(propertyName: "result")
+            .EnumerateArray().Select(selector: h => $"{h.GetProperty(propertyName: "position").GetProperty(propertyName: "line").GetInt32() + 1}:{h.GetProperty(propertyName: "label").GetString()}")
+            .ToList();
+        Assert.Contains(expected: "3:[Bool]", collection: hints);
+    }
+
     // ----- Refactors that cut indentation (code actions of kind refactor.rewrite) -----
 
     /// <summary>A document from its lines, with the module header and the import every case needs.</summary>
