@@ -1,0 +1,96 @@
+module Tests/StdlibMi/IntRangeLoopVersionsApi
+
+# A `for` over an `Int` range gives the same values whatever the range: small ends, empty ranges, ends past the
+# 64-bit limits on either side, big numbers, steps of both signs, nested loops, leaving the loop early, and a loop
+# value kept after its round.
+
+import IO/Console
+
+routine values(of: List[Int]) -> Text
+    var text = ""
+    for v in of
+        text = f"{text} {v}"
+    return text
+
+routine first_square_over(limit: Int) -> Int
+    for i in 0 til 100
+        if i * i > limit
+            return i
+    throw AbsentValueError()
+
+routine start()
+    var two_63 = 2 ** 63
+    var two_70 = 2 ** 70
+
+    var small = List[Int]()
+    for i in 1 til 5
+        small.add_last(value: i)
+    for i in 3 to 5
+        small.add_last(value: i)
+    show(f"small:{values(of: small)}")
+
+    var empty = 0
+    for i in 5 til 5
+        empty = empty + 1
+    for i in 5 to 4
+        empty = empty + 1
+    for i in 1 to 5 by -1
+        empty = empty + 1
+    for i in two_70 til two_70
+        empty = empty + 1
+    show(f"empty: {empty}")
+
+    var upper = List[Int]()
+    for i in two_63 - 2 til two_63 + 2
+        upper.add_last(value: i)
+    show(f"past S64_MAX:{values(of: upper)}")
+
+    var lower = List[Int]()
+    for i in -two_63 - 2 to -two_63 + 1
+        lower.add_last(value: i)
+    show(f"past S64_MIN:{values(of: lower)}")
+
+    var big = List[Int]()
+    for i in two_70 til two_70 + 5
+        big.add_last(value: i - two_70)
+    show(f"big: {big[0]} {big[4]} {big.count()}")
+
+    var stepped = List[Int]()
+    for i in 0 til 10 by 3
+        stepped.add_last(value: i)
+    for i in 10 to 0 by -4
+        stepped.add_last(value: i)
+    for i in 0 to two_70 by two_70 // 2
+        stepped.add_last(value: i // two_63)
+    for i in 0 to -two_63 by -two_63
+        stepped.add_last(value: i)
+    show(f"stepped:{values(of: stepped)}")
+
+    var grid = List[Int]()
+    for row in 0 til 3
+        for column in row to row + 2
+            grid.add_last(value: row * 10 + column)
+    show(f"nested:{values(of: grid)}")
+
+    var early = List[Int]()
+    for i in 0 til 20
+        if i % 2 == 1
+            continue
+        if i > 8
+            break
+        early.add_last(value: i)
+    show(f"break and continue:{values(of: early)}")
+    show(f"return: {first_square_over(limit: 50)}")
+    when try first_square_over(limit: 100000)
+        is Int as v => show(f"try: {v}")
+        else => show("try: none")
+
+    var kept = List[Int]()
+    var adders = List[Callable[(Int), Int]]()
+    for i in 0 til 3
+        kept.add_last(value: i)
+        adders.add_last(value: (x) given (i) => x + i)
+    var applied = List[Int]()
+    for adder in adders
+        applied.add_last(value: adder(10))
+    show(f"kept:{values(of: kept)} applied:{values(of: applied)}")
