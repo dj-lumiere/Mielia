@@ -1013,6 +1013,9 @@ A member routine written outside a generic type names its parameters on the rece
   - `g.greet()` runs the routine of the value's own type: the builder switches on the type hash over the types the
     program puts into places of that protocol. A routine of the protocol that takes or gives `Me` can't be called on a
     stored value (ME-S715).
+  - The language server marks such a call with a gray `dispatch` inlay hint after the routine name. Its tooltip lists
+    the types that can be stored in places of that protocol in this build. A call made per type at buildtime (a
+    `thing: Greetable` parameter, `needs T obeys`) gets none.
   - Passing a stored value to a `thing: Greetable` parameter makes that routine's copy for the stored value.
   - `when g` with `is Cat as c =>` takes it apart (`c` is the same entity, or a copy of a record), `g is Cat` tests it.
     Such a `when` needs `else` (ME-S356). An `is T` arm whose `T` doesn't obey the protocol is ME-S357.

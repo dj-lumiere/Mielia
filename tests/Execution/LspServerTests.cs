@@ -226,6 +226,84 @@ public sealed class LspServerTests
         Assert.Contains(expected: "3:[Bool]", collection: hints);
     }
 
+    [Fact]
+    public void StoredProtocolValue_CallShowsDispatchWithTheTypesThatCanBeThere()
+    {
+        const string script =
+            "import IO/Console\n" +
+            "\n" +
+            "protocol Enemy\n" +
+            "    routine Me.hp() -> S64\n" +
+            "\n" +
+            "entity Slime\n" +
+            "    life: S64\n" +
+            "\n" +
+            "routine Slime.hp() -> S64\n" +
+            "    return me.life\n" +
+            "\n" +
+            "record Rock\n" +
+            "    weight: S64\n" +
+            "\n" +
+            "routine Rock.hp() -> S64\n" +
+            "    return me.weight\n" +
+            "\n" +
+            "routine finish(e: Enemy)\n" +
+            "    show(e.hp())\n" +
+            "    return\n" +
+            "\n" +
+            "var enemies = List[Enemy]()\n" +
+            "enemies.add_last(value: Slime(life: 10))\n" +
+            "enemies.add_last(value: Rock(weight: 20))\n" +
+            "for e in enemies\n" +
+            "    show(e.hp())\n" +
+            "var one: Enemy = Rock(weight: 3)\n" +
+            "show(one.hp())\n" +
+            "finish(e: one)\n";
+        string dir = Directory.CreateTempSubdirectory(prefix: "lsp_dispatch_").FullName;
+        string path = Path.Combine(path1: dir, path2: "main.mie");
+        File.WriteAllText(path: path, contents: script);
+        string uri = new System.Uri(uriString: path).AbsoluteUri;
+        IReadOnlyList<JsonDocument> replies;
+        try
+        {
+            replies = LspTestHarness.Run(
+                JsonSerializer.Serialize(value: new
+                {
+                    jsonrpc = "2.0", id = 1, method = "initialize",
+                    @params = new { processId = (int?)null, rootUri = new System.Uri(uriString: dir).AbsoluteUri, capabilities = new { } }
+                }),
+                LspTestHarness.DidOpen(uri: uri, text: script, languageId: "mielia"),
+                JsonSerializer.Serialize(value: new
+                {
+                    jsonrpc = "2.0", id = 70, method = "textDocument/inlayHint",
+                    @params = new
+                    {
+                        textDocument = new { uri },
+                        range = new { start = new { line = 0, character = 0 }, end = new { line = 50, character = 0 } }
+                    }
+                }),
+                Exit);
+        }
+        finally
+        {
+            Directory.Delete(path: dir, recursive: true);
+        }
+
+        List<JsonElement> hints = LspTestHarness.ReplyWithId(replies: replies, id: 70)!.Value.GetProperty(propertyName: "result")
+            .EnumerateArray().Where(predicate: h => h.GetProperty(propertyName: "label").GetString() == "dispatch").ToList();
+        List<string> at = hints.Select(selector: h =>
+                $"{h.GetProperty(propertyName: "position").GetProperty(propertyName: "line").GetInt32() + 1}:" +
+                $"{h.GetProperty(propertyName: "position").GetProperty(propertyName: "character").GetInt32() + 1}")
+            .ToList();
+
+        // A loop element and a variable of the protocol, after the routine name. A parameter of the protocol is made
+        // for each type at buildtime: no hint.
+        Assert.Equal(expected: ["26:14", "28:12"], actual: at);
+        string tooltip = hints[index: 0].GetProperty(propertyName: "tooltip").GetString()!;
+        Assert.Contains(expectedSubstring: "Types a place of Enemy holds in this build: Rock, Slime.", actualString: tooltip);
+        Assert.DoesNotContain(expectedSubstring: "Roamed", actualString: tooltip);
+    }
+
     // ----- Refactors that cut indentation (code actions of kind refactor.rewrite) -----
 
     /// <summary>A document from its lines, with the module header and the import every case needs.</summary>
