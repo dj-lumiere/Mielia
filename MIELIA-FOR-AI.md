@@ -286,8 +286,8 @@ harmless. A standard library module is its folder (`Mielia/Standard/System/Text/
   is ME-S767. `using` on an entity calls its
   `enter`/`exit` on that entity. Works giving no value can be gathered.
 - `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or ME-S202 (a `return`
-  path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
-  one-item tuple as `(1,)`. `try sv.to[List[Int]]()` recovers a bad element too. A cancelled job nothing
+  path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `empty`, an
+  empty Optional as `none`, a one-item tuple as `(1,)`. `try sv.to[List[Int]]()` recovers a bad element too. A cancelled job nothing
   started is done (`is_done()` is true).
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
@@ -786,9 +786,12 @@ variant Number
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
   `has` / `has_any` / `lacks` / `==` (`perms.has(WRITE)`, `perms.has(READ and WRITE)` is all of them,
   `perms.has_any(READ and WRITE)` at least one, `perms.lacks(READ and WRITE)` none), and taken off with `without` (`perms.without(WRITE)`: where a
-  value of the flags type goes, its members are named bare). The flags value with no member on is `none` where the
-  flags type is expected (`var marks: CellMarks = none`, `marks == none`, a preset or record preset). A `CellMarks?`
-  slot takes `none` as the absent value. There is no `all_off()`.
+  value of the flags type goes, its members are named bare). The flags value with no member on is `empty`, a
+  contextual keyword where the flags type is expected (`var marks: CellMarks = empty`, `marks == empty`, a parameter, a
+  return, a preset or record preset) and in a `CellMarks?` place or a generic `T` / `T?` place with T a flags type.
+  Everywhere else `empty` is a name like any other, and a visible value named `empty` keeps its meaning. `none` is the
+  None value only: a `CellMarks?` slot takes it as the absent value, and `none` where a flags value goes is ME-S016
+  saying to write `empty` (`migrate --step flags-none` rewrites it). There is no `all_off()`.
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
   `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Int | Text`,
   `List[Circle | Square]` (same types in any order = one type; a smaller one goes where a larger one is expected;
