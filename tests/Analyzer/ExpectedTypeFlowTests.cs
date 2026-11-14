@@ -99,4 +99,14 @@ public class ExpectedTypeFlowTests
             predicate: e => e.Code == SemanticDiagnosticCode.ResultTypeArgumentUnknown);
         Assert.Contains(expectedSubstring: "'B64.add' fits more than one way here", actualString: error.Message);
     }
+
+    /// <summary>An argument that failed while the overload was looked for is reported once, not again against
+    /// another overload's parameter.</summary>
+    [Fact]
+    public void Analyze_FailedArgument_ReportedOnce()
+    {
+        AnalysisResult result = AnalyzeSaMielia(source: Program(body: "show(n.to())"), fileName: "expected_type_once.mie");
+        SemanticError error = Assert.Single(collection: result.Errors);
+        Assert.Equal(expected: SemanticDiagnosticCode.ResultTypeArgumentUnknown, actual: error.Code);
+    }
 }
