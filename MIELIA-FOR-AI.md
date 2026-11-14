@@ -340,10 +340,17 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   (`S32`..`U256` to `B16`, `U128`/`S256`/`U256` to `B32`). An infinity stays infinite and a NaN stays a NaN.
   Each has `to_unchecked[T]()`, the raw rounded value (an infinity past the range); a value in range is the
   same in both. `try big.to[B32]()` recovers. A conversion that can't overflow has only `to[T]()`.
-- `[T]` may be left out where the surrounding code says the type: a declared variable type, the routine's
-  return type (`return count.to()`), a parameter (`takes(n: x.to())`), and through `try`/`check`. Where
-  nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is ME-S645: write
-  `.to[S64]()`.
+- `[T]` may be left out where the surrounding code says the type. The expected type flows inward, never from later
+  uses of a variable: a declared variable type, an assignment or compound assignment target (`total += n.to()`), the
+  routine's return type (`return count.to()`), a parameter (`takes(n: x.to())`), `try`/`check`; from there into each
+  operand of an operator whose routine takes and gives `Me` (`var r: B128 = i.to() * x`, chosen among the routines
+  that give the expected type), the other side of a comparison (`if n.to() < limit`), the right operand from the left
+  one's operator parameter (`x * n.to()`), and the receiver of a member call that gives `Me` back, or `Me?` where a
+  `T?` goes (`var s: B64 = n.to().sqrt().sin()`). The same holds for every generic call whose type argument only the
+  result names (`ask()`, a user `zero[T]() -> T`). Arguments bind a type parameter before the expected type does
+  (`var e: B64 = pick(x: n)` with `n: S64` is a mismatch). Where nothing gives it (`var n = count.to()`,
+  `n.to() < 5`, `count.to().count()`) it is ME-S645 (ME-S161 for a free routine), and the message lists the places
+  looked at: write `.to[S64]()`.
 - A pair with no conversion is ME-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
   Converting a value to its own type is ME-S646 too (use the value as it is), and so is building a type from a
   variable of that type (`Int(n)`: `n` is an `Int` already). A number written out is read as the type (`Int(1)`).
