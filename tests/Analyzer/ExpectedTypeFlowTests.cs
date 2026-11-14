@@ -22,6 +22,11 @@ public class ExpectedTypeFlowTests
                                                    routine widened(n: S64) -> B64
                                                        return n.to()
 
+                                                   routine B64.positive() -> B64?
+                                                       if me > 0.0
+                                                           return me
+                                                       return none
+
                                                    var n: S64 = 9
                                                    var a: B64 = 0.0
                                                    {{body}}
@@ -72,5 +77,26 @@ public class ExpectedTypeFlowTests
         SemanticError error = Assert.Single(collection: result.Errors,
             predicate: e => e.Code == SemanticDiagnosticCode.ResultTypeArgumentUnknown);
         Assert.Contains(expectedSubstring: "The builder looks at a written variable type", actualString: error.Message);
+    }
+
+    [Fact]
+    public void Analyze_LeftOperandFromRight_Builds() => AssertBuilds(body: "var x: B128 = 2.0\nshow(n.to() * x)");
+
+    [Fact]
+    public void Analyze_ChainedComparison_Builds() =>
+        AssertBuilds(body: "var b: B64 = 10.0\nif 0.0 <= n.to() <= b\n    show(\"inside\")");
+
+    [Fact]
+    public void Analyze_MaybeChain_Builds() => AssertBuilds(body: "var p: B64? = n.to().positive()\nshow(p)");
+
+    /// <summary>An operator routine that fits more than one way gives no type, and the message names its
+    /// routines.</summary>
+    [Fact]
+    public void Analyze_SeveralOperatorRoutines_NamesThem()
+    {
+        AnalysisResult result = AnalyzeSaMielia(source: Program(body: "show(a + n.to())"), fileName: "expected_type_several.mie");
+        SemanticError error = Assert.Single(collection: result.Errors,
+            predicate: e => e.Code == SemanticDiagnosticCode.ResultTypeArgumentUnknown);
+        Assert.Contains(expectedSubstring: "'B64.add' fits more than one way here", actualString: error.Message);
     }
 }
