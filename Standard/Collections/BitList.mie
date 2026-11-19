@@ -332,7 +332,7 @@ routine BitList.set_all(value: Bool)
     var byte_count = me.count +% 7 >> 3
     var fill_byte: U8 = if value then 0xFF else 0x00
     danger
-        ig_set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
+        set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
     return
 
 ### Toggles the bit at a position.

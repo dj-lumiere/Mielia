@@ -14,7 +14,7 @@ public class RevareOnlyImportTests
     /// <summary>The errors of building <paramref name="source"/> as a Mielia entry file.</summary>
     private static List<SemanticError> BuildErrors(string source)
     {
-        string dir = Path.Combine(path1: Path.GetTempPath(), path2: "sf-rf-only-" + Guid.NewGuid().ToString(format: "N"));
+        string dir = Path.Combine(path1: Path.GetTempPath(), path2: "anv-rv-only-" + Guid.NewGuid().ToString(format: "N"));
         Directory.CreateDirectory(path: dir);
         try
         {

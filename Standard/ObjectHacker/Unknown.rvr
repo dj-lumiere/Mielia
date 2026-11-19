@@ -334,7 +334,7 @@ secret routine unknown_wrap[T](
 ) -> Unknown
 needs RecordType T
     danger
-        var cell = Hijacked[T](ig_allocate_dynamic(size: T.data_size()))
+        var cell = Hijacked[T](allocate_dynamic(size: T.data_size()))
         cell.poke(value)
         var kind = UnknownKind(
             type_id: type_id,
@@ -410,7 +410,7 @@ needs RecordType T
 secret routine unknown_wrap_routine(value: T) -> Unknown
 needs RoutineType T
     danger
-        var cell = Hijacked[T](ig_allocate_dynamic(size: T.data_size()))
+        var cell = Hijacked[T](allocate_dynamic(size: T.data_size()))
         cell.poke(value)
         var kind = UnknownKind(
             type_id: T.type_id(),

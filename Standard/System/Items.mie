@@ -90,7 +90,7 @@ routine Items[T, COUNT].carry(source: U64, target: U64, count: U64)
                 me.slot(position: i).peek().destruct()
         i = i +% 1
     danger
-        ig_copy_bytes_at(
+        copy_bytes_at(
             dest: me.slot(position: target).get_address(),
             src: me.slot(position: source).get_address(),
             size: T.data_size() * n,
@@ -172,5 +172,5 @@ secret routine Items[T, COUNT].slot(position: U64) -> Hijacked[T]
 ### :param count: How many places to zero.
 secret routine Items[T, COUNT].clear_places(from: U64, count: U64)
     danger
-        ig_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
+        set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
     return

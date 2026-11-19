@@ -407,7 +407,7 @@ internal sealed class EntityLoweringPass
         switch (stmt)
         {
             // The adapter a recovery variant takes out of the carrier a recovered call gave (`var it =
-            // __rf_prop_1.value`) keeps the collection the call was made over, when it is a shared handle. One the
+            // __anv_prop_1.value`) keeps the collection the call was made over, when it is a shared handle. One the
             // library gives as the entity itself is used up in the routine, while the hidden variable holds the
             // collection.
             case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } unwrap } taken }
@@ -479,7 +479,7 @@ internal sealed class EntityLoweringPass
     /// (see <see cref="AdapterKeeper"/>).</summary>
     private readonly Dictionary<string, Expression> _carrierSources = new(comparer: StringComparer.Ordinal);
 
-    /// <summary>The variable whose carried value <paramref name="expr"/> reads (<c>__rf_prop_1.value</c>, also
+    /// <summary>The variable whose carried value <paramref name="expr"/> reads (<c>__anv_prop_1.value</c>, also
     /// stolen or shared), or null.</summary>
     private static string? CarrierRead(Expression expr)
     {
@@ -535,7 +535,7 @@ internal sealed class EntityLoweringPass
         protected override Expression VisitCall(CallExpression e)
         {
             bool whole = ReferenceEquals(objA: e, objB: _whole);
-            // A recovered call that makes an adapter (`__rf_prop_1 = xs.select[try](...)` in a recovery variant) gives
+            // A recovered call that makes an adapter (`__anv_prop_1 = xs.select[try](...)` in a recovery variant) gives
             // it inside a carrier: the collection is kept in a hidden variable, and the adapter taken out of the
             // carrier keeps it (KeepSourcesOf).
             if (e.Callee is MemberExpression { Object: var carriedReceiver } carriedMember &&
@@ -786,9 +786,9 @@ internal sealed class EntityLoweringPass
         }
 
         // A recovery variant of a routine of Mielia's library takes the entity a Revare routine gave out of its
-        // carrier (`var x = steal __rf_prop_1.value`): the call was made bare, so the value is moved into a handle
+        // carrier (`var x = steal __anv_prop_1.value`): the call was made bare, so the value is moved into a handle
         // here, as the call's result is where the call stands alone.
-        if (vd.Name.StartsWith(value: "__rf_", comparisonType: StringComparison.Ordinal) &&
+        if (vd.Name.StartsWith(value: "__anv_", comparisonType: StringComparison.Ordinal) &&
             CarriedEntityToWrap(expr: lowered) is { } carriedEntity)
         {
             lowered = WrapInRoam(inner: lowered, entity: carriedEntity);
@@ -816,7 +816,7 @@ internal sealed class EntityLoweringPass
             : ds with { Declaration = vd with { Initializer = init } };
     }
 
-    /// <summary>The calls a recovery variant keeps in a carrier (<c>var __rf_prop_1 = recv.f()</c>, an
+    /// <summary>The calls a recovery variant keeps in a carrier (<c>var __anv_prop_1 = recv.f()</c>, an
     /// <c>Optional[E]</c> or <c>Check[E]</c> of a bare entity), by the carrier's variable.</summary>
     private readonly Dictionary<string, Expression> _bareEntityCarriers = new(comparer: StringComparer.Ordinal);
 

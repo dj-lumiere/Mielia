@@ -32,14 +32,15 @@ public static class MieliaKeywords
         return withExpand;
     }
 
-    /// <summary>Whether <paramref name="fileName"/> is inside the standard library directory.</summary>
+    /// <summary>Whether <paramref name="fileName"/> is inside the standard library directory, or inside the checkout's
+    /// <c>Mielia/Standard</c> the builder copies that directory from (what <c>docs</c> and <c>format</c> read).</summary>
     private static bool IsStandardLibraryFile(string fileName)
     {
         try
         {
-            string root = Path.GetFullPath(path: Builder.Declaration.StdlibLoader.GetDefaultStdlibPath());
-            return Path.GetFullPath(path: fileName)
-                       .StartsWith(value: root, comparisonType: StringComparison.OrdinalIgnoreCase);
+            string file = Path.GetFullPath(path: fileName);
+            return StandardLibraryRoots.Any(predicate: root =>
+                file.StartsWith(value: root, comparisonType: StringComparison.OrdinalIgnoreCase));
         }
         catch (ArgumentException)
         {
@@ -50,6 +51,42 @@ public static class MieliaKeywords
             return false;
         }
     }
+
+    /// <summary>The standard library directory the builder reads, and the checkout's source of it when there is one,
+    /// each ending in a separator so a sibling folder with a longer name never matches.</summary>
+    private static readonly Lazy<List<string>> LazyStandardLibraryRoots = new(valueFactory: () =>
+    {
+        var roots = new List<string>();
+        try
+        {
+            roots.Add(item: WithSeparator(path: Path.GetFullPath(path: Builder.Declaration.StdlibLoader.GetDefaultStdlibPath())));
+        }
+        catch (Exception e) when (e is ArgumentException or NotSupportedException or IOException or InvalidOperationException)
+        {
+            // No installed library: only the checkout's source counts.
+        }
+
+        // A development checkout: the builder sits a few folders under the workspace, next to Mielia/Standard.
+        string? current = Builder.BuilderLocation.Directory;
+        for (int i = 0; i < 6 && current != null; i++)
+        {
+            string source = Path.Combine(path1: current, path2: "Mielia", path3: "Standard");
+            if (Directory.Exists(path: source))
+            {
+                roots.Add(item: WithSeparator(path: Path.GetFullPath(path: source)));
+                break;
+            }
+
+            current = Path.GetDirectoryName(path: Path.TrimEndingDirectorySeparator(path: current));
+        }
+
+        return roots;
+    });
+
+    private static List<string> StandardLibraryRoots => LazyStandardLibraryRoots.Value;
+
+    private static string WithSeparator(string path) =>
+        Path.EndsInDirectorySeparator(path: path) ? path : path + Path.DirectorySeparatorChar;
 
     private static Dictionary<string, TokenType> Build()
     {
