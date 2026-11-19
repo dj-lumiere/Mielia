@@ -27,7 +27,7 @@ routine breach()
 routine set_exit_code(code: S32)
 
 ### Möller-Granlund reciprocal of a normalized `d`, delegated to the arch-gated C primitive
-### `rf_reciprocal_word` (returns 0 on x86-64/MSVC where the divide is hardware; the real M-G
+### `ig_reciprocal_word` (returns 0 on x86-64/MSVC where the divide is hardware; the real M-G
 ### reciprocal on arm64/wasm). Hoist it: compute once per divisor, reuse across every `div2by1`
 ### by that `d` — that reuse is what makes M-G win on arm64 (see div_ab_bench).
 ### :param d: The normalized divisor, with its top bit set.

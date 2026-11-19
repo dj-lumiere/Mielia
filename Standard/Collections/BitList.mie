@@ -257,7 +257,7 @@ secret routine BitList.reserve_raw(new_capacity: U64)
             # whole words at word boundaries, so the untouched tail is never read.
             if me.count > 0
                 var copy_words = bit_words(me.count)
-                C::rf_copy_bytes_at(
+                C::ig_copy_bytes_at(
                     dest: new_data.get_address(),
                     src: me.data.get_address(),
                     size: copy_words *% 8,
@@ -332,7 +332,7 @@ routine BitList.set_all(value: Bool)
     var byte_count = me.count +% 7 >> 3
     var fill_byte: U8 = if value then 0xFF else 0x00
     danger
-        rf_set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
+        ig_set_bytes_at(dest: me.data.get_address(), value: fill_byte, size: ByteSize(bytes: byte_count))
     return
 
 ### Toggles the bit at a position.

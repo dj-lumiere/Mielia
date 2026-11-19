@@ -25,7 +25,7 @@ secret routine hooks_leave()
 ### :returns: The flow's id.
 secret routine hook_flow_id() -> U64
     danger
-        return C::rf_current_task_id()
+        return C::ig_current_task_id()
 
 ### Makes a value the registry keeps safe to hold and let go on any thread: its handle counts with unbroken
 ### arithmetic from now on. Called before the value is stored, while only the storing thread has it.

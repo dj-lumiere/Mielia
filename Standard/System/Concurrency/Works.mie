@@ -97,9 +97,9 @@ secret routine Work[T].wind_down()
 secret routine Work[T].join_race(race: Addr)
     danger
         if me.state.is_coro()
-            C::rf_race_add_coro(race: race, coro: me.state.coro_handle())
+            C::ig_race_add_coro(race: race, coro: me.state.coro_handle())
         else
-            C::rf_race_add_task(race: race, task: me.state.task_handle())
+            C::ig_race_add_task(race: race, task: me.state.task_handle())
     return
 
 ### The value the finished work produced, or its failure thrown here. A cancelled Work throws
@@ -161,11 +161,11 @@ routine List[Work[T]].race() -> T
     danger
         if not me.launch_together()
             throw TaskSpawnError()
-        var race = C::rf_race_begin()
+        var race = C::ig_race_begin()
         for job in me
             job.join_race(race: race)
-        var winner = (C::rf_race_wait(race: race)).to[Int]()
-        C::rf_race_end(race: race)
+        var winner = (C::ig_race_wait(race: race)).to[Int]()
+        C::ig_race_end(race: race)
         var value = me[winner].result()
         for job in me
             job.reap()
@@ -197,11 +197,11 @@ routine List[Work[T]].next_finished() -> Work[T]
     danger
         if not me.launch_together()
             throw TaskSpawnError()
-        var race = C::rf_race_begin()
+        var race = C::ig_race_begin()
         for job in me
             job.join_race(race: race)
-        var winner = (C::rf_race_wait(race: race)).to[Int]()
-        C::rf_race_end(race: race)
+        var winner = (C::ig_race_wait(race: race)).to[Int]()
+        C::ig_race_end(race: race)
         return me.remove_at(index: winner)
 
 ### Drives the jobs concurrently and waits for all of them, returning each one's result or failure in the list's

@@ -440,7 +440,7 @@ routine Places[T].grow_to(room: U64)
     var moved = new_memory_block[T](room: room)
     if old > 0
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: moved.data.get_address(),
                 src: me.block.data.get_address(),
                 size: T.data_size() * old,
@@ -1065,18 +1065,18 @@ secret routine places_turn[T](base: Hijacked[T], room: U64, count: U64)
     var size = T.data_size()
     var rest = room - shift
     danger
-        var held = hijacked_from[T](rf_allocate_dynamic_uninit(size * room))
-        rf_copy_bytes_at(
+        var held = hijacked_from[T](ig_allocate_dynamic_uninit(size * room))
+        ig_copy_bytes_at(
             dest: held.get_address(),
             src: place_at[T](base: base, position: shift).get_address(),
             size: size * rest,
         )
-        rf_copy_bytes_at(
+        ig_copy_bytes_at(
             dest: held.offset(size * rest).get_address(),
             src: base.get_address(),
             size: size * shift,
         )
-        rf_copy_bytes_at(dest: base.get_address(), src: held.get_address(), size: size * room)
+        ig_copy_bytes_at(dest: base.get_address(), src: held.get_address(), size: size * room)
         held.invalidate()
     return
 
@@ -1132,7 +1132,7 @@ secret routine places_move[T](base: Hijacked[T], target: U64, source: U64, count
     if count == 0
         return
     danger
-        rf_copy_bytes_at(
+        ig_copy_bytes_at(
             dest: place_at[T](base: base, position: target).get_address(),
             src: place_at[T](base: base, position: source).get_address(),
             size: T.data_size() * count,
@@ -1147,7 +1147,7 @@ secret routine places_clear[T](base: Hijacked[T], from: U64, count: U64)
     if count == 0
         return
     danger
-        rf_set_bytes_at(
+        ig_set_bytes_at(
             dest: place_at[T](base: base, position: from).get_address(),
             value: 0,
             size: T.data_size() * count,
@@ -1183,7 +1183,7 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
     var start: U64 = 0
     lateinit var held: Hijacked[T]
     danger
-        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
+        held = hijacked_from[T](ig_allocate_dynamic_uninit(size))
     until start >= n
         var end = start + BUFFER_SORT_MIN_RUN
         if end > n
@@ -1196,7 +1196,7 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
         return
     lateinit var scratch: Hijacked[T]
     danger
-        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
+        scratch = hijacked_from[T](ig_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
     until width >= n
         var left: U64 = 0
@@ -1234,7 +1234,7 @@ secret routine MemoryBlock[T].places_insertion_sort(
     var i = start + 1
     until i >= end
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: held.get_address(),
                 src: place_at[T](base: base, position: i).get_address(),
                 size: size,
@@ -1244,7 +1244,7 @@ secret routine MemoryBlock[T].places_insertion_sort(
             places_move[T](base: base, target: j, source: j - 1, count: 1)
             j = j - 1
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: j).get_address(),
                 src: held.get_address(),
                 size: size,
@@ -1284,7 +1284,7 @@ secret routine MemoryBlock[T].places_merge(
 )
     var size = T.data_size()
     danger
-        rf_copy_bytes_at(
+        ig_copy_bytes_at(
             dest: scratch.offset(size * left).get_address(),
             src: place_at[T](base: base, position: left).get_address(),
             size: size * (right - left),
@@ -1298,7 +1298,7 @@ secret routine MemoryBlock[T].places_merge(
             take_b = compare(scratch.offset(size * b).peek(), scratch.offset(size * a).peek())
         var from = if take_b then b else a
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out).get_address(),
                 src: scratch.offset(size * from).get_address(),
                 size: size,
@@ -1310,14 +1310,14 @@ secret routine MemoryBlock[T].places_merge(
         out = out + 1
     if a < mid
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out).get_address(),
                 src: scratch.offset(size * a).get_address(),
                 size: size * (mid - a),
             )
     if b < right
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out + (mid - a)).get_address(),
                 src: scratch.offset(size * b).get_address(),
                 size: size * (right - b),
@@ -1336,7 +1336,7 @@ needs T obeys Comparable
     var start: U64 = 0
     lateinit var held: Hijacked[T]
     danger
-        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
+        held = hijacked_from[T](ig_allocate_dynamic_uninit(size))
     until start >= n
         var end = start + BUFFER_SORT_MIN_RUN
         if end > n
@@ -1349,7 +1349,7 @@ needs T obeys Comparable
         return
     lateinit var scratch: Hijacked[T]
     danger
-        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
+        scratch = hijacked_from[T](ig_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
     until width >= n
         var left: U64 = 0
@@ -1381,7 +1381,7 @@ needs T obeys Comparable
     var i = start + 1
     until i >= end
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: held.get_address(),
                 src: place_at[T](base: base, position: i).get_address(),
                 size: size,
@@ -1391,7 +1391,7 @@ needs T obeys Comparable
             places_move[T](base: base, target: j, source: j - 1, count: 1)
             j = j - 1
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: j).get_address(),
                 src: held.get_address(),
                 size: size,
@@ -1419,7 +1419,7 @@ secret routine places_merge_less[T](base: Hijacked[T], left: U64, mid: U64, righ
 needs T obeys Comparable
     var size = T.data_size()
     danger
-        rf_copy_bytes_at(
+        ig_copy_bytes_at(
             dest: scratch.offset(size * left).get_address(),
             src: place_at[T](base: base, position: left).get_address(),
             size: size * (right - left),
@@ -1433,7 +1433,7 @@ needs T obeys Comparable
             take_b = scratch.offset(size * b).peek() < scratch.offset(size * a).peek()
         var from = if take_b then b else a
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out).get_address(),
                 src: scratch.offset(size * from).get_address(),
                 size: size,
@@ -1445,14 +1445,14 @@ needs T obeys Comparable
         out = out + 1
     if a < mid
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out).get_address(),
                 src: scratch.offset(size * a).get_address(),
                 size: size * (mid - a),
             )
     if b < right
         danger
-            rf_copy_bytes_at(
+            ig_copy_bytes_at(
                 dest: place_at[T](base: base, position: out + (mid - a)).get_address(),
                 src: scratch.offset(size * b).get_address(),
                 size: size * (right - b),
