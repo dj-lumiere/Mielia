@@ -1,0 +1,2 @@
+# Reads environment variables, and the WASI runtime hands the program none.
+not wasm32

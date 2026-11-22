@@ -1,0 +1,2 @@
+# The Lapila backend does not translate a call to a routine with no value used as a value yet.
+not wasm32
