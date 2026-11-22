@@ -1708,6 +1708,15 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 - A section or key `config.toml` does not read is a build error naming it, and the key meant when there is one (`module-paths` →
   "Did you mean module_paths?"). The multi-word keys are `module_paths`, `c_libraries`, `library_paths` and the hyphenated rest.
 - A single script needs no manifest: `mielia run script.mie`. Without a manifest the build mode is `debug`.
+- **WebAssembly.** `triple = "wasm32-wasip1-none"` under `[target]` builds a `.wasm` program for WASI, linked with
+  wasm-ld (LLVM 22 with lld). `mielia run` runs it in the WASI runtime that `runner = "..."` under `[target]` names (a
+  name on PATH, or a path from the `config.toml` folder), else in `wasmtime` from PATH, with the working directory
+  opened as `.` and the system's temporary directory as `/tmp`. Leaving `triple` out builds for this machine. What
+  wasm32 does not have: a program that starts a Work (`f.to[Work](...)`) is build error ME-S900, which shows the call
+  path from `start` to the place the Work starts (WASI runs one routine at a time, and a Work runs alongside the routine
+  that starts it). No processes, no `CpuEventManager` events, no working directory (`working_directory()` fails with
+  `NotFoundError`), files only below the directories the runtime opened, and only the environment variables the
+  runtime passes.
 - **Moving 0.1 code:** `mielia migrate <folder>` first renames every source with the previous extension to `.mie`
   (`--step extensions` does only that, with the `ME-` spelling of diagnostic codes in comments and `mielia-version`
   in `config.toml`; such a file given to the builder is a build error naming the new name), then indents a file written in steps of 2 spaces in steps of 4
