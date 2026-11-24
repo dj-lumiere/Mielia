@@ -26,8 +26,8 @@ namespace Mielia.Passes;
 /// of a memory falls back to the copy when a name in the body is spelled like the loop variable. A loop whose body only
 /// reads the loop variable keeps the read as it is. A loop that takes its element apart (<c>for (a, b) in ...</c>)
 /// already binds copies and is left alone.
-/// <para>Runs on analyzed user routines before the entity lowering and before scope teardown, so the teardown's
-/// member-write release sees the element's place or the copy.</para>
+/// <para>Runs on the analyzed routines of every Mielia file, the library's own included, before the entity lowering and
+/// before scope teardown, so the teardown's member-write release sees the element's place or the copy.</para>
 /// </summary>
 internal sealed class RecordLoopElementPass(TypeRegistry registry)
 {
@@ -89,8 +89,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
 
     private bool IsProgramMieliaFile(string? file)
     {
-        return file != null && !registry.IsStandardLibraryFile(filePath: file) &&
-               Builder.Frontends.Languages.OfFile(fileName: file) == TypeModel.Enums.Language.Mielia;
+        return file != null && Builder.Frontends.Languages.OfFile(fileName: file) == TypeModel.Enums.Language.Mielia;
     }
 
     private Statement LowerBody(Statement body)
