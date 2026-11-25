@@ -157,8 +157,14 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
 
         WhenClause arm = step.Clauses[index: armIndex];
         string name = ((ElsePattern)arm.Pattern).VariableName!;
-        if (name.StartsWith(value: "_lf_seen_", comparisonType: StringComparison.Ordinal) ||
-            ElementOf(step: step) is not RecordTypeSymbol element || !IsChangeableValue(type: element) ||
+        EntityTypeSymbol? walk = MemoryWalkOf(emitter: emitter);
+        TypeSymbol? element = ElementOf(step: step);
+        // A type parameter of the routine (`for x in xs` over a `List[T]`) may be a record once it is concrete, so
+        // a walk over the places of a memory reaches it in place too. Through its place an entity's handle reaches
+        // the same entity, as the handle read out does.
+        bool parameter = element is GenericParameterTypeSymbol && walk != null;
+        if (name.StartsWith(value: "_lf_seen_", comparisonType: StringComparison.Ordinal) || element == null ||
+            !(parameter || element is RecordTypeSymbol record && IsChangeableValue(type: record)) ||
             !ChangesThrough(body: arm.Body, name: name))
         {
             return null;
@@ -166,18 +172,23 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
 
         int n = _count++;
         Statement? body = null;
-        if (MemoryWalkOf(emitter: emitter) is { } walk &&
-            !AstWalker.BoundNames(node: arm.Body).Contains(item: name))
+        if (walk != null && !AstWalker.BoundNames(node: arm.Body).Contains(item: name))
         {
             body = InPlace(body: arm.Body, name: name, element: element, emitter: emitter, walk: walk,
                 iterator: iterator, n: n);
         }
 
         string seen = $"_lf_seen_{n}";
+        if (body == null && parameter)
+        {
+            return null;
+        }
+
         if (body == null)
         {
+            // A record of a type parameter may hold managed values once the parameter is concrete, so it is copied.
             TypeRegistry.Lifecycle lifecycle = registry.GetLifecycle(type: element);
-            if (lifecycle.IsBorrow || lifecycle.Destroy == null)
+            if (!HasTypeParameter(type: element) && (lifecycle.IsBorrow || lifecycle.Destroy == null))
             {
                 // Nothing the record holds is released by a member write, so the read is safe to change.
                 return null;
@@ -208,13 +219,13 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
     }
 
     /// <summary>Whether <paramref name="type"/> is a record or a tuple of member variables a program can change: not a
-    /// handle, a pointer or a carrier, not an entity kind, and concrete.</summary>
+    /// handle, a pointer or a carrier, and not an entity kind. Its member types may hold the routine's type parameters
+    /// (<c>Cell[T]</c>): the place or the copy is made in the generic routine and made concrete with it.</summary>
     private bool IsChangeableValue(RecordTypeSymbol type)
     {
         return type.BackendType == null &&
                type.CarrierKind == TypeModel.Enums.CarrierKind.None &&
-               TypeRegistry.GetRcWrapperBaseName(type: type) == null && !registry.IsEntityKind(type: type) &&
-               !HasTypeParameter(type: type);
+               TypeRegistry.GetRcWrapperBaseName(type: type) == null && !registry.IsEntityKind(type: type);
     }
 
     private static bool HasTypeParameter(TypeSymbol type)
@@ -274,7 +285,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
 
     /// <summary>The body with the place the step read bound first and every use of <paramref name="name"/> made the
     /// record at that place.</summary>
-    private Statement? InPlace(Statement body, string name, RecordTypeSymbol element, TypeSymbol emitter,
+    private Statement? InPlace(Statement body, string name, TypeSymbol element, TypeSymbol emitter,
         EntityTypeSymbol walk, string iterator, int n)
     {
         // The routine of the walk itself, called through the handle the loop holds, as the loop's `emit` is.
@@ -321,7 +332,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
     }
 
     /// <summary>The body with the element copied into <paramref name="name"/> first.</summary>
-    private static Statement Copied(Statement body, string name, string seen, RecordTypeSymbol element)
+    private static Statement Copied(Statement body, string name, string seen, TypeSymbol element)
     {
         SourceLocation loc = body.Location;
         var copy = new DeclarationStatement(
@@ -348,7 +359,7 @@ internal sealed class RecordLoopElementPass(TypeRegistry registry)
         string name,
         string place,
         TypeSymbol placeType,
-        RecordTypeSymbol element) : AstRewriter
+        TypeSymbol element) : AstRewriter
     {
         public override Expression VisitExpression(Expression expr)
         {

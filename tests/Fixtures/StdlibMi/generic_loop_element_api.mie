@@ -1,0 +1,63 @@
+module Tests/StdlibMi/GenericLoopElementApi
+
+# A for loop in a generic routine changes the elements it walks, whether the element type holds the routine's type
+# parameter (`Cell[T]`) or is the parameter itself (`T`, a record or an entity). A creator of a generic type takes
+# its type arguments from the type it goes to, and an optional collection literal holds its values as optionals.
+protocol Counting
+    routine Me.bump(by: Int)
+    routine Me.total() -> Int
+
+record Tally
+obeys Counting
+    label: Text
+    n: Int
+
+routine Tally.bump(by: Int)
+    me.n += by
+    me.label = f"tally {me.n}"
+
+routine Tally.total() -> Int
+    return me.n
+
+entity Meter
+obeys Counting
+    n: Int
+
+routine Meter.bump(by: Int)
+    me.n += by
+
+routine Meter.total() -> Int
+    return me.n
+
+record Cell[T]
+    value: T
+    tag: Text
+
+routine retag[T](cells: List[Cell[T]], tag: Text)
+    for c in cells
+        c.tag = f"{tag} {c.value}"
+
+routine bump_each[T](xs: List[T]) needs T obeys Counting
+    for x in xs
+        x.bump(by: 2)
+
+routine start()
+    var cells = [Cell[Text](value: "one", tag: "a"), Cell[Text](value: "two", tag: "b")]
+    retag(cells: cells, tag: "t")
+    show(f"{cells[0].tag}, {cells[1].tag}")
+    var tallies = [Tally(label: "x", n: 0), Tally(label: "y", n: 1)]
+    bump_each(xs: tallies)
+    show(f"{tallies[0].label}, {tallies[1].label}")
+    var a = Meter(n: 1)
+    var meters = [a, Meter(n: 5)]
+    bump_each(xs: meters)
+    show(f"meters {a.total()} {meters[1].total()}")
+    var small: List[Cell[U8]] = [Cell(value: 7, tag: "u8")]
+    retag(cells: small, tag: "small")
+    show(small[0].tag)
+    var one: Cell[U8] = Cell(value: 255, tag: "max")
+    show(f"{one.value} {one.tag}")
+    var maybe: List[Int?] = [1, none]
+    show(f"maybe {maybe[0] ?? -1} {maybe[1] ?? -1}")
+    var named: Dict[Text, Int?] = {"a": 3, "b": none}
+    show(f"named {named["a"] ?? -1} {named["b"] ?? -1}")
