@@ -694,12 +694,21 @@ routine Account.deposit(amount: Int)                       # member routine, rec
   (`try` gives `none`, no keyword stops the program there), `e.fits[Callable[...]]()` asks without failing. Routine
   values of different signatures fit in one `List[ErasedCallable]` (an event bus).
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
-- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
+- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@property`, `@inline`, `@noinline`, `@crash_only`,
   `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is ME-G221, and a
   misspelling names the close one. `@noinline` keeps a routine out of its callers (its own body is still optimized),
   and `@inline` with `@noinline` on one routine is ME-G227. A name that starts with a capital is the program's own annotation (§19): a record
   that obeys `Annotation`, and ME-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
   yet.
+- **`@property`** on a member routine makes it read like a member variable, without parentheses: `r.area`
+  (`@property routine Rect.area() -> Int`). It takes nothing but `me` and gives a result (else ME-S717), its own body
+  writes nothing into `me` (ME-S718, a call of another routine on `me` is not looked into), its type has no member
+  variable of the same name (ME-S719), `r.area()` is ME-S720 and `r.area = 5` is ME-S721. A routine without
+  `@property` is always called with parentheses. A protocol may require one (`@property routine Me.size() -> Int`): a
+  `@property` routine fills it, or a member variable of the same name and type on a type that says `obeys` (the
+  builder writes the reading routine). A plain routine filling a property requirement, or a property filling a plain
+  one, is ME-S722. Reads work through a type parameter, a stored value of the protocol and `try` on an optional
+  receiver (`try den.spare.hp`).
 - **Routine tests.** `mielia test` builds a file once per `@test` routine, calling it in place of the program's own
   statements: once per `@case(input: (a, b), output: r)` (arguments in parameter order, the result compared with
   `==`), or once with no arguments when there is no case. `@skip("reason")` reports it skipped, `@time_limit(1s)`
@@ -1747,6 +1756,8 @@ number). At most 20 are shown per batch.
 | ME-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
 | ME-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | ME-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
+| ME-S720       | a `@property` called with parentheses               | read it without them: `r.area`                    |
+| ME-S722       | a protocol's `@property` filled by a plain routine  | mark it `@property`, or fill it with a member variable |
 | ME-G230       | `failable` written on a routine                     | remove it: every routine passes its failures on   |
 | ME-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | ME-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
