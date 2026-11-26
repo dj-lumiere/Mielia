@@ -35,6 +35,24 @@ public sealed class TaskCheckTests
         Assert.Matches(expectedRegex: PromoteUse, actualString: ir);
     }
 
+    /// <summary>A local list that the routine only calls the list's own routines on is reached by no other task, so it
+    /// takes no access lock. The entity handed to the Work keeps its lock, and so does a list that gives out an emitter
+    /// over itself (the emitter could be handed on): its one bracket is the only list lock left in <c>start</c>.</summary>
+    [Fact]
+    public void ProgramWithWork_LocalThatNeverLeaves_HasNoAccessLock()
+    {
+        string ir = Emit(fixture: "confined_local.mie");
+        Match start = Regex.Match(input: ir,
+            pattern: @"^define [^\n]*ConfinedLocal\.start\(\)[^\n]*\{\n(.*?)^\}",
+            options: RegexOptions.Multiline | RegexOptions.Singleline);
+        Assert.True(condition: start.Success, userMessage: "no definition of start");
+        string body = start.Groups[groupnum: 1].Value;
+
+        Assert.Single(collection: Regex.Matches(input: body, pattern: @"call .*Roamed\[ME::System\.List\[[^\n]*lock_enter"));
+        Assert.Matches(expectedRegex: new Regex(pattern: @"call .*Roamed\[Tests/TaskChecks/ConfinedLocal\.Counter\]\]?\.lock_enter"),
+            actualString: body);
+    }
+
     private static string Emit(string fixture)
     {
         string source = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "TaskChecks", fixture]);
